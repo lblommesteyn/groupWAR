@@ -28,19 +28,19 @@ This refactor moves the reusable pieces into a package with:
 Base package:
 
 ```bash
-python -m pip install -e .
+python -m pip install --user -e .
 ```
 
 With test tooling:
 
 ```bash
-python -m pip install -e .[dev]
+python -m pip install --user -e .[dev]
 ```
 
 With the graph model extras:
 
 ```bash
-python -m pip install -e .[ml]
+python -m pip install --user -e .[ml]
 ```
 
 ## Quick Start
@@ -50,7 +50,7 @@ Use the packaged optimizer with the included synthetic examples.
 NHL:
 
 ```bash
-groupwar optimize ^
+python -m groupwar.cli optimize ^
   --league nhl ^
   --players examples/nhl_players.csv ^
   --score-column war ^
@@ -60,7 +60,7 @@ groupwar optimize ^
 NBA:
 
 ```bash
-groupwar optimize ^
+python -m groupwar.cli optimize ^
   --league nba ^
   --players examples/nba_players.csv ^
   --score-column impact_score ^
@@ -114,4 +114,3 @@ Run:
 ```bash
 python -m pytest
 ```
-
