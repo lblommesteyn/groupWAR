@@ -1,0 +1,25 @@
+player_id,player_name,positionCode,war,shooting,passing,defense
+1001,Connor North,C,9.8,92,91,78
+1002,Liam Rush,LW,9.5,90,87,76
+1003,Ethan Vale,RW,9.2,88,84,74
+1004,Noah Crest,C,8.9,86,86,77
+1005,Oliver Frost,L,8.7,85,82,73
+1006,Lucas Hart,R,8.5,84,80,72
+1007,Mason Pike,LW,8.3,83,79,71
+1008,Logan Steel,RW,8.1,81,80,70
+1009,James Lake,C,7.9,79,82,72
+1010,Ben Grant,L,7.7,78,77,71
+1011,Henry Stone,R,7.4,77,76,70
+1012,Jack Rowan,LW,7.2,75,74,69
+1013,Wyatt Hale,RW,6.4,72,71,66
+1014,Levi Shore,C,6.0,70,70,65
+1015,Owen Marsh,L,5.7,69,68,64
+2001,Adam Blue,D,9.1,66,82,92
+2002,Ryan Peak,LD,8.8,64,80,90
+2003,Eli Ward,RD,8.4,63,78,88
+2004,Nathan Fox,D,8.0,61,75,86
+2005,Caleb Snow,LD,7.6,60,74,84
+2006,Dylan Park,RD,7.3,58,72,82
+2007,Isaac Birch,D,6.6,56,68,78
+2008,Hudson Field,LD,6.2,54,65,76
+
