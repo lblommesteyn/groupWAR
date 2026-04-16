@@ -81,6 +81,11 @@ src/groupwar/
   ml/
     graph.py       Graph model extracted from the notebooks
     stackelberg.py Stackelberg adjacency optimizer generalized for any even matchup size
+
+nba_war/
+  README.md        Legacy NBA workflow notes
+  *.py             Data pull, processing, training, and roster-search scripts
+  data/            Small derived NBA artifacts kept with the repo
 ```
 
 ## Data Contract
@@ -100,7 +105,7 @@ The examples show the expected shape.
 
 ## Where The Data Comes From
 
-This repository includes small example CSVs in `examples/`, but it does not bundle the full raw research datasets, intermediate parquet/pickle files, or trained model checkpoints. To reproduce the original hockey and NBA workflow, you need to build those inputs yourself from the upstream data sources below.
+This repository includes small example CSVs in `examples/` and a compact `nba_war/data/` snapshot, but it does not bundle the full raw research datasets, the large source dumps, or trained model checkpoints. To reproduce the original hockey and NBA workflow from scratch, you need to build the missing inputs yourself from the upstream data sources below.
 
 ### Hockey
 
@@ -131,11 +136,11 @@ The SQLite path is the cleaner starting point if you want to reproduce the train
 The following are intentionally not packaged here:
 
 - large raw game-event dumps
-- derived parquet or pickle artifacts
+- the raw NBA SQLite dump and downloaded archive
 - trained `.pth` model weights
 - league-specific output CSVs from ad hoc search runs
 
-If you want a reproducible setup, store those files under a local `data/` directory and keep only lightweight examples in git.
+If you want a reproducible setup, store those files under a local `data/` directory and keep only lightweight examples or compact derived artifacts in git.
 
 ## NHL and NBA Defaults
 
