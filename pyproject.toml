@@ -8,10 +8,16 @@ version = "0.1.0"
 description = "Clean multi-sport groupWAR lineup optimization toolkit."
 readme = "README.md"
 requires-python = ">=3.10"
+keywords = ["sports analytics", "roster optimization", "lineup optimization", "basketball", "hockey"]
 dependencies = [
     "numpy>=1.26",
     "pandas>=2.2",
 ]
+
+[project.urls]
+Repository = "https://github.com/lblommesteyn/groupWAR"
+Reproducibility = "https://github.com/lblommesteyn/groupWAR/blob/main/REPRODUCIBILITY.md"
+Data = "https://github.com/lblommesteyn/groupWAR/blob/main/DATA_AVAILABILITY.md"
 
 [project.optional-dependencies]
 dev = [
@@ -33,4 +39,3 @@ where = ["src"]
 
 [tool.pytest.ini_options]
 testpaths = ["tests"]
-

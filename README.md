@@ -1,177 +1,136 @@
 # groupWAR
 
-`groupWAR` is a cleaned-up package extracted from the original notebook snapshot and reshaped into a reusable lineup optimization toolkit.
+Code and lightweight reproducibility materials for:
 
-The repository now has two layers:
+**National-Team Selection Under Pressure: Graph-Scored Search and Adversarial Evaluation**
 
-- a generic optimizer/scoring layer that works across leagues
-- an optional ML layer containing the legacy graph + Stackelberg machinery, generalized so it is no longer hardcoded to the NHL 18-vs-18 setting
+Repository URL: <https://github.com/lblommesteyn/groupWAR>
 
-## What Changed
+This repository supports the paper's roster-selection case studies. It contains
+an installable Python package for constrained group selection, legacy NBA
+research scripts, small example inputs, and curated result tables. Large raw
+game-event dumps, downloaded databases, and trained model checkpoints are not
+stored in git.
 
-The legacy zip was notebook-heavy and NHL-specific:
+## Repository Contents
 
-- business logic lived inside notebooks
-- search code depended on global variables
-- the graph solver assumed 36 players and two hardcoded NHL roster buckets
-- there was no clean extension point for NBA work
+```text
+src/groupwar/        Installable optimizer package
+src/groupwar/ml/     Optional graph and Stackelberg model components
+examples/            Small synthetic NHL and NBA player tables for smoke tests
+hockey_war/          Hockey case-study search and graph-scoring scripts
+nba_war/             NBA data, training, and roster-search research scripts
+nba_war/data/        Compact derived NBA artifacts kept for inspection
+nba_war/v2/          Later NBA feature, search, rotation, and RAPM analyses
+results/             Curated manuscript result tables
+tests/               Package regression tests
+```
 
-This refactor moves the reusable pieces into a package with:
-
-- league specs for `nhl` and `nba`
-- a generic lineup optimizer for tabu search and tournament-style pruning
-- scorer interfaces so the optimizer is not tied to one model family
-- optional ML modules for graph/Stackelberg evaluation when trained weights and feature tensors are available
+The package layer is intentionally generic. League definitions in
+`src/groupwar/specs.py` specify roster groups and position constraints. The
+selection logic in `src/groupwar/selection.py` then runs tournament-style
+pruning or tabu refinement against a scorer interface. The default scorer is a
+weighted column scorer so the package can be tested without trained neural
+models.
 
 ## Install
 
-Base package:
+From the repository root:
 
 ```bash
-python -m pip install --user -e .
+python -m pip install -e .[dev]
 ```
 
-With test tooling:
+Optional graph-model dependencies:
 
 ```bash
-python -m pip install --user -e .[dev]
+python -m pip install -e .[ml]
 ```
 
-With the graph model extras:
+The optional ML dependency set installs PyTorch and PyTorch Geometric. It is not
+needed for the package tests or the example optimizer runs.
 
-```bash
-python -m pip install --user -e .[ml]
-```
+## Quick Verification
 
-## Quick Start
-
-Use the packaged optimizer with the included synthetic examples.
-
-NHL:
-
-```bash
-python -m groupwar.cli optimize ^
-  --league nhl ^
-  --players examples/nhl_players.csv ^
-  --score-column war ^
-  --output outputs/nhl_selected.csv
-```
-
-NBA:
-
-```bash
-python -m groupwar.cli optimize ^
-  --league nba ^
-  --players examples/nba_players.csv ^
-  --score-column impact_score ^
-  --output outputs/nba_selected.csv
-```
-
-The CLI uses the generic weighted scorer by default so the package works immediately for both sports. When trained graph models and matchup features are available, the optional ML modules in `groupwar.ml` can be used to plug the legacy counterfactual scorer back in.
-
-## Package Layout
-
-```text
-src/groupwar/
-  cli.py           Command-line entry point
-  data.py          Player loading, grouping, distance helpers
-  scoring.py       Generic scorer interfaces and weighted scorer
-  selection.py     Tabu and tournament lineup optimization
-  specs.py         NHL/NBA league definitions
-  ml/
-    graph.py       Graph model extracted from the notebooks
-    stackelberg.py Stackelberg adjacency optimizer generalized for any even matchup size
-
-nba_war/
-  README.md        Legacy NBA workflow notes
-  *.py             Data pull, processing, training, and roster-search scripts
-  data/            Small derived NBA artifacts kept with the repo
-```
-
-## Data Contract
-
-For the base optimizer, a player table is enough:
-
-- player id column, defaulted per league
-- position column, defaulted per league
-- score column, chosen at the CLI
-
-Optional columns:
-
-- `player_name` or `name`
-- feature columns for distance-based swap ranking
-
-The examples show the expected shape.
-
-## Where The Data Comes From
-
-This repository includes small example CSVs in `examples/` and a compact `nba_war/data/` snapshot, but it does not bundle the full raw research datasets, the large source dumps, or trained model checkpoints. To reproduce the original hockey and NBA workflow from scratch, you need to build the missing inputs yourself from the upstream data sources below.
-
-### Hockey
-
-The hockey pipeline was built from NHL public endpoints:
-
-- play-by-play: `https://api-web.nhle.com/v1/gamecenter/{game_id}/play-by-play`
-- shift charts: `https://api.nhle.com/stats/rest/en/shiftcharts?cayenneExp=gameId={game_id}`
-- roster and player metadata: `https://api-web.nhle.com/v1/roster/{team}/{season}`
-
-From those feeds, the original workflow constructs lineup stints, co-deployment graphs, APM tables, and player feature embeddings. In the legacy project layout, those derived artifacts end up as files such as:
-
-- season play-by-play and shift dumps
-- `apm_minutes.csv`
-- roster or headshot tables used to map player IDs, positions, and nationality
-- period or stint-level tensors used for GCN training
-
-### NBA
-
-There are two supported acquisition paths for the NBA side:
-
-- Kaggle SQLite dump: the legacy NBA pipeline expects `data/nba.sqlite` from the `wyattowalsh/basketball` dataset on Kaggle
-- direct API pull: an alternate script path uses `nba_api` to pull `stats.nba.com` game logs, play-by-play, game rotations, shot charts, and player metadata
-
-The SQLite path is the cleaner starting point if you want to reproduce the training tables in one place. The API path is useful when you want to refresh the dataset without depending on the Kaggle dump.
-
-### Not Included In Git
-
-The following are intentionally not packaged here:
-
-- large raw game-event dumps
-- the raw NBA SQLite dump and downloaded archive
-- trained `.pth` model weights
-- league-specific output CSVs from ad hoc search runs
-
-If you want a reproducible setup, store those files under a local `data/` directory and keep only lightweight examples or compact derived artifacts in git.
-
-## NHL and NBA Defaults
-
-Default lineup groups are editable in code and intentionally explicit:
-
-- NHL: `12` forwards and `6` defense
-- NBA: `4` guards, `4` wings, and `4` bigs
-
-The NBA default is a 12-player rotation rather than a strict 5-man starting lineup so the optimizer mirrors the broader roster-selection use case from the original hockey workflow.
-
-## Awesome TODO
-
-Ideas worth building because they would make `groupWAR` materially more interesting, not just more polished:
-
-- Opponent-aware roster co-design: optimize a lineup against an entire distribution of opponents, then expose which players are "meta-stable" versus only good against a narrow matchup class.
-- Counterfactual substitution simulator: learn the value of replacing one player with an archetype rather than a specific name, so the system can answer questions like "what kind of player are we actually missing?"
-- Chemistry as a latent variable: infer hidden pair and trio effects from observed lineups/rotations instead of relying only on explicit player features, then surface unexplained chemistry as a first-class output.
-- Robust optimization under uncertainty: optimize not just for expected score but for downside protection when player projections are noisy, creating lineups that are resilient to model error.
-- Time-aware lineup policy search: choose different optimal groups for early game, late game, trailing, leading, or special-situation contexts rather than producing one static "best roster."
-- Cross-sport representation learning: align NHL and NBA player embeddings into a shared "role space" so ideas like connectors, finishers, stabilizers, and suppressors become sport-agnostic building blocks.
-- Fatigue and load propagation: treat repeated high-leverage usage as a cost that changes downstream matchup quality, allowing the optimizer to reason about rotation sustainability instead of one-shot peak output.
-- Adversarial coach model: train a second policy that reacts to your chosen lineup with substitutions or matchup targeting, turning the search into a real strategic game instead of a fixed-response evaluation.
-- Budget and contract frontier search: add salary, age, and term constraints so the package can generate efficient front-office tradeoffs instead of only best-on-paper competitive lineups.
-- Tournament bracket optimization: optimize a roster for a path of opponents rather than one matchup, which is a genuinely different problem and much closer to playoff or international tournament decision-making.
-- Explainable lineup narratives: generate a compact explanation of why each selected player survived the search, including which opponent styles or internal chemistry structures they protect.
-- Archetype market generator: simulate a synthetic free-agent or trade market by asking which archetypes would most improve a roster if added, then rank them by marginal team-level counterfactual value.
-
-## Validation
-
-Run:
+Run the test suite:
 
 ```bash
 python -m pytest
 ```
+
+Run the included NHL example:
+
+```bash
+python -m groupwar.cli optimize --league nhl --players examples/nhl_players.csv --score-column war --output outputs/nhl_selected.csv
+```
+
+Run the included NBA example:
+
+```bash
+python -m groupwar.cli optimize --league nba --players examples/nba_players.csv --score-column impact_score --output outputs/nba_selected.csv
+```
+
+These commands use synthetic examples and do not reproduce the trained GCN
+results from the paper. They verify the installable package, league constraints,
+and search machinery.
+
+## Manuscript Result Tables
+
+Curated result tables used for the manuscript summaries are in `results/`.
+They include selected roster summaries, evaluation scores, tournament phase
+outputs, greedy-iteration summaries, model-performance summaries, and rotation
+analysis tables.
+
+See [results/README.md](results/README.md) for the table manifest.
+
+## Full Reproduction Scope
+
+The paper's full end-to-end workflow requires external data and trained model
+artifacts that are too large or too license-dependent for git:
+
+- NHL public API event, shift, roster, and metadata pulls
+- Kaggle `wyattowalsh/basketball` SQLite data for the NBA workflow
+- trained GCN checkpoint files
+- large intermediate tensors and raw event dumps
+
+See [DATA_AVAILABILITY.md](DATA_AVAILABILITY.md) and
+[REPRODUCIBILITY.md](REPRODUCIBILITY.md) for the exact inputs and the intended
+reproduction path.
+
+## NBA Workflow
+
+The NBA-specific scripts are preserved under `nba_war/`:
+
+```text
+nba_from_sqlite.py   Build derived tables from Kaggle SQLite
+nba_data_pull.py     Alternate acquisition path using nba_api
+nba_process.py       Build lineup, APM, and embedding artifacts
+nba_train.py         Train the GCN ensemble
+nba_search.py        Run the Olympic roster search
+nba_stackel.py       NBA graph and Stackelberg utilities
+v2/                  Later case-study, rotation-scoring, and RAPM scripts
+```
+
+Place the external SQLite file at `nba_war/data/nba.sqlite` before running the
+SQLite path. Model checkpoints are expected under `nba_war/models/` after
+training and are ignored by git.
+
+## Hockey Workflow
+
+The hockey-specific scripts are preserved under `hockey_war/`:
+
+```text
+run_search.py       Canada hockey roster search workflow
+mie368stackel.py    Hockey graph model and Stackelberg utilities
+submit_search.sh    Cluster submission helper
+```
+
+The hockey workflow expects locally generated NHL event data, APM tables,
+eligibility tables, and trained checkpoint files. Those large inputs remain
+outside git; the manuscript-facing result exports are in `results/`.
+
+## Citation
+
+If using the repository directly, cite the repository URL above or use the
+metadata in [CITATION.cff](CITATION.cff). A formal paper citation can replace
+the repository citation once the manuscript is published.

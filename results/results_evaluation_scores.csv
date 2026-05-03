@@ -1,0 +1,13 @@
+roster,sport,opponent,stackelberg_score,blended_score
+Canada 2025,Hockey,USA,0.4812,0.4495
+Canada 2025,Hockey,EDM,0.4287,0.4495
+Canada 2025,Hockey,FLA,0.4285,0.4495
+Canada 2024,Hockey,USA,0.4521,0.4428
+Canada 2024,Hockey,EDM,0.4312,0.4428
+Canada 2024,Hockey,FLA,0.4441,0.4428
+USA 2024,Basketball,Canada,0.7418,0.7251
+USA 2024,Basketball,France,0.7195,0.7251
+USA 2024,Basketball,OKC,0.7139,0.7251
+Canada 2024,Basketball,USA,0.6218,0.6425
+Canada 2024,Basketball,France,0.6511,0.6425
+Canada 2024,Basketball,OKC,0.6446,0.6425
