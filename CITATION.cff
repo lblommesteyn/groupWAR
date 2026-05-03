@@ -1,0 +1,20 @@
+cff-version: 1.2.0
+message: "If you use this software or result artifact, please cite the repository and the associated manuscript."
+title: "groupWAR: Graph-scored roster optimization and adversarial evaluation"
+type: software
+authors:
+  - family-names: Blommesteyn
+    given-names: Luke
+  - family-names: Majumdar
+    given-names: Jaden
+repository-code: "https://github.com/lblommesteyn/groupWAR"
+url: "https://github.com/lblommesteyn/groupWAR"
+date-released: "2026-05-03"
+abstract: "Research code and lightweight reproducibility materials for national-team roster selection with graph-scored search and adversarial evaluation."
+keywords:
+  - sports analytics
+  - roster optimization
+  - group WAR
+  - graph neural networks
+  - Stackelberg games
+license: NOASSERTION

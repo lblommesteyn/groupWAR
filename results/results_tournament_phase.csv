@@ -1,0 +1,15 @@
+roster,sport,round,teams_evaluated,teams_survived,avg_score_top_third,avg_score_bottom_third
+Canada 2025,Hockey,1,8932,2977,0.4087,0.3621
+Canada 2025,Hockey,2,2977,992,0.4198,0.3812
+Canada 2025,Hockey,3,992,331,0.4312,0.3951
+Canada 2025,Hockey,4,331,110,0.4398,0.4087
+Canada 2024,Hockey,1,8932,2977,0.4021,0.3512
+Canada 2024,Hockey,2,2977,992,0.4156,0.3748
+Canada 2024,Hockey,3,992,331,0.4267,0.3897
+Canada 2024,Hockey,4,331,110,0.4351,0.4012
+USA 2024,Basketball,1,3684,1228,0.6821,0.6112
+USA 2024,Basketball,2,1228,409,0.6948,0.6247
+USA 2024,Basketball,3,409,136,0.7031,0.6384
+Canada 2024,Basketball,1,1215,405,0.6127,0.5521
+Canada 2024,Basketball,2,405,135,0.6234,0.5687
+Canada 2024,Basketball,3,135,45,0.6328,0.5821

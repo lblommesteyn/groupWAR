@@ -1,0 +1,13 @@
+rank,player,position,team,locked,starter_prob
+1,Shai Gilgeous-Alexander,G,OKC,True,0.98
+2,Jamal Murray,G,DEN,True,0.92
+3,RJ Barrett,G,TOR,False,0.75
+4,Nickeil Alexander-Walker,G,NOP,False,0.68
+5,Cory Joseph,G,TOR,False,0.55
+6,Luguentz Dort,F,OKC,False,0.65
+7,Kelly Olynyk,C,MIA,False,0.60
+8,Brandon Clarke,F,MEM,False,0.58
+9,Dwight Powell,C,DAL,False,0.50
+10,Dillon Brooks,F,MEM,False,0.62
+11,Zach Edey,C,MEM,False,0.48
+12,Andrew Wiggins,F,GSW,False,0.70

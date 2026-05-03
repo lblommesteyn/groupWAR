@@ -1,0 +1,5 @@
+roster,sport,final_score,blended_score,all_positive_war,overlap_with_official,position_balance,avg_war,max_war,min_war,search_time_hours,final_roster_size
+Canada 2025,Hockey,0.4495,0.4495,True,10/13,6C 4L 4R 4D,0.00972,0.0179,0.0006,2.34,18
+Canada 2024,Hockey,0.4428,0.4428,True,14/18,6C 4L 4R 4D,0.00356,0.0082,0.0009,2.47,18
+USA 2024,Basketball,0.7251,0.7251,True,10/12,3G 4F 5C,0.0623,0.0918,0.0234,1.82,12
+Canada 2024,Basketball,0.6425,0.6425,True,9/12,4G 4F 4C,0.0535,0.0847,0.0198,1.71,12

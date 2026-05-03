@@ -1,0 +1,19 @@
+rank,player,position,team,war,locked,pos_constraint
+1,Connor McDavid,C,EDM,0.0082,True,C
+2,Cale Makar,D,COL,0.0071,True,D
+3,Sidney Crosby,C,PIT,0.0068,True,C
+4,Nathan MacKinnon,C,COL,0.0064,True,C
+5,Shea Theodore,D,VGK,0.0058,True,D
+6,Sam Reinhart,C,FLA,0.0054,False,C
+7,Devon Toews,D,COL,0.0048,False,D
+8,Brent Burns,D,CAR,0.0043,False,D
+9,Tage Thompson,L,BUF,0.0038,False,L
+10,Tim Stutzle,L,OTT,0.0034,False,L
+11,Artemi Panarin,L,NYR,0.0031,False,L
+12,Mitch Marner,R,TOR,0.0027,False,R
+13,Connor Brown,R,OTT,0.0024,False,R
+14,Travis Konecny,R,PHI,0.0021,False,R
+15,P.O. Joseph,D,PIT,0.0018,False,D
+16,Ryan Ellis,D,PHI,0.0015,False,D
+17,Tyson Jost,C,COL,0.0012,False,C
+18,Mark Scheifele,C,WPG,0.0009,False,C
