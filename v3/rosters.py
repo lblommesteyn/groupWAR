@@ -102,7 +102,7 @@ class Evaluator:
     def _noop(self):
         return None
 
-    def score_tensors(self, Xh, Xo_list, mode=None, per_model=False, chunk=512):
+    def score_tensors(self, Xh, Xo_list, mode=None, per_model=False, chunk=1024):
         """Xh (B,R,F); Xo_list list of (R,F). Returns (B, n_opp) win probabilities."""
         mode = mode or self.mode
         B = Xh.shape[0]
@@ -125,6 +125,20 @@ class Evaluator:
         Xh = torch.stack([self.tensor(r)[0] for r in rosters])
         Xo = [self.tensor(o)[0] for o in opponents]
         return self.score_tensors(Xh, Xo, mode)
+
+    def war_many(self, rosters, opponents, mode=None):
+        """Batched replacement-level knockouts for several rosters at once."""
+        Xs, spans = [], []
+        for r in rosters:
+            base_X, ids = self.tensor(r)
+            spans.append((len(Xs), ids))
+            Xs += [base_X] + [self.tensor(r, knock=p)[0] for p in ids]
+        Xo = [self.tensor(o)[0] for o in opponents]
+        s = self.score_tensors(torch.stack(Xs), Xo, mode).mean(1)
+        out = []
+        for start, ids in spans:
+            out.append((float(s[start]), {p: float(s[start] - s[start + i + 1]) for i, p in enumerate(ids)}))
+        return out
 
     def war(self, roster, opponents, mode=None):
         """Replacement-level knockout: drop in mean win probability (vs the opponent

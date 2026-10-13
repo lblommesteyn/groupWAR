@@ -89,8 +89,9 @@ def tournament(ev, pool, opponents, locks, quota, seed=0, verbose=True, max_roun
         for k in order[: max(1, len(teams) // 3)]:
             keep.update(p for p in teams[k] if p not in locks)
         drop = set()
-        for k in order[max(1, len(teams) // 3):]:
-            _, war = ev.war(teams[k], opponents)
+        bottom = list(order[max(1, len(teams) // 3):])
+        wars = ev.war_many([teams[k] for k in bottom], opponents)
+        for k, (_, war) in zip(bottom, wars):
             cands = sorted([p for p in teams[k] if p not in locks], key=lambda p: war[p])
             n_drop = 2 if quota.sport == "nba" else 4
             drop.update(cands[:n_drop])

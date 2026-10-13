@@ -117,7 +117,7 @@ class UnitSpace:
         mins = []
         for lg, M in zip(logits, self.groups):
             w = torch.softmax(lg, -1)
-            A = A + torch.einsum("bl,li,lj->bij", w, M, M)
+            A = A + (M.T.unsqueeze(0) * w.unsqueeze(1)) @ M
             mins.append(w @ M)
         if len(self.groups) == 2:  # forward-D cross terms under independence
             mf, md = mins
