@@ -54,8 +54,12 @@ def main():
     R, scale = S.R, S.scale
     res = {}
     cache = {}
+    from prior_graphs import prior_graph_tensors
+    prior_A = {}
     for lag in (0, 1):
         cache[lag] = S.tensors(lag=lag)
+        Xl, Al, Ml, _, ml, _ = cache[lag]
+        prior_A[lag] = prior_graph_tensors(S, Xl, Al, Ml, ml, lag=lag)
     X, A, M, y, meta, cov = cache[0]
     season = np.array([m["season"] for m in meta])
     playoff = np.array([m["playoff"] for m in meta])
@@ -99,27 +103,44 @@ def main():
 
     for lag in (0, 1):
         Xl, Al, Ml, _, _, covl = cache[lag]
-        F = mw_feat(Xl, Al, Ml)
-        lin = LogisticRegression(max_iter=2000, C=1.0).fit(F[tr][margin[tr] != 0], win[tr][margin[tr] != 0])
-        for name, idx in subsets.items():
-            res.setdefault(name, {})[f"feat_lin_lag{lag}"] = metrics(lin.predict_proba(F[idx])[:, 1],
-                                                                    win[idx], margin[idx], scale)
+        for suffix, Ause in (("", Al), ("_pre", prior_A[lag])):
+            F = mw_feat(Xl, Ause, Ml)
+            lin = LogisticRegression(max_iter=2000, C=1.0).fit(F[tr][margin[tr] != 0], win[tr][margin[tr] != 0])
+            for name, idx in subsets.items():
+                res.setdefault(name, {})[f"feat_lin_lag{lag}{suffix}"] = metrics(
+                    lin.predict_proba(F[idx])[:, 1], win[idx], margin[idx], scale)
+    # RAPM-sum with pre-game minutes (prior deployment) instead of observed minutes
+    dpre = torch.diagonal(prior_A[0], dim1=1, dim2=2).numpy()
+    strength_pre = np.zeros(len(games))
+    for k, g in enumerate(games):
+        pos = S.hockey_pos(g) if S.hockey_pos else None
+        ps_ = side_players(g, g["home"], R, pos) + side_players(g, g["away"], R, pos)
+        v = np.array([rmap.get(p, 0.0) if p else 0.0 for p in ps_])
+        strength_pre[k] = (dpre[k, :R] * v[:R]).sum() - (dpre[k, R:] * v[R:]).sum()
+    lr_pre = LogisticRegression(max_iter=2000).fit(strength_pre[tr, None][margin[tr] != 0],
+                                                   win[tr][margin[tr] != 0])
     lr = LogisticRegression(max_iter=2000).fit(strength[tr, None][margin[tr] != 0], win[tr][margin[tr] != 0])
     home_rate = win[tr][margin[tr] != 0].mean()
     for name, idx in subsets.items():
         res[name]["home_only"] = metrics(np.full(len(idx), home_rate), win[idx], margin[idx], scale)
         res[name]["rapm_sum"] = metrics(lr.predict_proba(strength[idx, None])[:, 1], win[idx], margin[idx], scale)
+        res[name]["rapm_sum_pre"] = metrics(lr_pre.predict_proba(strength_pre[idx, None])[:, 1],
+                                            win[idx], margin[idx], scale)
 
     for tag in args.tags.split(","):
         ens, cfg = load_ensemble(args.sport, tag)
         assert cfg["test_season"] == args.test_season, tag
         Xl, Al, Ml, _, _, _ = cache[cfg["lag"]]
-        if cfg.get("shuffle_graph"):
-            from train import shuffle_graph
-            Al = shuffle_graph(Al, Ml, R)
-        for name, idx in subsets.items():
-            res[name][tag] = metrics(predict(ens, Xl, Al, Ml, R, torch.tensor(idx)), win[idx],
-                                     margin[idx], scale)
+        variants = {"": Al, "@pre": prior_A[cfg["lag"]]}
+        if cfg.get("prior_deploy"):
+            variants = {"": prior_A[cfg["lag"]]}
+        for suffix, Ause in variants.items():
+            if cfg.get("shuffle_graph"):
+                from train import shuffle_graph
+                Ause = shuffle_graph(Ause, Ml, R)
+            for name, idx in subsets.items():
+                res[name][tag + suffix] = metrics(predict(ens, Xl, Ause, Ml, R, torch.tensor(idx)),
+                                                  win[idx], margin[idx], scale)
     res["meta"] = {"rapm_alpha": alpha, "train_games": int(len(tr)),
                    "coverage_lag0": cache[0][5], "coverage_lag1": cache[1][5],
                    "n": {k: int(len(v)) for k, v in subsets.items()}}
