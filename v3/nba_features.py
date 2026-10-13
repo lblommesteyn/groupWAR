@@ -75,6 +75,41 @@ def build():
     t = load_totals()
     b = bio()
     df = t.merge(b, on="player_id", how="left")
+    # fill players missing from the Kaggle player table with ESPN bio data
+    esp = D / "espn_bio.parquet"
+    if esp.exists():
+        from cases import norm
+        e = pd.read_parquet(esp)
+        e["k"] = e["name"].map(norm)
+        e = e.drop_duplicates("k").set_index("k")
+        miss = df["country"].isna()
+        k = df.loc[miss, "name"].map(norm)
+        hit = k.isin(e.index)
+        idx = k[hit]
+        df.loc[idx.index, "height"] = e.loc[idx.values, "height"].values
+        df.loc[idx.index, "weight"] = e.loc[idx.values, "weight"].values
+        df.loc[idx.index, "country"] = e.loc[idx.values, "birth_country"].values
+        df.loc[idx.index, "position"] = e.loc[idx.values, "position_espn"].values
+        df["bio_source"] = np.where(miss & df.index.isin(idx.index), "espn",
+                                    np.where(miss, "none", "kaggle"))
+    # manual corrections, checked by hand: national-team eligibility where the
+    # source country is wrong or missing, and bios absent from both sources
+    MANUAL = {
+        "Trey Lyles": {"country": "Canada"},          # born Saskatoon; ESPN lists USA
+        "Chris Boucher": {"country": "Canada"},       # plays for Canada; listed Saint Lucia
+        "Bilal Coulibaly": {"country": "France"},
+        "Fred VanVleet": {"country": "USA", "height": 72, "weight": 197, "position": "Guard"},
+        "Malcolm Brogdon": {"country": "USA", "height": 76, "weight": 229, "position": "Guard"},
+        "Vasilije Micic": {"country": "Serbia", "height": 75, "weight": 203, "position": "Guard"},
+    }
+    for n, vals in MANUAL.items():
+        for k, v in vals.items():
+            df.loc[df["name"] == n, k] = v
+    if "position" in df:
+        pos = df["position"].fillna("")
+        df["isG"] = pos.str.contains("Guard").astype(float)
+        df["isF"] = pos.str.contains("Forward").astype(float)
+        df["isC"] = pos.str.contains("Center").astype(float)
     m = df["Minutes"].clip(lower=1)
     fga = (df["FG2A"] + df["FG3A"]).clip(lower=1)
     lg_rim = df["AtRimFGM"].sum() / df["AtRimFGA"].sum()

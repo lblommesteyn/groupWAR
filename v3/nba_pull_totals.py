@@ -13,7 +13,7 @@ ROOT = Path(__file__).resolve().parents[1]
 OUT = ROOT / "v3" / "data" / "nba" / "totals"
 OUT.mkdir(parents=True, exist_ok=True)
 
-SEASONS = ["2019-20", "2020-21", "2021-22", "2022-23", "2023-24"]
+SEASONS = ["2018-19", "2019-20", "2020-21", "2021-22", "2022-23", "2023-24"]
 TEAM_IDS = list(range(1610612737, 1610612767))
 
 

@@ -126,7 +126,7 @@ def main():
     sport = "nba" if args.case == "paris" else "nhl"
     season = 2024 if sport == "nba" else 2025
     ev = Evaluator(sport, args.tag, season=season, mode=args.mode, lam=args.lam)
-    mm = args.min_minutes or (1000 if sport == "nba" else 300)
+    mm = args.min_minutes or (500 if sport == "nba" else 300)
     pool, actual, locks, opps, qpos, names = setup(ev, args.case, args.team, mm)
     # negative ids are replacement-level placeholders for unknown opponents
     ev.mpg.update({p: 0.0 for o in opps for p in o if p < 0})

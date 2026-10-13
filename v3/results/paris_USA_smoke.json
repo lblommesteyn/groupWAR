@@ -1,0 +1,205 @@
+{
+ "args": {
+  "case": "paris",
+  "team": "USA",
+  "tag": "smoke",
+  "seeds": 1,
+  "no_locks": false,
+  "no_quota": false,
+  "mode": "stackelberg",
+  "lam": 0.05,
+  "drop_opp": null,
+  "min_minutes": null,
+  "audit": true,
+  "out": "smoke"
+ },
+ "pool_size": 12,
+ "names": {
+  "2544": "LeBron James",
+  "201142": "Kevin Durant",
+  "201939": "Stephen Curry",
+  "201950": "Jrue Holiday",
+  "203076": "Anthony Davis",
+  "203482": "Kelly Olynyk",
+  "203920": "Khem Birch",
+  "203939": "Dwight Powell",
+  "203954": "Joel Embiid",
+  "1626164": "Devin Booker",
+  "1626168": "Trey Lyles",
+  "1627750": "Jamal Murray",
+  "1628369": "Jayson Tatum",
+  "1628389": "Bam Adebayo",
+  "1628401": "Derrick White",
+  "1628415": "Dillon Brooks",
+  "1628983": "Shai Gilgeous-Alexander",
+  "1629628": "RJ Barrett",
+  "1629638": "Nickeil Alexander-Walker",
+  "1629652": "Luguentz Dort",
+  "1630162": "Anthony Edwards",
+  "1630169": "Tyrese Haliburton"
+ },
+ "actual": [
+  2544,
+  201939,
+  201142,
+  203954,
+  1628369,
+  1626164,
+  1630162,
+  203076,
+  1628389,
+  201950,
+  1630169,
+  1628401
+ ],
+ "locks": [
+  201939,
+  2544,
+  201142
+ ],
+ "opponents": [
+  [
+   1628983,
+   1627750,
+   1629638,
+   1629628,
+   1629652,
+   1628415,
+   1626168,
+   203482,
+   203939,
+   203920,
+   -1,
+   -2
+  ],
+  [
+   -100,
+   -101,
+   -102,
+   -103,
+   -104,
+   -105,
+   -106,
+   -107,
+   -108,
+   -109,
+   -110,
+   -111
+  ],
+  [
+   -100,
+   -101,
+   -102,
+   -103,
+   -104,
+   -105,
+   -106,
+   -107,
+   -108,
+   -109,
+   -110,
+   -111
+  ]
+ ],
+ "runs": [
+  {
+   "seed": 0,
+   "roster": [
+    201939,
+    2544,
+    201142,
+    1628389,
+    1628401,
+    1630162,
+    1628369,
+    1626164,
+    201950,
+    1630169,
+    203076,
+    203954
+   ],
+   "score": NaN,
+   "history": [
+    [
+     0,
+     NaN,
+     null,
+     null
+    ]
+   ],
+   "overlap_actual": 12,
+   "minutes": 21.587141752243042
+  }
+ ],
+ "best": [
+  201939,
+  2544,
+  201142,
+  1628389,
+  1628401,
+  1630162,
+  1628369,
+  1626164,
+  201950,
+  1630169,
+  203076,
+  203954
+ ],
+ "best_score": NaN,
+ "actual_score": NaN,
+ "actual_score_by_opp": [
+  NaN,
+  NaN,
+  NaN
+ ],
+ "best_per_model": [
+  NaN,
+  NaN
+ ],
+ "actual_per_model": [
+  NaN,
+  NaN
+ ],
+ "war_best": {
+  "201939": NaN,
+  "2544": NaN,
+  "201142": NaN,
+  "1628389": NaN,
+  "1628401": NaN,
+  "1630162": NaN,
+  "1628369": NaN,
+  "1626164": NaN,
+  "201950": NaN,
+  "1630169": NaN,
+  "203076": NaN,
+  "203954": NaN
+ },
+ "war_actual": {
+  "2544": NaN,
+  "201939": NaN,
+  "201142": NaN,
+  "203954": NaN,
+  "1628369": NaN,
+  "1626164": NaN,
+  "1630162": NaN,
+  "203076": NaN,
+  "1628389": NaN,
+  "201950": NaN,
+  "1630169": NaN,
+  "1628401": NaN
+ },
+ "distance": {
+  "2544": null,
+  "201142": null,
+  "201939": null,
+  "201950": null,
+  "203076": null,
+  "203954": null,
+  "1626164": null,
+  "1628369": null,
+  "1628389": null,
+  "1628401": null,
+  "1630162": null,
+  "1630169": null
+ }
+}
