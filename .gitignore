@@ -27,3 +27,9 @@ nba_war/results.zip
 hockey_war/data/
 hockey_war/models/
 hockey_war/outputs/
+
+# v3 rerun artifacts
+v3/data/
+v3/models/
+nba_war/data/raw_kaggle/
+__pycache__/
