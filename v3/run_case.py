@@ -71,7 +71,9 @@ def setup(ev, case, team, min_minutes):
         actual = dressed(team)
         locks, _ = C.resolve(C.NHL_LOCKS[team], idx)
         opps = [dressed(o) for o in C.NHL_OPP[team]]
-        quota_pos = dict(zip(ps["player_id"], ps["pos"]))
+        cur_role = ps[ps["season"] == season]
+        quota_pos = {int(p): ("D" if po == "D" else ("C" if fo >= 15 else "W"))
+                     for p, po, fo in zip(cur_role["player_id"], cur_role["pos"], cur_role["fo60"])}
         names = dict(zip(ps["player_id"], ps["name"]))
     pool = sorted(set(pool) | set(actual) | set(locks))
     return pool, actual, locks, opps, quota_pos, names

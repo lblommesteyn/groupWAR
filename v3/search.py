@@ -8,11 +8,13 @@ import torch
 
 class Quota:
     """NBA: 12 players, >= min_g guards, >= min_c centres (multi-position players count
-    for each listed position). NHL: 12 forwards + 6 D, >= min_l LW, >= min_r RW."""
+    for each listed position). NHL: 12 forwards + 6 D, with >= 4 centres and >= 4 wingers,
+    where pos labels are roles from play ('C' = forward taking >= 15 faceoffs per 60,
+    'W' = other forward, 'D' = defence), because listed NHL positions are unreliable."""
 
-    def __init__(self, sport, pos, min_g=4, min_c=2, min_l=3, min_r=3, enforce=True):
+    def __init__(self, sport, pos, min_g=4, min_c=2, min_hc=4, min_hw=4, enforce=True):
         self.sport, self.pos, self.enforce = sport, pos, enforce
-        self.min_g, self.min_c, self.min_l, self.min_r = min_g, min_c, min_l, min_r
+        self.min_g, self.min_c, self.min_hc, self.min_hw = min_g, min_c, min_hc, min_hw
 
     def is_d(self, p):
         return self.pos.get(p) == "D"
@@ -31,9 +33,9 @@ class Quota:
             return False
         if not self.enforce:
             return True
-        l = sum(self.pos.get(p) == "L" for p in roster)
-        r = sum(self.pos.get(p) == "R" for p in roster)
-        return l >= self.min_l and r >= self.min_r
+        c = sum(self.pos.get(p) == "C" for p in roster)
+        w = sum(self.pos.get(p) == "W" for p in roster)
+        return c >= self.min_hc and w >= self.min_hw
 
     def same_group(self, a, b):
         return self.sport == "nba" or self.is_d(a) == self.is_d(b)

@@ -58,9 +58,9 @@ def topk(order, locks, quota, sport):
                 continue
             if nf <= 0:
                 continue
-            nl = max(0, quota.min_l - cnt(roster, "L"))
-            nr = max(0, quota.min_r - cnt(roster, "R"))
-            if nl + nr >= nf and not ((nl and k == "L") or (nr and k == "R")):
+            nl = max(0, quota.min_hc - cnt(roster, "C"))
+            nr = max(0, quota.min_hw - cnt(roster, "W"))
+            if nl + nr >= nf and not ((nl and k == "C") or (nr and k == "W")):
                 continue
             roster.append(p)
     assert quota.ok(roster), "top-k fill failed"
