@@ -40,6 +40,12 @@ def setup(ev, case, team, min_minutes):
         pool = [int(p) for p, m in zip(cur["player_id"], cur["Minutes"])
                 if country.get(p) == nat[team] and m >= min_minutes]
         actual, miss = C.resolve(C.PARIS[team], idx)
+        # players with no NBA record (e.g. Melvin Ejim) enter at replacement level
+        placeholders = {}
+        for k, n in enumerate(miss):
+            pid = -(1000 + k)
+            actual.append(pid)
+            placeholders[pid] = n
         locks, _ = C.resolve(C.NBA_LOCKS[team], idx)
         opps = []
         for o in C.NBA_OPP[team]:
@@ -54,8 +60,10 @@ def setup(ev, case, team, min_minutes):
             r += [-(k + 100) for k in range(12 - len(r))]
             opps.append(r)
         pos = dict(zip(ps["player_id"], ps["position"]))
+        pos.update({pid: C.NON_NBA_POS.get(n, "Forward") for pid, n in placeholders.items()})
         quota_pos = pos
         names = dict(zip(ps["player_id"], ps["name"].fillna(ps["name_bio"])))
+        names.update(placeholders)
     else:
         ps = ps.copy()
         idx = C.name_index(ps, ["name"])

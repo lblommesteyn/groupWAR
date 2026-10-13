@@ -76,3 +76,6 @@ def resolve(names, idx, strict=True):
 def by_minutes(ps, season, ids, k, key):
     cur = ps[(ps["season"] == season) & ps["player_id"].isin(ids)]
     return cur.sort_values(key, ascending=False)["player_id"].astype(int).tolist()[:k]
+
+# listed positions for reference-roster players with no NBA record in the feature season
+NON_NBA_POS = {"Melvin Ejim": "Forward"}
