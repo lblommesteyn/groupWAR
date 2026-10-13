@@ -54,7 +54,9 @@ def main():
     R, scale = S.R, S.scale
     res = {}
     cache = {}
-    from prior_graphs import prior_graph_tensors
+    from prior_graphs import prior_graph_tensors, rolling_graph_tensors
+    roll_A, roll_ok = rolling_graph_tensors(S)
+    roll_ok = roll_ok.numpy()
     prior_A = {}
     for lag in (0, 1):
         cache[lag] = S.tensors(lag=lag)
@@ -65,9 +67,10 @@ def main():
     playoff = np.array([m["playoff"] for m in meta])
     margin = y.numpy()
     win = (margin > 0).astype(int)
-    tr = np.where((season < args.test_season) & ~playoff)[0]
-    subsets = {"test_regular": np.where((season == args.test_season) & ~playoff)[0],
-               "test_playoffs": np.where((season == args.test_season) & playoff)[0]}
+    # all methods are compared on games where both teams have deployment history
+    tr = np.where((season < args.test_season) & ~playoff & roll_ok)[0]
+    subsets = {"test_regular": np.where((season == args.test_season) & ~playoff & roll_ok)[0],
+               "test_playoffs": np.where((season == args.test_season) & playoff & roll_ok)[0]}
 
     # RAPM baseline (training seasons only)
     seasons_tr = sorted(set(season[tr].tolist()))
@@ -103,7 +106,7 @@ def main():
 
     for lag in (0, 1):
         Xl, Al, Ml, _, _, covl = cache[lag]
-        for suffix, Ause in (("", Al), ("_pre", prior_A[lag])):
+        for suffix, Ause in (("", Al), ("_pre", prior_A[lag]), ("_roll", roll_A)):
             F = mw_feat(Xl, Ause, Ml)
             lin = LogisticRegression(max_iter=2000, C=1.0).fit(F[tr][margin[tr] != 0], win[tr][margin[tr] != 0])
             for name, idx in subsets.items():
@@ -119,11 +122,22 @@ def main():
         strength_pre[k] = (dpre[k, :R] * v[:R]).sum() - (dpre[k, R:] * v[R:]).sum()
     lr_pre = LogisticRegression(max_iter=2000).fit(strength_pre[tr, None][margin[tr] != 0],
                                                    win[tr][margin[tr] != 0])
+    droll = torch.diagonal(roll_A, dim1=1, dim2=2).numpy()
+    strength_roll = np.zeros(len(games))
+    for k, g in enumerate(games):
+        pos = S.hockey_pos(g) if S.hockey_pos else None
+        ps_ = side_players(g, g["home"], R, pos) + side_players(g, g["away"], R, pos)
+        v = np.array([rmap.get(p, 0.0) if p else 0.0 for p in ps_])
+        strength_roll[k] = (droll[k, :R] * v[:R]).sum() - (droll[k, R:] * v[R:]).sum()
+    lr_roll = LogisticRegression(max_iter=2000).fit(strength_roll[tr, None][margin[tr] != 0],
+                                                    win[tr][margin[tr] != 0])
     lr = LogisticRegression(max_iter=2000).fit(strength[tr, None][margin[tr] != 0], win[tr][margin[tr] != 0])
     home_rate = win[tr][margin[tr] != 0].mean()
     for name, idx in subsets.items():
         res[name]["home_only"] = metrics(np.full(len(idx), home_rate), win[idx], margin[idx], scale)
         res[name]["rapm_sum"] = metrics(lr.predict_proba(strength[idx, None])[:, 1], win[idx], margin[idx], scale)
+        res[name]["rapm_sum_roll"] = metrics(lr_roll.predict_proba(strength_roll[idx, None])[:, 1],
+                                             win[idx], margin[idx], scale)
         res[name]["rapm_sum_pre"] = metrics(lr_pre.predict_proba(strength_pre[idx, None])[:, 1],
                                             win[idx], margin[idx], scale)
 
@@ -131,9 +145,11 @@ def main():
         ens, cfg = load_ensemble(args.sport, tag)
         assert cfg["test_season"] == args.test_season, tag
         Xl, Al, Ml, _, _, _ = cache[cfg["lag"]]
-        variants = {"": Al, "@pre": prior_A[cfg["lag"]]}
+        variants = {"": Al, "@pre": prior_A[cfg["lag"]], "@roll": roll_A}
         if cfg.get("prior_deploy"):
             variants = {"": prior_A[cfg["lag"]]}
+        if cfg.get("roll"):
+            variants = {"": roll_A}
         for suffix, Ause in variants.items():
             if cfg.get("shuffle_graph"):
                 from train import shuffle_graph

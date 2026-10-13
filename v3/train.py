@@ -67,6 +67,8 @@ def main():
     ap.add_argument("--folds", type=int, default=6)
     ap.add_argument("--lr", type=float, default=1e-3)
     ap.add_argument("--shuffle-graph", action="store_true")
+    ap.add_argument("--roll", action="store_true",
+                    help="train on pre-game rolling deployments from each team's previous games")
     ap.add_argument("--prior-deploy", action="store_true",
                     help="train on pre-game prior deployments instead of observed time")
     ap.add_argument("--include-playoffs", action="store_true")
@@ -75,6 +77,10 @@ def main():
     S = load_sport(args.sport)
     X, A, M, y, meta, coverage = S.tensors(lag=args.lag)
     R, scale = S.R, S.scale
+    roll_ok = None
+    if args.roll:
+        from prior_graphs import rolling_graph_tensors
+        A, roll_ok = rolling_graph_tensors(S)
     if args.prior_deploy:
         from prior_graphs import prior_graph_tensors
         A = prior_graph_tensors(S, X, A, M, meta, lag=args.lag)
@@ -83,6 +89,8 @@ def main():
     seasons = np.array([m["season"] for m in meta])
     playoff = np.array([m["playoff"] for m in meta])
     pool = np.ones(len(meta), dtype=bool)
+    if roll_ok is not None:
+        pool &= roll_ok.numpy()
     if not args.include_playoffs:
         pool &= ~playoff
     if args.test_season is not None:
