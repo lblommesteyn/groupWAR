@@ -80,7 +80,7 @@ def main():
     ev = Evaluator(sport, args.tag, season=season)
     mm = 500 if sport == "nba" else 300
     pool, actual, locks, opps, qpos, names = RC.setup(ev, args.case, args.team, mm)
-    ev.mpg.update({p: 0.0 for o in opps for p in o if p < 0})
+    ev.mpg.update({p: 0.0 for o in opps + [actual] for p in o if p < 0})
     quota = Quota(sport, qpos)
 
     rapm_seasons = [2021, 2022, 2023] if sport == "nba" else [2023, 2024, 2025]
