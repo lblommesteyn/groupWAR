@@ -19,7 +19,7 @@ def load_ensemble(sport, tag):
     ms = []
     for k in range(cfg["folds"]):
         m = RelGraphScorer(cfg["n_feat"], cfg["hidden"], cfg["layers"]).to(DEV)
-        m.load_state_dict(torch.load(d / f"fold{k}.pt", map_location=DEV))
+        m.load_state_dict(torch.load(d / f"fold{k}.pt", map_location="cpu"))
         m.eval()
         for p in m.parameters():
             p.requires_grad_(False)
@@ -90,8 +90,9 @@ class Evaluator:
         X = torch.zeros(self.R, len(self.S.feature_cols))
         for i, p in enumerate(ids):
             v = self.S.vec(p, self.season)
-            if v is not None:
-                X[i] = torch.tensor(v)
+            # players with no league data in the feature season (e.g. playing in
+            # Europe) are represented at replacement level
+            X[i] = torch.tensor(v) if v is not None else self.replacement
         if knock is not None:
             X[ids.index(knock)] = self.replacement
         return X, ids
