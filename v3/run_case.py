@@ -120,6 +120,7 @@ def main():
     ap.add_argument("--drop-opp", type=int, default=None)
     ap.add_argument("--min-minutes", type=float, default=None)
     ap.add_argument("--audit", action="store_true", help="WAR + distance-to-selection")
+    ap.add_argument("--screen", type=int, default=128, help="greedy shortlist size (0 = no screen)")
     ap.add_argument("--out", required=True)
     args = ap.parse_args()
 
@@ -145,7 +146,7 @@ def main():
     pm = None
     for seed in range(args.seeds):
         t0 = time.time()
-        roster, s, hist = run_search(ev, pool, opps, locks, quota, seed=seed)
+        roster, s, hist = run_search(ev, pool, opps, locks, quota, seed=seed, screen=args.screen)
         res["runs"].append({"seed": seed, "roster": roster, "score": s,
                             "history": [list(map(lambda v: v if not isinstance(v, (np.integer,)) else int(v), h))
                                         for h in hist],

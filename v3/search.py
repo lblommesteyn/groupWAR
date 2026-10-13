@@ -79,7 +79,7 @@ def tournament(ev, pool, opponents, locks, quota, seed=0, verbose=True, max_roun
                 break
             teams.append(t)
             used.update(p for p in t if p not in locks)
-        if len(teams) < 2:
+        if len(teams) < 4:
             break
         s = score(ev, teams, opponents).numpy()
         order = np.argsort(-s)
@@ -102,7 +102,7 @@ def tournament(ev, pool, opponents, locks, quota, seed=0, verbose=True, max_roun
     return remaining, best
 
 
-def greedy(ev, start, pool, opponents, locks, quota, max_iters=40, verbose=True, tol=1e-4):
+def greedy(ev, start, pool, opponents, locks, quota, max_iters=40, verbose=True, tol=1e-4, screen=128):
     cur = list(start)
     cur_s = float(score(ev, [cur], opponents)[0])
     history = [(0, cur_s, None, None)]
@@ -120,6 +120,12 @@ def greedy(ev, start, pool, opponents, locks, quota, max_iters=40, verbose=True,
                     moves.append((out, inn))
         if not cands:
             break
+        if screen and len(cands) > screen:
+            # cheap non-adversarial screen, full Stackelberg score on the shortlist
+            pre = ev.score_rosters(cands, opponents, mode="prior").mean(1).numpy()
+            keep = np.argsort(-pre)[:screen]
+            cands = [cands[i] for i in keep]
+            moves = [moves[i] for i in keep]
         s = score(ev, cands, opponents).numpy()
         k = int(np.argmax(s))
         if s[k] <= cur_s + tol:
@@ -132,7 +138,7 @@ def greedy(ev, start, pool, opponents, locks, quota, max_iters=40, verbose=True,
     return cur, cur_s, history
 
 
-def run_search(ev, pool, opponents, locks, quota, seed=0, verbose=True):
+def run_search(ev, pool, opponents, locks, quota, seed=0, verbose=True, screen=128):
     remaining, best = tournament(ev, pool, opponents, locks, quota, seed, verbose)
     rng = random.Random(seed + 1)
     # start greedy from the best tournament team restricted to survivors where possible
@@ -144,4 +150,4 @@ def run_search(ev, pool, opponents, locks, quota, seed=0, verbose=True):
             start = best[1]
     except RuntimeError:
         start = best[1]
-    return greedy(ev, start, pool, opponents, locks, quota, verbose=verbose)
+    return greedy(ev, start, pool, opponents, locks, quota, verbose=verbose, screen=screen)
