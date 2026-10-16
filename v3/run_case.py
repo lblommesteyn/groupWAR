@@ -131,12 +131,20 @@ def main():
     ap.add_argument("--min-minutes", type=float, default=None)
     ap.add_argument("--audit", action="store_true", help="WAR + distance-to-selection")
     ap.add_argument("--screen", type=int, default=128, help="greedy shortlist size (0 = no screen)")
+    ap.add_argument("--scorer", default="value", choices=["value", "gnn"],
+                    help="value: additive player-value model (main); gnn: graph scorer (appendix)")
+    ap.add_argument("--order", default="coach", choices=["coach", "club"],
+                    help="value scorer: rotation by model value (coach) or by club minutes (club)")
     ap.add_argument("--out", required=True)
     args = ap.parse_args()
 
     sport = "nba" if args.case == "paris" else "nhl"
     season = 2024 if sport == "nba" else 2025
-    ev = Evaluator(sport, args.tag, season=season, mode=args.mode, lam=args.lam)
+    if args.scorer == "value":
+        from values import ValueEvaluator
+        ev = ValueEvaluator(sport, season, order=args.order)
+    else:
+        ev = Evaluator(sport, args.tag, season=season, mode=args.mode, lam=args.lam)
     mm = args.min_minutes or (500 if sport == "nba" else 300)
     pool, actual, locks, opps, qpos, names = setup(ev, args.case, args.team, mm)
     # negative ids are replacement-level placeholders for unknown opponents
@@ -173,6 +181,9 @@ def main():
     res["actual_score_by_opp"] = actual_scores[0].tolist()
     # per-fold-model scores (uncertainty) for best and actual, in the same deployment
     for key, r in [("best", best["roster"]), ("actual", actual)]:
+        if hasattr(ev, "score_draws"):  # bootstrap draws of the value model
+            res[f"{key}_per_model"] = ev.score_draws(r, opps)
+            continue
         X, _ = ev.tensor(r)
         per = []
         for m in ev.model.models:
@@ -181,6 +192,10 @@ def main():
             per.append(float(ev.score_tensors(X.unsqueeze(0), [ev.tensor(o)[0] for o in opps]).mean()))
             ev.model = full
         res[f"{key}_per_model"] = per
+    if hasattr(ev, "values_table"):
+        res["values"] = {str(k): v for k, v in ev.values_table(sorted(set(pool) | set(actual))).items()}
+        res["rotation_best"] = [[int(p), float(q)] for p, q in zip(*ev.deploy(best["roster"]))]
+        res["rotation_actual"] = [[int(p), float(q)] for p, q in zip(*ev.deploy(actual))]
     if args.audit:
         s_b, war_b = ev.war(best["roster"], opps)
         s_a, war_a = ev.war(actual, opps)

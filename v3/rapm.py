@@ -16,8 +16,8 @@ DATA = ROOT / "v3" / "data"
 PER = {"nba": 2880.0, "nhl": 3600.0}
 
 
-def load_stints(sport):
-    st = pd.read_pickle(DATA / sport / "stints.pkl")
+def load_stints(sport, name="stints.pkl"):
+    st = pd.read_pickle(DATA / sport / name)
     with open(DATA / sport / "game_graphs.pkl", "rb") as f:
         g = pickle.load(f)
     meta = pd.DataFrame([{"game_id": x["game_id"], "season": x["season"], "playoff": x["playoff"]}

@@ -74,10 +74,15 @@ def main():
     ap.add_argument("--tag", default="main")
     ap.add_argument("--n-null", type=int, default=2000)
     ap.add_argument("--search-out", default="main")
+    ap.add_argument("--scorer", default="value", choices=["value", "gnn"])
     args = ap.parse_args()
     sport = "nba" if args.case == "paris" else "nhl"
     season = 2024 if sport == "nba" else 2025
-    ev = Evaluator(sport, args.tag, season=season)
+    if args.scorer == "value":
+        from values import ValueEvaluator
+        ev = ValueEvaluator(sport, season)
+    else:
+        ev = Evaluator(sport, args.tag, season=season)
     mm = 500 if sport == "nba" else 300
     pool, actual, locks, opps, qpos, names = RC.setup(ev, args.case, args.team, mm)
     ev.mpg.update({p: 0.0 for o in opps + [actual] for p in o if p < 0})
@@ -102,7 +107,9 @@ def main():
     res = {"rosters": rosters, "scores": {}, "prior_scores": {}, "overlap_actual": {}}
     names_list = list(rosters)
     S = ev.score_rosters([rosters[k] for k in names_list], opps)
-    P = ev.score_rosters([rosters[k] for k in names_list], opps, mode="prior")
+    # comparison deployment: no adversary for the GNN, club-minutes rotation for the value model
+    alt = "club" if args.scorer == "value" else "prior"
+    P = ev.score_rosters([rosters[k] for k in names_list], opps, mode=alt)
     for k, s, p in zip(names_list, S, P):
         res["scores"][k] = float(s.mean())
         res["prior_scores"][k] = float(p.mean())
@@ -111,7 +118,7 @@ def main():
     rng = random.Random(0)
     null = [random_valid(pool, locks, quota, rng) for _ in range(args.n_null)]
     ns = ev.score_rosters(null, opps).mean(1).numpy()
-    npr = ev.score_rosters(null, opps, mode="prior").mean(1).numpy()
+    npr = ev.score_rosters(null, opps, mode=alt).mean(1).numpy()
     res["null"] = {"mean": float(ns.mean()), "sd": float(ns.std()),
                    "q": {str(q): float(np.quantile(ns, q)) for q in (0.05, 0.5, 0.95, 0.99)}}
     res["percentile"] = {k: float((ns < v).mean()) for k, v in res["scores"].items()}

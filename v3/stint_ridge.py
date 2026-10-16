@@ -22,6 +22,7 @@ from sklearn.metrics import log_loss, roc_auc_score
 
 from data_registry import load_sport
 from rapm import PER, load_stints
+from values import state_dummies
 
 ROOT = Path(__file__).resolve().parents[1]
 
@@ -35,6 +36,8 @@ def main():
     ap.add_argument("--box-scale", default="0,1,3,10,30")
     ap.add_argument("--std-days", type=int, default=0,
                     help="season-to-date: refit every N days of the test season on all earlier stints")
+    ap.add_argument("--stints", default="stints.pkl", help="stints_xg.pkl for NHL expected goals")
+    ap.add_argument("--states", action="store_true", help="NHL manpower-state terms")
     ap.add_argument("--out", default=None)
     args = ap.parse_args()
 
@@ -51,10 +54,12 @@ def main():
             cur = S.ps[S.ps["season"] == s]
             lo, hi = cur["minutes_total"].quantile([0.10, 0.30])
             rp = cur[(cur["minutes_total"] >= lo) & (cur["minutes_total"] <= hi)]
-            repl[s] = ((rp[S.feature_cols] - S.mu) / S.sd).fillna(0).mean().to_numpy(np.float32)
+            # no feature season at all (first season of data): league average
+            repl[s] = (((rp[S.feature_cols] - S.mu) / S.sd).fillna(0).mean().to_numpy(np.float32)
+                       if len(rp) else np.zeros(F, np.float32))
         return repl[s]
 
-    st_all = load_stints(args.sport)
+    st_all = load_stints(args.sport, args.stints)
     gdate = {g["game_id"]: pd.Timestamp(g["date"]) for g in S.games()}
     st_all["date"] = st_all["game_id"].map(gdate)
     st_all = st_all[~st_all["playoff"] & (st_all["secs"] >= 5)]
@@ -140,9 +145,11 @@ def main():
                 df = st_all[(st_all["season"] <= args.test_season) & (st_all["date"] < cut)]
                 Xi, Bm, pl, yy, ww = build(df)
                 X = hstack([csr_matrix(Bm * c), Xi]).tocsr() if c > 0 else Xi
+                if args.states:
+                    X = hstack([X, state_dummies(df)]).tocsr()
                 m = Ridge(alpha=a, fit_intercept=True).fit(X, yy, sample_weight=ww)
                 bb = m.coef_[:F] * c if c > 0 else np.zeros(F)
-                r_ = m.coef_[F:] if c > 0 else m.coef_
+                r_ = m.coef_[(F if c > 0 else 0):(F if c > 0 else 0) + len(pl)]
                 cache[k] = (bb, dict(zip(pl, r_)))
             return cache[k]
         return get
@@ -152,9 +159,11 @@ def main():
         for a in [float(x) for x in args.alphas.split(",")]:
             # scaling the box block by c divides its effective penalty by c^2
             X = hstack([csr_matrix(B * c), Xid]).tocsr() if c > 0 else Xid
+            if args.states:
+                X = hstack([X, state_dummies(st)]).tocsr()
             m = Ridge(alpha=a, fit_intercept=True).fit(X, y, sample_weight=w)
             b = m.coef_[:F] * c if c > 0 else np.zeros(F)
-            rr = m.coef_[F:] if c > 0 else m.coef_
+            rr = m.coef_[(F if c > 0 else 0):(F if c > 0 else 0) + len(players)]
             by_date = None
             if args.std_days:
                 by_date = std_fitter(c, a)
