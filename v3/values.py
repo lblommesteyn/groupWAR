@@ -80,14 +80,28 @@ class ValueModel:
         st = st[~st["playoff"] & (st["secs"] >= 5) & (st["season"] <= season)]
         if exclude_season is not None:
             st = st[st["season"] != exclude_season]
-        if sport == "nba":
-            for ls in (lineup_seasons if lineup_seasons is not None else [season]):
-                if ls not in set(st["season"]) and ls != exclude_season:
-                    lr = nba_lineup_rows(ls)
-                    if len(lr):
-                        st = pd.concat([st, lr], ignore_index=True)
         zero = np.zeros(F, np.float32)
         fv = lambda p, s: S.vec(p, s) if S.vec(p, s) is not None else zero
+        st = st.assign(is_lineup=False)
+        if sport == "nba":
+            extra = [ls for ls in (lineup_seasons if lineup_seasons is not None else [season])
+                     if ls not in set(st["season"]) and ls != exclude_season]
+            if extra:
+                opp_curve = self._opponent_curve(st, fv, decay)
+                mpg = {(p, s_): m for p, s_, m in zip(S.ps["player_id"], S.ps["season"], S.ps["mpg"])}
+                for ls in extra:
+                    lr = nba_lineup_rows(ls)
+                    if not len(lr):
+                        continue
+                    # lineup totals do not say who the opponent was; bench units face
+                    # bench units, so add the expected opponent unit value for a lineup
+                    # of this usage level (measured on seasons with full stints)
+                    use = np.array([sum(mpg.get((p, ls), 0.0) for p in u) for u in lr["home5"]])
+                    opp = np.interp(use, *opp_curve)
+                    secs = lr["secs"].to_numpy()
+                    lr["pts_home"] = lr["pts_home"] + opp * secs / PER[sport]
+                    st = pd.concat([st, lr.assign(is_lineup=True)], ignore_index=True)
+        self.opp_curve = getattr(self, "opp_curve", None)
         players = sorted({p for t in st["home5"] for p in t} | {p for t in st["away5"] for p in t})
         ix = {p: i for i, p in enumerate(players)}
         rows, cols, vals = [], [], []
@@ -99,6 +113,9 @@ class ValueModel:
                 rows.append(r); cols.append(ix[p]); vals.append(-1.0); B[r] -= fv(p, s)
         Xid = csr_matrix((vals, (rows, cols)), shape=(len(st), len(players)))
         self.X = hstack([csr_matrix(B * self.c), Xid]).tocsr() if self.c > 0 else Xid
+        if st["is_lineup"].any():
+            # separate intercept for lineup rows (they mix home and away time)
+            self.X = hstack([self.X, csr_matrix(st["is_lineup"].to_numpy(float)[:, None] * 30.0)]).tocsr()
         if sport == "nhl":
             # manpower-state terms (5v4, 4v5, 6v5, ...) so power-play time is not
             # credited to the skaters on the ice; lightly penalised via scaling
@@ -110,6 +127,30 @@ class ValueModel:
         cur = S.ps[S.ps["season"] == season]
         lo, hi = cur["minutes_total"].quantile([0.10, 0.30])
         self.repl_ids = cur[(cur["minutes_total"] >= lo) & (cur["minutes_total"] <= hi)]["player_id"].tolist()
+
+    def _opponent_curve(self, st, fv, decay):
+        """Mean opponent unit value (stint-only fit) by own-unit usage, as bin
+        centres and values for interpolation."""
+        sub = ValueModel.__new__(ValueModel)
+        sub.__init__(self.sport, self.season, decay=decay, alpha=self.alpha, box_scale=self.c,
+                     lineup_seasons=[])
+        b, r, repl = sub.fit()
+        S = self.S
+        mpg = {(p, s_): m for p, s_, m in zip(S.ps["player_id"], S.ps["season"], S.ps["mpg"])}
+        u, o, w = [], [], []
+        for h, a, s_, sec in zip(st["home5"], st["away5"], st["season"], st["secs"]):
+            for own, opp in ((h, a), (a, h)):
+                u.append(sum(mpg.get((p, s_), 0.0) for p in own))
+                o.append(sum(value_of(S, p, s_, b, r, repl) for p in opp))
+                w.append(sec)
+        u, o, w = map(np.array, (u, o, w))
+        edges = np.quantile(u, np.linspace(0, 1, 21))
+        cen, val = [], []
+        for lo, hi in zip(edges[:-1], edges[1:]):
+            m = (u >= lo) & (u <= hi)
+            cen.append(np.average(u[m], weights=w[m])); val.append(np.average(o[m], weights=w[m]))
+        self.opp_curve = (np.array(cen), np.array(val))
+        return self.opp_curve
 
     def fit(self, seed=None):
         w = self.w

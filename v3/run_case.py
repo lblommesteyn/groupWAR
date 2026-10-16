@@ -135,6 +135,7 @@ def main():
                     help="value: additive player-value model (main); gnn: graph scorer (appendix)")
     ap.add_argument("--order", default="coach", choices=["coach", "club"],
                     help="value scorer: rotation by model value (coach) or by club minutes (club)")
+    ap.add_argument("--decay", type=float, default=0.75, help="value scorer: weight per season back")
     ap.add_argument("--out", required=True)
     args = ap.parse_args()
 
@@ -142,7 +143,7 @@ def main():
     season = 2024 if sport == "nba" else 2025
     if args.scorer == "value":
         from values import ValueEvaluator
-        ev = ValueEvaluator(sport, season, order=args.order)
+        ev = ValueEvaluator(sport, season, order=args.order, decay=args.decay)
     else:
         ev = Evaluator(sport, args.tag, season=season, mode=args.mode, lam=args.lam)
     mm = args.min_minutes or (500 if sport == "nba" else 300)

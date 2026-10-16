@@ -82,6 +82,9 @@ def main():
     te = (st["season"] == args.test_season).to_numpy()
     c = args.box_scale
     X = hstack([csr_matrix(B * c), Xid]).tocsr()
+    if args.sport == "nhl":
+        from values import state_dummies
+        X = hstack([X, state_dummies(st)]).tocsr()
     lin = Ridge(alpha=args.alpha).fit(X[tr], y[tr], sample_weight=w[tr])
     resid = y - lin.predict(X)
     wm = lambda e, m: float(np.average(e[m] ** 2, weights=w[m]))
