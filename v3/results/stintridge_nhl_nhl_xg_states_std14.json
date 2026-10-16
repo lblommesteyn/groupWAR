@@ -1,0 +1,25 @@
+{
+ "args": {
+  "sport": "nhl",
+  "test_season": 2025,
+  "lag": 1,
+  "alphas": "100000",
+  "box_scale": "0",
+  "std_days": 14,
+  "stints": "stints_xg.pkl",
+  "states": true,
+  "out": "nhl_xg_states_std14"
+ },
+ "grid": [
+  {
+   "box_scale": 0.0,
+   "alpha": 100000.0,
+   "test_regular": {
+    "n": 803,
+    "auc": 0.592622034529872,
+    "logloss": 0.6833044010968046,
+    "acc": 0.5566625155666252
+   }
+  }
+ ]
+}

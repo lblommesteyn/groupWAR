@@ -1,0 +1,45 @@
+{
+ "args": {
+  "sport": "nhl",
+  "test_season": 2025,
+  "lag": 1,
+  "alphas": "30000,100000,300000",
+  "box_scale": "0",
+  "std_days": 0,
+  "stints": "stints_xg.pkl",
+  "states": true,
+  "out": "nhl_xg_states"
+ },
+ "grid": [
+  {
+   "box_scale": 0.0,
+   "alpha": 30000.0,
+   "test_regular": {
+    "n": 803,
+    "auc": 0.5867345671345174,
+    "logloss": 0.6862565430232507,
+    "acc": 0.5653798256537983
+   }
+  },
+  {
+   "box_scale": 0.0,
+   "alpha": 100000.0,
+   "test_regular": {
+    "n": 803,
+    "auc": 0.5873618184076512,
+    "logloss": 0.6848104219734029,
+    "acc": 0.5666251556662516
+   }
+  },
+  {
+   "box_scale": 0.0,
+   "alpha": 300000.0,
+   "test_regular": {
+    "n": 803,
+    "auc": 0.5864364675195628,
+    "logloss": 0.684011973798819,
+    "acc": 0.5716064757160647
+   }
+  }
+ ]
+}

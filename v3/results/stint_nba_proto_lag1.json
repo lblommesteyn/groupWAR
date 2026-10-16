@@ -1,0 +1,31 @@
+{
+ "args": {
+  "sport": "nba",
+  "test_season": 2023,
+  "lag": 1,
+  "epochs": 10,
+  "id_l2": 0.003,
+  "no_ids": false,
+  "no_interact": false,
+  "seed": 0,
+  "out": "proto_lag1"
+ },
+ "test_regular": {
+  "n": 1025,
+  "auc": 0.6661275433819708,
+  "logloss": 0.6547428861408876,
+  "acc": 0.6234146341463415
+ },
+ "test_playoffs": {
+  "n": 74,
+  "auc": 0.5643939393939394,
+  "logloss": 0.7230154231983399,
+  "acc": 0.5135135135135135
+ },
+ "train_games": {
+  "n": 2818,
+  "auc": 0.72700605216428,
+  "logloss": 0.6055440618079082,
+  "acc": 0.6710432931156849
+ }
+}

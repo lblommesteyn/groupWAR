@@ -1,0 +1,34 @@
+{
+ "args": {
+  "sport": "nhl",
+  "test_season": 2025,
+  "lag": 1,
+  "alphas": "30000,100000",
+  "box_scale": "0",
+  "std_days": 14,
+  "stints": "stints_xg.pkl",
+  "out": "nhl_xg_std14"
+ },
+ "grid": [
+  {
+   "box_scale": 0.0,
+   "alpha": 30000.0,
+   "test_regular": {
+    "n": 803,
+    "auc": 0.5781083095267667,
+    "logloss": 0.6878304523481066,
+    "acc": 0.5691158156911582
+   }
+  },
+  {
+   "box_scale": 0.0,
+   "alpha": 100000.0,
+   "test_regular": {
+    "n": 803,
+    "auc": 0.5808284685132281,
+    "logloss": 0.6876835362676248,
+    "acc": 0.5516811955168119
+   }
+  }
+ ]
+}
