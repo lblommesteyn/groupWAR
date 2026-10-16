@@ -45,12 +45,12 @@ def rolling_graph_tensors(S, decay=0.9, min_history=5):
                 for i, p in enumerate(players):
                     if p is None:
                         continue
-                    W[i, i] = st["secs"].get(p, 0.0) / st["length"]
+                    W[i, i] = float(st["secs"].get(p, 0.0) / st["length"])
                     for j in range(i + 1, R):
                         q = players[j]
                         if q is None:
                             continue
-                        v = st["shared"].get((p, q) if p < q else (q, p), 0.0) / st["length"]
+                        v = float(st["shared"].get((p, q) if p < q else (q, p), 0.0) / st["length"])
                         W[i, j] = W[j, i] = v
                 tot = torch.diagonal(W).sum()
                 if tot > 0:

@@ -12,6 +12,19 @@ ROOT = Path(__file__).resolve().parents[1]
 DATA = ROOT / "v3" / "data"
 
 
+def read_parquet(path, tries=3):
+    """Single-threaded read with retries: threaded reads have intermittently
+    returned corrupt pages under GPU-job load, although the file itself is intact."""
+    import time
+    for k in range(tries):
+        try:
+            return pd.read_parquet(path, use_threads=False)
+        except OSError:
+            if k == tries - 1:
+                raise
+            time.sleep(2)
+
+
 class Sport:
     name: str
     R: int
@@ -50,7 +63,7 @@ class NBA(Sport):
         super().__init__()
 
     def load_player_seasons(self):
-        ps = pd.read_parquet(DATA / "nba" / "player_seasons.parquet")
+        ps = read_parquet(DATA / "nba" / "player_seasons.parquet")
         ps["minutes_total"] = ps["Minutes"]
         return ps
 
@@ -70,7 +83,7 @@ class NHL(Sport):
         self.pos = dict(zip(self.ps["player_id"], self.ps["pos"]))
 
     def load_player_seasons(self):
-        ps = pd.read_parquet(DATA / "nhl" / "player_seasons.parquet")
+        ps = read_parquet(DATA / "nhl" / "player_seasons.parquet")
         return ps
 
     def hockey_pos(self, g):

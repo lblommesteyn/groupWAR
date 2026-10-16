@@ -97,6 +97,8 @@ def main():
     te = subsets["test_regular"]
     q75 = np.quantile(np.concatenate([lvl_h[te], lvl_a[te]]), 0.75)
     subsets["test_high_talent"] = te[(lvl_h[te] >= q75) & (lvl_a[te] >= q75)]
+    # the NHL test window ends at the 4 Nations break, so it has no playoff games
+    subsets = {k: v for k, v in subsets.items() if len(v) > 0}
 
     def mw_feat(Xl, Al, Ml):
         d = torch.diagonal(Al, dim1=1, dim2=2)
