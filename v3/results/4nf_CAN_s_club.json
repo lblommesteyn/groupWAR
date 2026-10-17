@@ -15,6 +15,7 @@
   "scorer": "value",
   "order": "club",
   "decay": 0.75,
+  "box_scale": null,
   "out": "s_club"
  },
  "pool_size": 244,
@@ -498,7 +499,7 @@
     ]
    ],
    "overlap_actual": 8,
-   "minutes": 1.1635890007019043
+   "minutes": 0.5358755588531494
   }
  ],
  "best": [

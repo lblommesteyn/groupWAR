@@ -15,6 +15,7 @@
   "scorer": "value",
   "order": "coach",
   "decay": 0.75,
+  "box_scale": null,
   "out": "main"
  },
  "pool_size": 244,
@@ -498,7 +499,7 @@
     ]
    ],
    "overlap_actual": 8,
-   "minutes": 2.0222747325897217
+   "minutes": 0.5810480117797852
   },
   {
    "seed": 1,
@@ -580,7 +581,7 @@
     ]
    ],
    "overlap_actual": 8,
-   "minutes": 1.8615145683288574
+   "minutes": 0.4634978771209717
   },
   {
    "seed": 2,
@@ -656,7 +657,7 @@
     ]
    ],
    "overlap_actual": 9,
-   "minutes": 1.6137356758117676
+   "minutes": 0.4684293270111084
   }
  ],
  "best": [

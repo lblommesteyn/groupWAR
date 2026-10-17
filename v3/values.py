@@ -2,7 +2,11 @@
 
 Player value v_p = b . x_p + r_p from one weighted ridge regression on stints
 (box-score prior block b, per-player residual r, RAPM penalty), fitted on all
-regular-season data up to the case season. For the NBA the stint table ends in
+regular-season data up to the case season. The box block is off by default in
+both sports: on the held-out validation it did not help (NBA AUC 0.683 with it,
+0.686 without; NHL worse with it), and in the NBA its linear fit to usage and
+shot mix pulls high-usage guards down (Curry 39th with it, 15th without).
+`box_scale` turns it back on for the sensitivity run. For the NBA the stint table ends in
 2022-23, so 2023-24 enters as pbpstats five-man lineup totals, each treated as
 one long stint against an average opponent. Older seasons are down-weighted by
 `decay` per season.
@@ -40,7 +44,7 @@ DATA = ROOT / "v3" / "data"
 CACHE = ROOT / "v3" / "models" / "values"
 
 # settings chosen on the held-out-season validation (stint_ridge.py)
-DEFAULTS = {"nba": {"alpha": 1e5, "box_scale": 3.0, "stints": "stints.pkl"},
+DEFAULTS = {"nba": {"alpha": 1e5, "box_scale": 0.0, "stints": "stints.pkl"},
             "nhl": {"alpha": 1e5, "box_scale": 0.0, "stints": "stints_xg.pkl"}}
 
 
@@ -186,7 +190,7 @@ def value_of(S, p, season, b, r, repl):
     return (float(x @ b) if x is not None else 0.0) + r.get(p, 0.0)
 
 
-def fit_kappa(sport, decay=0.75):
+def fit_kappa(sport, decay=0.75, box_scale=None):
     """Out-of-sample win-probability slope: leave-one-season-out values applied
     to that season's games with rolling pre-game minute shares."""
     from dataset import side_players
@@ -197,7 +201,8 @@ def fit_kappa(sport, decay=0.75):
     seasons = sorted({g["season"] for g in games})
     xs, ys = [], []
     for s in seasons:
-        b, r, repl = ValueModel(sport, max(seasons), decay=decay, exclude_season=s, lineup_seasons=[]).fit()
+        b, r, repl = ValueModel(sport, max(seasons), decay=decay, box_scale=box_scale, exclude_season=s,
+                             lineup_seasons=[]).fit()
         for k, g in enumerate(games):
             if g["season"] != s or g["playoff"] or not ok[k] or g["margin"] == 0:
                 continue
@@ -216,25 +221,26 @@ def fit_kappa(sport, decay=0.75):
 class ValueEvaluator:
     """Drop-in for rosters.Evaluator: score_rosters, war, war_many, mpg, R, S, season."""
 
-    def __init__(self, sport, season, n_boot=20, order="coach", decay=0.75, **_):
+    def __init__(self, sport, season, n_boot=20, order="coach", decay=0.75, box_scale=None, **_):
         self.sport, self.season, self.order_mode = sport, season, order
+        c = box_scale if box_scale is not None else DEFAULTS[sport]["box_scale"]
         self.S = load_sport(sport)
         self.R = self.S.R
         CACHE.mkdir(parents=True, exist_ok=True)
-        f = CACHE / f"{sport}_{season}_d{decay}_b{n_boot}.pkl"
+        f = CACHE / f"{sport}_{season}_d{decay}_c{c:g}_b{n_boot}.pkl"
         if f.exists():
             with open(f, "rb") as fh:
                 state = pickle.load(fh)
         else:
             print("fitting value model", flush=True)
-            vm = ValueModel(sport, season, decay=decay)
+            vm = ValueModel(sport, season, decay=decay, box_scale=c)
             main = vm.fit()
             draws = [vm.fit(seed=1000 + k) for k in range(n_boot)]
-            kf = CACHE / f"{sport}_kappa_d{decay}.json"
+            kf = CACHE / f"{sport}_kappa_d{decay}_c{c:g}.json"
             if kf.exists():
                 kappa = json.loads(kf.read_text())["kappa"]
             else:
-                kappa, icpt = fit_kappa(sport, decay)
+                kappa, icpt = fit_kappa(sport, decay, c)
                 kf.write_text(json.dumps({"kappa": kappa, "home_intercept": icpt}))
             state = {"main": main, "draws": draws, "kappa": kappa}
             with open(f, "wb") as fh:

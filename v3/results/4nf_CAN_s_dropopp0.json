@@ -15,6 +15,7 @@
   "scorer": "value",
   "order": "coach",
   "decay": 0.75,
+  "box_scale": null,
   "out": "s_dropopp0"
  },
  "pool_size": 244,
@@ -460,7 +461,7 @@
     ]
    ],
    "overlap_actual": 8,
-   "minutes": 0.7139284610748291
+   "minutes": 0.6059136390686035
   }
  ],
  "best": [

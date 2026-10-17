@@ -15,6 +15,7 @@ for ct in "paris USA" "paris Canada" "4nf CAN"; do
   run v3/run_case.py --case $c --team $t --seeds 1 --no-quota --out s_noquota
   run v3/run_case.py --case $c --team $t --seeds 1 --decay 0.5 --out s_decay05
   run v3/run_case.py --case $c --team $t --seeds 1 --decay 1.0 --out s_decay10
+  [ "$c" = paris ] && run v3/run_case.py --case $c --team $t --seeds 1 --box-scale 3 --out s_box3
   for k in 0 1 2; do
     run v3/run_case.py --case $c --team $t --seeds 1 --drop-opp $k --out s_dropopp$k
   done
