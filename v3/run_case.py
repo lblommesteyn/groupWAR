@@ -83,7 +83,9 @@ def setup(ev, case, team, min_minutes):
         quota_pos = {int(p): ("D" if po == "D" else ("C" if fo >= 15 else "W"))
                      for p, po, fo in zip(cur_role["player_id"], cur_role["pos"], cur_role["fo60"])}
         names = dict(zip(ps["player_id"], ps["name"]))
-    pool = sorted(set(pool) | set(actual) | set(locks))
+    # placeholders (no NBA record) score the actual roster but are not candidates:
+    # the search can only pick players the model has measured
+    pool = sorted(set(pool) | {p for p in actual if p >= 0} | set(locks))
     return pool, actual, locks, opps, quota_pos, names
 
 
@@ -160,7 +162,7 @@ def main():
     print("  actual quota-valid:", quota.ok(actual), flush=True)
 
     res = {"args": vars(args), "pool_size": len(pool), "names": {str(k): v for k, v in names.items()
-                                                                 if k in set(pool) | {p for o in opps for p in o}},
+                                                                 if k in set(pool) | set(actual) | {p for o in opps for p in o}},
            "actual": actual, "locks": locks, "opponents": opps, "runs": []}
     actual_scores = ev.score_rosters([actual], opps)
     pm = None
