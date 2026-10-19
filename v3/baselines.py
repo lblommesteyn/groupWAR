@@ -74,11 +74,14 @@ def main():
     ap.add_argument("--tag", default="main")
     ap.add_argument("--n-null", type=int, default=2000)
     ap.add_argument("--search-out", default="main")
-    ap.add_argument("--scorer", default="value", choices=["value", "gnn"])
+    ap.add_argument("--scorer", default="value", choices=["bayes", "value", "gnn"])
     args = ap.parse_args()
     sport = "nba" if args.case == "paris" else "nhl"
     season = 2024 if sport == "nba" else 2025
-    if args.scorer == "value":
+    if args.scorer == "bayes":
+        from bayes import BayesEvaluator
+        ev = BayesEvaluator(sport, season)
+    elif args.scorer == "value":
         from values import ValueEvaluator
         ev = ValueEvaluator(sport, season)
     else:
@@ -128,7 +131,7 @@ def main():
     res["null_scores"] = ns.tolist()
     res["null_prior_scores"] = npr.tolist()
     res["rapm_seasons"] = rapm_seasons
-    (OUT / f"E3_{args.case}_{args.team}.json").write_text(json.dumps(res, indent=1, default=int))
+    (OUT / f"E3_{args.case}_{args.team}{'_' + args.scorer if args.scorer != 'value' else ''}.json").write_text(json.dumps(res, indent=1, default=int))
     for k in names_list:
         print(f"{k:22s} score {res['scores'][k]:.4f}  prior {res['prior_scores'][k]:.4f}  "
               f"pct {res['percentile'][k]:.3f}  overlap {res['overlap_actual'][k]}")

@@ -133,8 +133,8 @@ def main():
     ap.add_argument("--min-minutes", type=float, default=None)
     ap.add_argument("--audit", action="store_true", help="WAR + distance-to-selection")
     ap.add_argument("--screen", type=int, default=128, help="greedy shortlist size (0 = no screen)")
-    ap.add_argument("--scorer", default="value", choices=["value", "gnn"],
-                    help="value: additive player-value model (main); gnn: graph scorer (appendix)")
+    ap.add_argument("--scorer", default="value", choices=["bayes", "value", "gnn"],
+                    help="bayes: Bayesian player-value model (main); value: ridge version; gnn: graph scorer (appendix)")
     ap.add_argument("--order", default="coach", choices=["coach", "club"],
                     help="value scorer: rotation by model value (coach) or by club minutes (club)")
     ap.add_argument("--decay", type=float, default=0.75, help="value scorer: weight per season back")
@@ -144,7 +144,10 @@ def main():
 
     sport = "nba" if args.case == "paris" else "nhl"
     season = 2024 if sport == "nba" else 2025
-    if args.scorer == "value":
+    if args.scorer == "bayes":
+        from bayes import BayesEvaluator
+        ev = BayesEvaluator(sport, season, order=args.order)
+    elif args.scorer == "value":
         from values import ValueEvaluator
         ev = ValueEvaluator(sport, season, order=args.order, decay=args.decay, box_scale=args.box_scale)
     else:
@@ -196,6 +199,11 @@ def main():
             per.append(float(ev.score_tensors(X.unsqueeze(0), [ev.tensor(o)[0] for o in opps]).mean()))
             ev.model = full
         res[f"{key}_per_model"] = per
+    if "best_per_model" in res and "actual_per_model" in res:
+        d = np.array(res["best_per_model"]) - np.array(res["actual_per_model"])
+        res["p_best_beats_actual"] = float((d > 0).mean())
+    if hasattr(ev, "value_sd"):
+        res["value_sd"] = {str(k): ev.value_sd.get(k, float("nan")) for k in sorted(set(pool) | set(actual))}
     if hasattr(ev, "values_table"):
         res["values"] = {str(k): v for k, v in ev.values_table(sorted(set(pool) | set(actual))).items()}
         res["rotation_best"] = [[int(p), float(q)] for p, q in zip(*ev.deploy(best["roster"]))]
