@@ -10,12 +10,23 @@ import embed_eval as ee
 from masked_paths import ROOT
 
 EV = pickle.load(open(ROOT / 'results/metrics/event_counts.pkl', 'rb'))
+import os
+HOLES = os.environ.get('HOLES') == '1'
+if HOLES:  # holes-field sums (holes_metrics.py) merged into the per-game event counts
+    for g, c in pickle.load(open(ROOT / 'results/holes/player_game.pkl', 'rb')).items():
+        for p, v in c.items():
+            EV.setdefault(g, {}).setdefault(p, {}).update(v)
 
 NEW_OFF = ['pass_rate', 'pot_ast36', 'pot_ast_quality', 'lost_pass_rate', 'hold_per_touch', 'drives36',
            'drive_finish', 'drive_kick_rate', 'drive_tov_rate', 'collapse', 'cut_rate', 'cut_fed_rate',
            'screen_rate', 'crash_rate', 'trans_share', 'cs_share']
 NEW_DEF = ['closeout_speed', 'closeout_d1', 'closeout_res', 'beaten_rate', 'help', 'rim_deter',
            'switch_entropy', 'iso_def_adj']
+HOLES_OFF = ['h_open_rate', 'h_reach_rate', 'h_spot', 'h_teamA', 'h_hold_A', 'h_create']
+HOLES_DEF = ['h_cover_rate', 'h_oppA', 'h_onball_A']
+if HOLES:
+    NEW_OFF = NEW_OFF + HOLES_OFF
+    NEW_DEF = NEW_DEF + HOLES_DEF
 
 
 def shrink(num, den, prior, k):
@@ -85,6 +96,17 @@ def describe2(G, gids, shots):
             rim_deter=shrink(rim_faced[p], faced[p], lg_rim, 50),
             switch_entropy=(lambda v: float(-(v / v.sum() * np.log(v / v.sum() + 1e-12)).sum()) if v.sum() > 30 else np.nan)(pair_h[p]),
             iso_def_adj=iso_num[p] / (iso_n[p] + 100))
+        if HOLES:
+            f.update(
+                h_open_rate=shrink(g_('h_open'), g_('h_off_n'), lg('h_open', 'h_off_n'), 2000),
+                h_reach_rate=shrink(g_('h_reach'), g_('h_off_n'), lg('h_reach', 'h_off_n'), 2000),
+                h_spot=shrink(g_('h_hat'), g_('h_off_n'), lg('h_hat', 'h_off_n'), 2000),
+                h_teamA=shrink(g_('h_teamA'), g_('h_off_n'), lg('h_teamA', 'h_off_n'), 2000),
+                h_hold_A=shrink(g_('h_hold_A'), g_('h_hold_n'), lg('h_hold_A', 'h_hold_n'), 500),
+                h_create=shrink(g_('h_create'), g_('h_touches'), lg('h_create', 'h_touches'), 50),
+                h_cover_rate=shrink(g_('h_cover'), g_('h_def_n'), lg('h_cover', 'h_def_n'), 2000),
+                h_oppA=shrink(g_('h_oppA'), g_('h_def_n'), lg('h_oppA', 'h_def_n'), 2000),
+                h_onball_A=shrink(g_('h_onball_A'), g_('h_onball_n'), lg('h_onball_A', 'h_onball_n'), 500))
     return d
 
 

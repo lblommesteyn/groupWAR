@@ -53,15 +53,8 @@ def score_track(z, base):
     return ts, sc
 
 
-def game(task):
-    base, shots = task
-    gid = base.rstrip('/').rsplit('/', 1)[1]
-    with zipfile.ZipFile(ARCHIVE) as z:
-        T, P, B, players, on, SC, GC = load(z, base)
-        sts, ssc = score_track(z, base)
-    if len(T) == 0 or not sts:
-        return gid, 0
-    dirs = attack_dirs(shots)
+def possessions(T, P, B, players, on):
+    """Ball-holder sequence -> possessions (same-team runs merged, opposing runs < 1 s ignored)."""
     hold, segs = holders(T, P, B, players, on)
     segs = [s for s in segs if s[2] - s[1] >= 1]
     team = lambda i, p: 'home' if p in on[i][0] else 'away' if p in on[i][1] else None
@@ -77,6 +70,19 @@ def game(task):
             continue
         else:
             poss.append(dict(team=tm, start=i0, end=i1, period=P[i0]))
+    return hold, poss
+
+
+def game(task):
+    base, shots = task
+    gid = base.rstrip('/').rsplit('/', 1)[1]
+    with zipfile.ZipFile(ARCHIVE) as z:
+        T, P, B, players, on, SC, GC = load(z, base)
+        sts, ssc = score_track(z, base)
+    if len(T) == 0 or not sts:
+        return gid, 0
+    dirs = attack_dirs(shots)
+    hold, poss = possessions(T, P, B, players, on)
     def score_at(t):
         j = bisect.bisect_right(sts, t) - 1
         return ssc[j] if j >= 0 else (0, 0)
