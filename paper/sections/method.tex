@@ -1,0 +1,42 @@
+\section{Method}
+\label{sec:method}
+
+\subsection{Game graphs}
+\label{sec:graph}
+Each training example is one game. For each team we keep the $R$ players with the most time in that game (in hockey, the twelve forwards and six defencemen with the most time), padding with empty slots when fewer appeared. The game is represented by a graph with $N=2R$ nodes, home players first. Node $i$ carries the player's feature vector $x_i$ for that season (Section~\ref{sec:data}). The signed matrix $A\in\mathbb{R}^{N\times N}$ records time: $A_{ii}$ is player $i$'s share of game time, $A_{ij}\ge 0$ is the share of time teammates $i$ and $j$ were on together, and $A_{ij}\le 0$ is minus the share of time opponents $i$ and $j$ were on at the same time. In basketball the diagonal of each side sums to five and in hockey it sums to roughly five (less when penalties remove skaters). The game outcome is the home margin $\Delta$ in points or goals; shootout results count as $\Delta=0$.
+
+\subsection{Scoring model}
+\label{sec:model}
+The scoring model $\hat{y}$ has three stages. An embedding layer maps $[x_i, A_{ii}]$ to a hidden vector $h_i^{(0)}\in\mathbb{R}^{128}$. Then $L=4$ relational convolution layers update every node from its teammates and its opponents through separate weight matrices,
+\begin{equation}
+h_i^{(\ell+1)}=h_i^{(\ell)}+\mathrm{ReLU}\Big(\mathrm{LN}\big(W_s^{(\ell)}h_i^{(\ell)}+W_+^{(\ell)}\textstyle\sum_{j}A^+_{ij}h_j^{(\ell)}+W_-^{(\ell)}\sum_{j}A^-_{ij}h_j^{(\ell)}\big)\Big),
+\end{equation}
+where $A^+$ and $A^-$ are the positive (teammate) and negative (opponent) parts of the off-diagonal of $A$ and LN is layer normalization \citep{schlichtkrull2018}. Because the update uses only sums over neighbours weighted by time, relabelling players within a side does not change the output. Finally, a DeepSet layer \citep{zaheer2017} summarizes each side as $z=\sum_{i\in\text{side}} A_{ii}\,\phi(h_i^{(L)})$, so a player who does not play contributes nothing, and the prediction is
+\begin{equation}
+\hat{y}=\sigma\big(\rho(z_{\text{home}})-\rho(z_{\text{away}})+\eta\big),
+\end{equation}
+where $\phi$ and $\rho$ are two-layer networks, $\sigma$ is the logistic function and $\eta$ is a learned home-court or home-ice term. At a neutral site $\eta$ is omitted, which makes the prediction exactly antisymmetric: swapping the two sides gives $1-\hat{y}$.
+
+The model is trained to minimize the squared error between $\hat{y}$ and $\sigma(\Delta/s)$, with $s=10$ points in basketball and $s=2$ goals in hockey, so that larger margins count as stronger evidence. We train six models on six random partitions of the training games, each using one partition for early stopping (AdamW, learning rate $10^{-3}$, weight decay $10^{-4}$, cosine schedule, 40 epochs), and average their predictions. The spread across the six models is used as one measure of uncertainty in Section~\ref{sec:cases}.
+
+\subsection{Deployment prior}
+\label{sec:deploy}
+The prior deployment $\pi_r$ reflects how real teams distribute time across a roster. We order the roster's players by minutes per game in the feature season (in hockey, forwards and defencemen separately) and take, for each slot rank $k$, the average share of game time $q_k$ that the $k$-th most-used player received in real regular-season games. The prior is the distribution over units $u$ with $\pi(u)\propto\exp(\sum_{k\in u}\theta_k)$, where the slot weights $\theta$ are fitted by iterative proportional scaling so that each slot's expected share of time under $\pi$ equals $q_k$. This construction generalizes the fixed rotation templates used in earlier versions of this work: instead of a hand-written list of lineups with fixed weights, every unit of the roster has positive prior weight, the marginal minutes match observed usage by rank, and the adversarial step can move weight toward or away from any unit.
+
+Given deployments for both sides, the within-team block of $A$ is $\sum_u d(u)\,\mathbf{1}_u\mathbf{1}_u^{\top}$, where $\mathbf{1}_u$ indicates the players in unit $u$; in hockey the forward-defence entries are products of the two players' time shares. The cross-team block is minus the outer product of the two sides' time shares, which corresponds to matchups that are independent of the units chosen.
+
+\subsection{Leader-follower evaluation}
+\label{sec:stackelberg}
+We solve \eqref{eq:value} by gradient methods on the logits of the two deployment distributions. In each of 40 outer iterations the opponent takes five Adam steps that decrease $\hat{y}+\lambda\,\mathrm{KL}(d_o\|\pi_o)$ with the candidate's deployment held fixed, and the candidate then takes one step that increases $\hat{y}-\lambda\,\mathrm{KL}(d_r\|\pi_r)$ at the opponent's current response. Using the gradient at the follower's response is justified by Danskin's theorem \citep{danskin1967} when the follower's problem is solved accurately, which is why the follower takes more steps than the leader. After the last leader step the follower takes five more steps, and the score is $\hat{y}$ at the final pair of deployments. We use $\lambda=0.05$ and a step size of 0.3 in the main analysis and report sensitivity to $\lambda$ and to the step ratio in Section~\ref{sec:sensitivity}.
+
+\subsection{Player attribution}
+\label{sec:war}
+The contribution of player $i$ to roster $r$ is the drop in $J$ when $i$ is replaced by a replacement-level player,
+\begin{equation}
+\mathrm{WAR}_i(r)=J(r)-J(r_{i\leftarrow\text{repl}}),
+\end{equation}
+where the replacement-level feature vector is the average feature vector of players between the 10th and 30th percentiles of minutes played in the feature season, and both sides re-optimize their deployments after the substitution. $\mathrm{WAR}_i$ is measured in units of win probability per game against the reference opponents and depends on the rest of the roster; it is not a transferable rating of the player. The sum of $\mathrm{WAR}_i$ over a roster is called Group WAR.
+
+\subsection{Search}
+\label{sec:search}
+The search has two phases. In the tournament phase the non-locked players in the pool are shuffled and split into as many quota-satisfying rosters as the pool allows (each roster also containing any locked players). All rosters are scored, the top third survive intact, and from each remaining roster the two (basketball) or four (hockey) players with the lowest $\mathrm{WAR}$ are removed from the pool. This repeats until at most twice the number of free slots remain. In the greedy phase we start from whichever scores higher of the best roster seen in the tournament and a random quota-satisfying roster drawn from the surviving players, and evaluate every quota-satisfying single swap between a roster player and any pool player at the same broad position (all players in basketball; forwards for forwards and defencemen for defencemen in hockey), accept the best swap if it raises $J$ by more than $10^{-4}$, and repeat until no swap does. All candidate rosters in a phase are scored in one batch on a GPU. Neither phase guarantees a global optimum, so we run the search from five random seeds and report how often each player is selected.

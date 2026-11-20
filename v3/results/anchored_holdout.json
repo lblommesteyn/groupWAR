@@ -1,0 +1,32 @@
+{
+ "args": {
+  "tag": "holdout",
+  "test_season": 2023,
+  "lag": 1,
+  "epochs": 30,
+  "folds": 6,
+  "lr": 0.001,
+  "shrink": 0.01,
+  "arms": "ratings,anchored,anchored_shuffled"
+ },
+ "arms": {
+  "ratings": {
+   "val_mse": 0.0635591764094428,
+   "auc": 0.6774989317951183,
+   "logloss": 0.6426923871040344,
+   "n": 1106
+  },
+  "anchored": {
+   "val_mse": 0.05795271959742206,
+   "auc": 0.6772836217486514,
+   "logloss": 0.6425360441207886,
+   "n": 1106
+  },
+  "anchored_shuffled": {
+   "val_mse": 0.05822290514399365,
+   "auc": 0.6762538054798911,
+   "logloss": 0.6432787775993347,
+   "n": 1106
+  }
+ }
+}

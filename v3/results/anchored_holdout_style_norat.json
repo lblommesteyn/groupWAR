@@ -1,0 +1,22 @@
+{
+ "args": {
+  "tag": "holdout_style_norat",
+  "test_season": 2023,
+  "lag": 1,
+  "epochs": 30,
+  "folds": 6,
+  "lr": 0.001,
+  "shrink": 0.01,
+  "arms": "anchored",
+  "hide_rating": true,
+  "drop_feats": "mpg,gp_share,usage,pts36"
+ },
+ "arms": {
+  "anchored": {
+   "val_mse": 0.05802147461850993,
+   "auc": 0.6749752977621108,
+   "logloss": 0.6426551938056946,
+   "n": 1106
+  }
+ }
+}

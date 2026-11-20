@@ -1,0 +1,20 @@
+\section{Problem setup}
+\label{sec:problem}
+
+A federation selects a roster $r$ of $R$ players from an eligible pool $\mathcal{P}$. In basketball $R=12$, and in hockey $R=18$ skaters (twelve forwards and six defencemen; goaltenders are outside the scope of this paper). The roster is evaluated against a set $\mathcal{O}$ of reference opponents, each also a roster of $R$ players.
+
+\paragraph{Deployment.} A roster does not play as a single unit. At any moment a basketball team has five players on the floor and a hockey team has three forwards and two defencemen on the ice at even strength. A \emph{deployment strategy} for a roster is a probability distribution over these on-court units, interpreted as the fraction of game time each unit plays. For basketball the units are the $\binom{12}{5}=792$ five-player subsets of the roster. For hockey a deployment is a pair of distributions, one over the $\binom{12}{3}=220$ forward trios and one over the $\binom{6}{2}=15$ defensive pairs, combined independently. A deployment determines two quantities used by the scoring model: each player's share of game time and each pair of players' share of time together. Every deployment considered in this paper is a mixture of real units, so every shared-time matrix it produces could be realized by a coach.
+
+\paragraph{Score.} For a roster $r$, an opponent $o$, a deployment $d_r$ of $r$ and a deployment $d_o$ of $o$, the scoring model of Section~\ref{sec:method} returns $\hat{y}(r,d_r;o,d_o)$, the predicted probability that $r$ beats $o$ at a neutral site. The value of $r$ against $o$ is the outcome of a leader-follower game in which $r$ commits to a deployment and $o$ responds,
+\begin{equation}
+V(r,o)=\max_{d_r}\;\min_{d_o}\;\Big[\hat{y}(r,d_r;o,d_o)+\lambda\,\mathrm{KL}(d_o\,\|\,\pi_o)\Big]-\lambda\,\mathrm{KL}(d_r\,\|\,\pi_r), \label{eq:value}
+\end{equation}
+where $\pi_r$ and $\pi_o$ are prior deployments (Section~\ref{sec:deploy}) and $\lambda\ge 0$ limits how far either side may move from its prior. The reported score of a roster is the predicted win probability at the solution of \eqref{eq:value}, averaged over opponents with equal weight,
+\begin{equation}
+J(r)=\frac{1}{|\mathcal{O}|}\sum_{o\in\mathcal{O}}\hat{y}\big(r,d_r^{*};o,d_o^{*}\big). \label{eq:score}
+\end{equation}
+Setting $\lambda\to\infty$ fixes both sides at their priors, which we call the non-adversarial score. Section~\ref{sec:sensitivity} compares the two.
+
+\paragraph{Constraints.} The constrained problem maximizes $J(r)$ over rosters that satisfy positional quotas. In basketball a roster must contain at least four players listed as guards and at least two listed as centres, with players listed at two positions counting toward both. In hockey a roster must contain exactly twelve forwards and six defencemen, with at least four centres and four wingers among the forwards. Listed NHL positions proved unreliable for this purpose (several of Canada's 2025 wingers are listed as centres), so roles are defined from play: a forward who took at least 15 faceoffs per 60 minutes in the feature season is a centre, and other forwards are wingers. The distribution of faceoff rates is bimodal, and this threshold separates its two modes. These are minimum requirements on roster balance, not lineup rules, they are satisfied by every actual roster we study, and they are the only positional knowledge given to the method. The unconstrained problem drops them (keeping only the forward and defence counts in hockey, which the deployment model requires). A \emph{lock} fixes a player in the roster before the search. Locks reduce the search space and are not part of the objective, so every analysis that uses them is repeated without them.
+
+\paragraph{What is and is not claimed.} Because the optimal roster is never observed, we make no claim that the roster maximizing $J$ is the best roster. We report what $J$ implies, how robust those implications are, and how $J$ ranks the roster that was actually selected.

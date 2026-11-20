@@ -1,0 +1,44 @@
+\documentclass[11pt]{article}
+\usepackage[margin=1in]{geometry}
+\usepackage{amsmath,amssymb}
+\usepackage{graphicx}
+\usepackage{booktabs}
+\usepackage{natbib}
+\usepackage{setspace}
+\usepackage{xcolor}
+\usepackage[hidelinks]{hyperref}
+\onehalfspacing
+\newcommand{\res}[1]{\textcolor{red}{[#1]}}
+
+\title{Auditing National-Team Rosters with a Learned Lineup Model and Adversarial Deployment}
+\author{Anonymous for review}
+\date{}
+
+\begin{document}
+\maketitle
+
+\begin{abstract}
+\input{sections/abstract}
+\end{abstract}
+
+\noindent\textbf{Keywords:} roster construction; graph neural networks; Stackelberg games; adjusted plus-minus; decision support
+
+\input{sections/introduction}
+\input{sections/related}
+\input{sections/problem}
+\input{sections/data}
+\input{sections/method}
+\input{sections/validation}
+\input{sections/cases}
+\input{sections/sensitivity}
+\input{sections/discussion}
+
+\section*{Data and code availability}
+All data are drawn from public sources described in Section~\ref{sec:data}. Code that rebuilds every table and figure from the raw sources is available in an anonymized repository for review.
+
+\bibliographystyle{apalike}
+\bibliography{refs}
+
+\appendix
+\input{sections/appendix}
+\end{document}

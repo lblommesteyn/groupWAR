@@ -1,0 +1,22 @@
+{
+ "args": {
+  "tag": "holdout_style",
+  "test_season": 2023,
+  "lag": 1,
+  "epochs": 30,
+  "folds": 6,
+  "lr": 0.001,
+  "shrink": 0.01,
+  "arms": "anchored",
+  "hide_rating": false,
+  "drop_feats": "mpg,gp_share,usage,pts36"
+ },
+ "arms": {
+  "anchored": {
+   "val_mse": 0.05795385413113033,
+   "auc": 0.6730892485178658,
+   "logloss": 0.6440165638923645,
+   "n": 1106
+  }
+ }
+}

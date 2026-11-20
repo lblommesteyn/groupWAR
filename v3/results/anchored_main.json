@@ -1,0 +1,20 @@
+{
+ "args": {
+  "tag": "main",
+  "test_season": null,
+  "lag": 1,
+  "epochs": 30,
+  "folds": 6,
+  "lr": 0.001,
+  "shrink": 0.01,
+  "arms": "ratings,anchored"
+ },
+ "arms": {
+  "ratings": {
+   "val_mse": 0.06092567219927584
+  },
+  "anchored": {
+   "val_mse": 0.056802988188683325
+  }
+ }
+}

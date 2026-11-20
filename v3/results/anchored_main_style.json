@@ -1,0 +1,19 @@
+{
+ "args": {
+  "tag": "main_style",
+  "test_season": null,
+  "lag": 1,
+  "epochs": 30,
+  "folds": 6,
+  "lr": 0.001,
+  "shrink": 0.01,
+  "arms": "anchored",
+  "hide_rating": false,
+  "drop_feats": "mpg,gp_share,usage,pts36"
+ },
+ "arms": {
+  "anchored": {
+   "val_mse": 0.0570248019798113
+  }
+ }
+}
