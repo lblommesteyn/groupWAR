@@ -5,3 +5,4 @@ results/
 *.pkl
 *.tgz
 .DS_Store
+logs/

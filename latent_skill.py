@@ -58,7 +58,8 @@ class Model(torch.nn.Module):
         self.g0 = torch.nn.Parameter(torch.tensor(-1.0)); self.dg = torch.nn.Parameter(torch.zeros(n))
         F = Z.shape[1]
         self.A = torch.nn.Parameter(0.01 * torch.randn(F, K, generator=torch.Generator().manual_seed(0)))
-        self.dz = torch.nn.Parameter(torch.zeros(n, K))
+        # small random start: with z = 0 and W = 0 the fit term has zero gradient (saddle)
+        self.dz = torch.nn.Parameter(0.1 * torch.randn(n, K, generator=torch.Generator().manual_seed(1)))
         self.Wo = torch.nn.Parameter(torch.zeros(K, K)); self.Wd = torch.nn.Parameter(torch.zeros(K, K))
         self.M = torch.nn.Parameter(torch.zeros(K, K))
         self.n = n
@@ -93,11 +94,13 @@ class Model(torch.nn.Module):
         return p
 
 
-def fit(R, ex, usage, fit_, iters=300, l2w=L2_W):
+def fit(R, ex, usage, fit_, iters=300, l2w=L2_W, wmult=None):
     pidx = {p: i for i, p in enumerate(ex['pids'])}; n = len(pidx)
     O = torch.tensor([[pidx[p] for p in r[1]] for r in R]); D = torch.tensor([[pidx[p] for p in r[2]] for r in R])
     H = torch.tensor([r[3] for r in R], dtype=torch.float64); y = torch.tensor([r[4] for r in R]); w = torch.tensor([r[5] for r in R])
     C = torch.tensor([[float(c) for c in r[6]] for r in R])
+    if wmult is not None:  # e.g. recency decay; also scales the usage counts
+        w = w * torch.tensor(np.asarray(wmult, np.float64)); C = C * torch.tensor(np.asarray(wmult, np.float64))[:, None]
     Zs = ex['Z']; Zs = (Zs - Zs.mean(0)) / (Zs.std(0) + 1e-9)
     mdl = Model(n, ex['m'], ex['v'], Zs, usage, fit_, l2w)
     with torch.no_grad():  # noise scale as in hist_prior.prior_rapm
