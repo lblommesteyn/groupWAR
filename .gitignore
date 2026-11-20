@@ -1,0 +1,7 @@
+.venv/
+__pycache__/
+results/
+*.npz
+*.pkl
+*.tgz
+.DS_Store
