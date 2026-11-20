@@ -1,4 +1,4 @@
-"""Missed field goals -> rebound samples: positions at release, where the ball was secured, who won it, what followed.
+"""Field goals (all tracked shots -> shots_release.pkl; misses -> rebounds.pkl) -> rebound samples: positions at release, where the ball was secured, who won it, what followed.
 
 Per aligned, tracked miss (results/shots/features.jsonl, made = false):
   label         PBP rebound after the shot (next REBOUND event by id; latest correction of each id wins):
@@ -65,7 +65,9 @@ def game(task):
             m = ev[e][1]
             if m.get('subType') in ('offensive', 'defensive') and 'REBOUND' in (m.get('description') or '').upper():
                 reb = m; break
-        if reb is None:
+        if s['made']:
+            reb = None
+        elif reb is None:
             continue
         side = s['team']; sg = dirs.get((s['period'], side))
         if sg is None:
@@ -90,21 +92,23 @@ def game(task):
         pos = np.array([x[0] for x in now]) * sg; pe = np.array([x[1] for x in now])
         # secure: first holder after the rim frame (within 6 s)
         sec = None
-        for i in range(k + 1, len(T)):
+        for i in (range(k + 1, len(T)) if not s['made'] else []):
             if T[i] - T[k] > 6000 or P[i] != P[k]:
                 break
             if hold[i] is not None and np.isfinite(B[i, 0]):
                 sec = i; break
         tm_of = lambda p: 'off' if p in off else 'def' if p in de else None
-        oreb = int(reb['subType'] == 'offensive')
+        oreb = None if reb is None else int(reb['subType'] == 'offensive')
         rec = dict(game_id=gid, event_id=s['event_id'], date=s['date'], shooter=s['shooter'], three=s['three'],
                    dist=s['dist_trk'], subtype=s['subtype'], blocked='BLOCK' in (s.get('desc') or '').upper(),
-                   oreb=oreb, rebounder=int(reb.get('personId') or 0), off=off, de=de,
+                   made=bool(s['made']), oreb=oreb, rebounder=0 if reb is None else int(reb.get('personId') or 0), off=off, de=de,
                    pos=pos.astype(np.float32), vel=vel.astype(np.float32), pe=pe.astype(np.float32),
                    ball_rel=(B[r, :2] * sg).astype(np.float32), flight_ms=int(T[k] - T[r]),
                    secure_xy=None if sec is None else (B[sec, :2] * sg).astype(np.float32),
                    secure_ms=None if sec is None else int(T[sec] - T[k]),
                    secure_team=None if sec is None else tm_of(hold[sec]), secure_pid=None if sec is None else hold[sec])
+        if s['made']:
+            out.append(rec); continue
         # what followed: score changes until the next possession of the other team starts
         t0 = T[sec] if sec is not None else T[k]
         si = 0 if side == 'home' else 1
@@ -124,7 +128,7 @@ def game(task):
 def main():
     feats = defaultdict(list)
     for f in map(json.loads, open(ROOT / 'results/shots/features.jsonl')):
-        if f.get('trk_ok') and not f['made'] and f.get('release_idx') is not None:
+        if f.get('trk_ok') and f.get('release_idx') is not None:
             feats[f['game_id']].append(f)
     xs = defaultdict(list)
     for s in map(json.loads, open(ROOT / 'results/embed/shots_xfg.jsonl')):
@@ -142,7 +146,9 @@ def main():
             if i % 50 == 0:
                 print(i, len(res), flush=True)
     OUT.mkdir(parents=True, exist_ok=True)
-    pickle.dump(res, open(OUT / 'rebounds.pkl', 'wb'))
+    pickle.dump(res, open(OUT / 'shots_release.pkl', 'wb'))
+    pickle.dump([r for r in res if not r['made']], open(OUT / 'rebounds.pkl', 'wb'))
+    res = [r for r in res if not r['made']]
     o = np.array([r['oreb'] for r in res]); st = [r['secure_team'] for r in res]
     agree = np.mean([(t == 'off') == bool(y) for t, y in zip(st, o) if t is not None])
     pa = [r for r in res if 'pts_after' in r]

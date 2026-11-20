@@ -82,7 +82,8 @@ def parse_game(prefix, validate=False):
             continue
         if cur is None or cur["lineup"] != lu or cur["period"] != m.get("period"):
             cur = dict(game_id=gid, date=date, period=m.get("period"), lineup=lu, t0=ts, t1=ts,
-                       pts=[0, 0], fga=[0, 0], fta=[0, 0], oreb=[0, 0], tov=[0, 0], n_ev=0)
+                       pts=[0, 0], fga=[0, 0], fta=[0, 0], oreb=[0, 0], tov=[0, 0], n_ev=0,
+                       use={})  # per player: [fga, fta, tov, pts, [shot event ids]]
             stints.append(cur)
         cur["t1"] = ts
         cur["n_ev"] += 1
@@ -94,6 +95,16 @@ def parse_game(prefix, validate=False):
             # independent check: the PBP actor must be on court for his side in the attributed lineup
             diag["actor_checked"] += 1
             diag["actor_on_court"] += m["personId"] in lu[side]
+        pid = m.get("personId")
+        if pid and pid in lu[side] and et in ("2pt", "3pt", "freethrow", "turnover"):
+            u = cur["use"].setdefault(pid, [0, 0, 0, 0, []])
+            if et in ("2pt", "3pt"):
+                u[0] += 1; u[4].append(i)
+            elif et == "freethrow":
+                u[1] += 1
+            else:
+                u[2] += 1
+            u[3] += max(d[side], 0)
         if et in ("2pt", "3pt"):
             cur["fga"][side] += 1
         elif et == "freethrow":

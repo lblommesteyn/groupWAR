@@ -25,8 +25,8 @@ TEMP, K_CONV = 0.3, 15.0
 
 
 def per_shot(args):
-    r, bank = args
-    w = rm.landing_weights(r, bank)
+    r, bank = args[:2]
+    w = args[2] if len(args) > 2 else rm.landing_weights(r, bank)
     pos, vel, pe = r['pos'].astype(float), r['vel'].astype(float), r['pe'].astype(float)
     m = w > 1e-4; q = rm.GRID[m]; wq = w[m] / w[m].sum()
     mu = rm.arrival(pos, vel, q); var = rm.S0 ** 2 + (pe[:, None] / rm.V_REF) ** 2 + (rm.K_DIST * mu) ** 2

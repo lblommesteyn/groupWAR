@@ -23,7 +23,7 @@ SEEDS = 3
 K_REL = 1500.0  # minutes at which a description gets half weight
 
 
-def tables(G, shots, win, mapg):
+def tables(G, shots, win, mapg, extra=False):
     R_win, R_map = ee.rows(G, win), ee.rows(G, mapg)
     pids = sorted({p for Rr in (R_win, R_map) for r in Rr for p in r[1] + r[2]} | {p for d in G.values() for p in d['box']})
     pidx = {p: i for i, p in enumerate(pids)}; n = len(pids)
@@ -52,6 +52,8 @@ def tables(G, shots, win, mapg):
     m3_ = m + np.concatenate([rho * add_o, rho * add_d])
     _, th5 = hp.prior_rapm(R_win, pidx, m3_, v); rat['rapm_hist_trk_rel'] = hp.net(th5, pids)
     feats = {'comp': dict(zip(pids, embs['comp']))}
+    if extra:  # prior means/variances of rapm_hist_trk and the shrunk descriptions (latent_skill)
+        return rat, feats, dict(pids=pids, m=m2_, v=v, Z=Z)
     return rat, feats
 
 

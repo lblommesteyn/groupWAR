@@ -22,8 +22,18 @@ NEW_OFF = ['pass_rate', 'pot_ast36', 'pot_ast_quality', 'lost_pass_rate', 'hold_
            'screen_rate', 'crash_rate', 'trans_share', 'cs_share']
 NEW_DEF = ['closeout_speed', 'closeout_d1', 'closeout_res', 'beaten_rate', 'help', 'rim_deter',
            'switch_entropy', 'iso_def_adj']
+REB = os.environ.get('REB') == '1'
+if REB:  # rebound positioning / conversion and rebound-adjusted shot value sums (rebound_all.py)
+    for g, c in pickle.load(open(ROOT / 'results/rebounds/player_game.pkl', 'rb')).items():
+        for p, v in c.items():
+            EV.setdefault(g, {}).setdefault(p, {}).update(v)
+REB_OFF = ['reb_pos_off', 'reb_conv_off', 'shot_xreb', 'shot_vmiss']
+REB_DEF = ['reb_pos_def', 'reb_conv_def']
 HOLES_OFF = ['h_open_rate', 'h_reach_rate', 'h_spot', 'h_teamA', 'h_hold_A', 'h_create']
 HOLES_DEF = ['h_cover_rate', 'h_oppA', 'h_onball_A']
+if REB:
+    NEW_OFF = NEW_OFF + REB_OFF
+    NEW_DEF = NEW_DEF + REB_DEF
 if HOLES:
     NEW_OFF = NEW_OFF + HOLES_OFF
     NEW_DEF = NEW_DEF + HOLES_DEF
@@ -96,6 +106,14 @@ def describe2(G, gids, shots):
             rim_deter=shrink(rim_faced[p], faced[p], lg_rim, 50),
             switch_entropy=(lambda v: float(-(v / v.sum() * np.log(v / v.sum() + 1e-12)).sum()) if v.sum() > 30 else np.nan)(pair_h[p]),
             iso_def_adj=iso_num[p] / (iso_n[p] + 100))
+        if REB:
+            f.update(
+                reb_pos_off=100 * shrink(g_('r_pos_off'), g_('r_off_n'), lg('r_pos_off', 'r_off_n'), 200),
+                reb_conv_off=(g_('r_got_off') - g_('r_x_off')) / (g_('r_x_off') + 15),
+                shot_xreb=shrink(g_('r_sh_xreb'), g_('r_sh_n'), lg('r_sh_xreb', 'r_sh_n'), 100),
+                shot_vmiss=shrink(g_('r_sh_vmiss'), g_('r_sh_n'), lg('r_sh_vmiss', 'r_sh_n'), 100),
+                reb_pos_def=100 * shrink(g_('r_pos_def'), g_('r_def_n'), lg('r_pos_def', 'r_def_n'), 200),
+                reb_conv_def=(g_('r_got_def') - g_('r_x_def')) / (g_('r_x_def') + 15))
         if HOLES:
             f.update(
                 h_open_rate=shrink(g_('h_open'), g_('h_off_n'), lg('h_open', 'h_off_n'), 2000),
