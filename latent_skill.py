@@ -30,6 +30,9 @@ OUT = gw.OUT / 'latent'
 K, TAU_G, TAU_Z, TAU_U, ALPHA, L2_W = 3, 0.5, 0.3, 1.5, 1.0, 1.0
 L2_GRID = [10.0, 100.0, 1000.0, 10000.0]
 ARMS = {'additive': (False, False), 'usage': (True, False), 'fit': (False, True), 'full': (True, True)}
+# load slope transferred from the four-season fit (ms_latent.py: softplus(g0) 0.93-1.15 across 2022-23 blocks)
+G0_MS = 1.08
+ARMS_FIX = {'usage_ms': G0_MS}  # usage arm with the population load slope fixed, not learned from one season
 
 
 def stint_rows(GU, gids):
@@ -46,7 +49,7 @@ def stint_rows(GU, gids):
 
 
 class Model(torch.nn.Module):
-    def __init__(self, n, m, v, Z, usage, fit, l2w=L2_W):
+    def __init__(self, n, m, v, Z, usage, fit, l2w=L2_W, g0_fix=None):
         super().__init__()
         self.l2w = l2w
         self.usage, self.fit_ = usage, fit
@@ -55,7 +58,11 @@ class Model(torch.nn.Module):
         self.th = torch.nn.Parameter(self.m.clone())  # [o (n), d (n)] in RAPM sign convention (d: + = allows more)
         self.b = torch.nn.Parameter(torch.zeros(2))
         self.u = torch.nn.Parameter(torch.zeros(n))
-        self.g0 = torch.nn.Parameter(torch.tensor(-1.0)); self.dg = torch.nn.Parameter(torch.zeros(n))
+        if g0_fix is None:
+            self.g0 = torch.nn.Parameter(torch.tensor(-1.0))
+        else:  # fixed population slope: softplus(g0) = g0_fix; player deviations dg still free under their prior
+            self.register_buffer('g0', torch.tensor(float(np.log(np.expm1(g0_fix))), dtype=torch.float64))
+        self.dg = torch.nn.Parameter(torch.zeros(n))
         F = Z.shape[1]
         self.A = torch.nn.Parameter(0.01 * torch.randn(F, K, generator=torch.Generator().manual_seed(0)))
         # small random start: with z = 0 and W = 0 the fit term has zero gradient (saddle)
@@ -94,7 +101,7 @@ class Model(torch.nn.Module):
         return p
 
 
-def fit(R, ex, usage, fit_, iters=300, l2w=L2_W, wmult=None):
+def fit(R, ex, usage, fit_, iters=300, l2w=L2_W, wmult=None, g0_fix=None):
     pidx = {p: i for i, p in enumerate(ex['pids'])}; n = len(pidx)
     O = torch.tensor([[pidx[p] for p in r[1]] for r in R]); D = torch.tensor([[pidx[p] for p in r[2]] for r in R])
     H = torch.tensor([r[3] for r in R], dtype=torch.float64); y = torch.tensor([r[4] for r in R]); w = torch.tensor([r[5] for r in R])
@@ -102,7 +109,7 @@ def fit(R, ex, usage, fit_, iters=300, l2w=L2_W, wmult=None):
     if wmult is not None:  # e.g. recency decay; also scales the usage counts
         w = w * torch.tensor(np.asarray(wmult, np.float64)); C = C * torch.tensor(np.asarray(wmult, np.float64))[:, None]
     Zs = ex['Z']; Zs = (Zs - Zs.mean(0)) / (Zs.std(0) + 1e-9)
-    mdl = Model(n, ex['m'], ex['v'], Zs, usage, fit_, l2w)
+    mdl = Model(n, ex['m'], ex['v'], Zs, usage, fit_, l2w, g0_fix)
     with torch.no_grad():  # noise scale as in hist_prior.prior_rapm
         res = y - mdl(O, D, H)['yhat']; res = res - (w * res).sum() / w.sum()
         s2 = float((w * res ** 2).sum() / len(R))
@@ -143,15 +150,18 @@ def main():
     allp = {}
     for b0, b1 in list(zip(BLOCKS[:-1], BLOCKS[1:]))[:nblocks]:
         f = out / f'block_{b0}.npz'
-        if f.exists():
-            allp[b0] = dict(np.load(f)); continue
+        P = dict(np.load(f)) if f.exists() else {}
+        todo = [a for a in list(ARMS) + list(ARMS_FIX) if f'lat_{a}' not in P] + (['additive'] if 'm_additive' not in P else [])
+        if not todo and 'lat_best_load' in P:
+            allp[b0] = P; continue
+        print(f'block {b0}: arms {todo}', flush=True)
         hist = sorted(g for g, d in G.items() if d['date'] < b0)
         mid = sorted(G[g]['date'] for g in hist)[len(hist) // 2]
         h1 = [g for g in hist if G[g]['date'] < mid]; h2 = [g for g in hist if G[g]['date'] >= mid]
         blk = [g for g, d in G.items() if b0 <= d['date'] < b1]
         base = dict(np.load(gw.OUT / 'rolling_prior' / f'block_{b0}.npz'))
         test_order = [g for g in gid if g in set(blk)]
-        P = {'win': np.array([int(G[g]['final'][0] > G[g]['final'][1]) for g in test_order])}
+        P.setdefault('win', np.array([int(G[g]['final'][0] > G[g]['final'][1]) for g in test_order]))
         assert (P['win'] == base['win']).all(), 'test order differs from rolling_prior'
         for k in ('rapm_hist_trk', 'anchored_comp_hist_trk'):
             P[k] = base[k]
@@ -161,12 +171,15 @@ def main():
         from sklearn.linear_model import LogisticRegression
         hy = np.array([int(G[g]['final'][0] > G[g]['final'][1]) for g in h1 + h2])
         R_ = {k: stint_rows(GU, v) for k, v in (('h1', h1), ('h2', h2), ('hist', h1 + h2), ('blk', blk))}
-        for arm, (usage, fit_) in ARMS.items():
+        arms = {**{a: (u, f_, None) for a, (u, f_) in ARMS.items()}, **{a: (True, False, g) for a, g in ARMS_FIX.items()}}
+        for arm, (usage, fit_, g0f) in arms.items():
+            if arm not in todo:
+                continue
             best = None
             for lw in (L2_GRID if fit_ else [L2_W]):  # pick the fit penalty on cross-fitted history log loss
                 pr_h = {}
                 for name, win, tgt in (('h1', 'h2', 'h1'), ('h2', 'h1', 'h2')):
-                    mdl, pidx = fit(R_[win], ex[name], usage, fit_, l2w=lw)
+                    mdl, pidx = fit(R_[win], ex[name], usage, fit_, l2w=lw, g0_fix=g0f)
                     pr_h.update(predict_games(mdl, pidx, R_[tgt]))
                 hx_ = np.array([pr_h.get(g, 0.0) for g in h1 + h2])
                 c_ = LogisticRegression(C=1e4).fit(hx_[:, None], hy)
@@ -174,7 +187,7 @@ def main():
                 if best is None or l_ < best[0]:
                     best = (l_, lw, pr_h)
             _, lw, preds = best
-            mdl, pidx = fit(R_['hist'], ex['all'], usage, fit_, l2w=lw)
+            mdl, pidx = fit(R_['hist'], ex['all'], usage, fit_, l2w=lw, g0_fix=g0f)
             preds = dict(preds); preds.update(predict_games(mdl, pidx, R_['blk']))
             if fit_ or usage:
                 print(f'  {arm}: l2w {lw} g0 {torch.nn.functional.softplus(mdl.g0).item():.3f} '
@@ -184,9 +197,17 @@ def main():
             cal = LogisticRegression(C=1e4).fit(hx[:, None], hy)
             tx = np.array([preds.get(g, 0.0) for g in test_order])
             P[f'lat_{arm}'] = cal.predict_proba(tx[:, None])[:, 1]
+            P[f'm_{arm}'] = tx; P[f'slope_{arm}'] = np.float64(cal.coef_[0, 0])
             print(f'{b0} lat_{arm:9s} auc {roc_auc_score(P["win"], P[f"lat_{arm}"]):.3f}', flush=True)
+        # load term on top of the best model: the usage_ms margin minus the additive margin (same priors, same data) is
+        # the lineup load adjustment; convert to logit with the usage_ms calibration slope and add to the best logit
+        pb = np.clip(P['anchored_comp_hist_trk'], 1e-6, 1 - 1e-6)
+        z = np.log(pb / (1 - pb)) + P['slope_usage_ms'] * (P['m_usage_ms'] - P['m_additive'])
+        P['lat_best_load'] = 1 / (1 + np.exp(-z))
+        print(f'{b0} lat_best_load  auc {roc_auc_score(P["win"], P["lat_best_load"]):.3f} '
+              f'(best {roc_auc_score(P["win"], pb):.3f})', flush=True)
         np.savez(f, **P); allp[b0] = P
-    names = [k for k in next(iter(allp.values())) if k != 'win']
+    names = [k for k in next(iter(allp.values())) if k != 'win' and not k.startswith(('m_', 'slope_'))]
     win = np.concatenate([p['win'] for p in allp.values()])
     pr = {k: np.concatenate([p[k] for p in allp.values()]) for k in names}
     rng = np.random.default_rng(0); Bs = rng.integers(0, len(win), (2000, len(win)))
