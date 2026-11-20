@@ -44,7 +44,7 @@ def darko_at(D, p, date):
 
 
 def load_epm(f):
-    return {int(r['player_id']): float(r['tot']) for r in csv.DictReader(open(B / f)) if r['tot'] not in ('', 'NA')}
+    return {int(r['player_id']): float(r['tot']) for r in csv.DictReader(open(B / f, encoding='utf-8')) if r['tot'] not in ('', 'NA')}
 
 
 def main():
