@@ -56,7 +56,8 @@ def tables(G, shots, win, mapg):
 
 
 def main():
-    out = gw.OUT / 'rolling_prior'; out.mkdir(parents=True, exist_ok=True)
+    import os
+    out = gw.OUT / os.environ.get('ROLLING_OUT', 'rolling_prior'); out.mkdir(parents=True, exist_ok=True)
     G = pickle.load(open(ee.E / 'player_games.pkl', 'rb'))
     shots = [json.loads(l) for l in open(ee.E / 'shots_xfg.jsonl')]
     G = {g: d for g, d in G.items() if d['stints']}

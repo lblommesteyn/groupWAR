@@ -14,7 +14,8 @@ from scipy.sparse.linalg import lsqr
 import embed_eval as ee
 from masked_paths import ROOT
 
-PRIOR = json.load(open(ROOT / 'results/groupwar_t/prior_2026.json'))
+import os
+PRIOR = json.load(open(ROOT / 'results/groupwar_t' / os.environ.get('PRIOR_FILE', 'prior_2026.json')))
 TAU_A = (PRIOR['hyper']['tau_a_o'], PRIOR['hyper']['tau_a_d'])
 
 

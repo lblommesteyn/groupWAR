@@ -163,11 +163,11 @@ def main():
     mid = G[allg[len(allg) // 2]]['date']
     h1 = [g for g in allg if G[g]['date'] < mid]; h2 = [g for g in allg if G[g]['date'] >= mid]
     import rolling_prior as rp
-    cache = OUT / 'tables_hist.pkl'
+    cache = OUT / 'tables_hist_rel.pkl'
     if cache.exists():
         t1, t2, tf = pickle.load(open(cache, 'rb'))
     else:
-        conv = lambda t: (t[0]['rapm'], t[0]['rapm_hist_trk'], {'box_trk': t[1]['comp']})  # rapm_t slot = new backbone
+        conv = lambda t: (t[0]['rapm'], t[0]['rapm_hist_trk_rel'], {'box_trk': t[1]['comp']})  # rapm_t slot = new backbone
         t1, t2, tf = (conv(rp.tables(G, shots, a, b)) for a, b in ((h2, h1), (h1, h2), (allg, h2)))
         pickle.dump((t1, t2, tf), open(cache, 'wb'))
     recs = gw.game_records(G)
@@ -220,7 +220,7 @@ def main():
     # player value table for reference
     table = sorted([(names.get(p, str(p)), country.get(p), round(rapm.get(p, 0), 2), round(rapm_t.get(p, 0), 2), int(mins.get(p, 0)))
                     for p in F_ if mins.get(p, 0) >= MIN_MINUTES], key=lambda r: -r[3])
-    json.dump(dict(results=results, top_players=table[:60]), open(OUT / 'case_study_hist.json', 'w'), indent=1)
+    json.dump(dict(results=results, top_players=table[:60]), open(OUT / 'case_study_hist_rel.json', 'w'), indent=1)
 
 
 if __name__ == '__main__':
