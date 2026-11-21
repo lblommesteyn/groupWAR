@@ -37,6 +37,16 @@ if REB:
 if HOLES:
     NEW_OFF = NEW_OFF + HOLES_OFF
     NEW_DEF = NEW_DEF + HOLES_DEF
+MAE = os.environ.get('MAE') == '1'
+MAE_K = 8
+MAE_OFF = [f'mae_o{k}' for k in range(MAE_K)]
+MAE_DEF = [f'mae_d{k}' for k in range(MAE_K)]
+if MAE:  # MAE encoder player-token profiles, top principal directions summed per game (mae_apply.py)
+    for g, c in pickle.load(open(ROOT / 'results/jepa/player_game.pkl', 'rb')).items():
+        for p, v in c.items():
+            EV.setdefault(g, {}).setdefault(p, {}).update(v)
+    NEW_OFF = NEW_OFF + MAE_OFF
+    NEW_DEF = NEW_DEF + MAE_DEF
 
 
 def shrink(num, den, prior, k):
@@ -125,6 +135,9 @@ def describe2(G, gids, shots):
                 h_cover_rate=shrink(g_('h_cover'), g_('h_def_n'), lg('h_cover', 'h_def_n'), 2000),
                 h_oppA=shrink(g_('h_oppA'), g_('h_def_n'), lg('h_oppA', 'h_def_n'), 2000),
                 h_onball_A=shrink(g_('h_onball_A'), g_('h_onball_n'), lg('h_onball_A', 'h_onball_n'), 500))
+        if MAE:
+            f.update({c: shrink(g_(c), g_('mae_off_n'), lg(c, 'mae_off_n'), 300) for c in MAE_OFF})
+            f.update({c: shrink(g_(c), g_('mae_def_n'), lg(c, 'mae_def_n'), 300) for c in MAE_DEF})
     return d
 
 

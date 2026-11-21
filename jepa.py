@@ -8,7 +8,7 @@ Variants:
   jepa_time   context = frames 0-9; predict EMA-target-encoder latents of frames 10-19 (all agents)
   jepa_agent  context = all frames minus 1-2 random players; predict their target latents
   jepa_mix    50/50 of the two masks             jepa_mix_id  same + learned player-identity embeddings
-  mae         same masks as jepa_mix, predict raw (normalised) coordinates of masked tokens instead of latents
+  mae, mae_* same masks as jepa_mix, predict raw (normalised) coordinates of masked tokens instead of latents
   world       causal over frames; predict next-frame position change of every agent (Gaussian NLL)
   random      untrained encoder (control)
 Probes (frozen encoder on frames 0-9, all agents; features = mean latent of frame 9 + mean over all tokens):
@@ -27,7 +27,9 @@ from masked_paths import ROOT
 J = ROOT / 'results/jepa'
 DEV = 'cuda' if torch.cuda.is_available() else 'cpu'
 D, LAYERS, HEADS, PRED_LAYERS = 128, 4, 4, 2
-EPOCHS, BS, LR = 12, 256, 3e-4
+import os
+EPOCHS, BS, LR = int(os.environ.get('EPOCHS', 12)), 256, 3e-4
+TRAIN_BEFORE = os.environ.get('TRAIN_BEFORE')  # date: pretrain only on games before it (default first 70%)
 SCALE = torch.tensor([47.0, 25.0, 20.0, 20.0])
 
 
@@ -75,7 +77,7 @@ class Net(nn.Module):
         self.emb = Embed(n_players, variant.endswith('_id'))
         self.enc = tfm(LAYERS); self.norm = nn.LayerNorm(D)
         self.pred = tfm(PRED_LAYERS); self.mask_tok = nn.Parameter(torch.zeros(D))
-        out = 4 if variant == 'mae' else 4 if variant == 'world' else D
+        out = 4 if variant.startswith('mae') else 4 if variant == 'world' else D
         self.head = nn.Linear(D, out)
 
     def encode(self, x, ids=None, keep=None, causal=False):
@@ -156,7 +158,7 @@ def train(variant, data, tr):
                 q = net.emb.query(x.shape[0], ti, ai, pid) + net.mask_tok
                 z = net.pred(torch.cat([ctx, q], 1))[:, ctx.shape[1]:]
                 pr = net.head(z)
-                if variant == 'mae':
+                if variant.startswith('mae'):
                     target = x.flatten(1, 2)[:, tg_t]
                     loss = Fn.mse_loss(pr, target)
                 else:
@@ -220,7 +222,8 @@ def main():
     variants = sys.argv[1:] or [ 'jepa_time', 'jepa_agent', 'jepa_mix', 'jepa_mix_id', 'mae', 'world']
     data = load()
     games = data['game']; ng = games.max() + 1
-    cut = int(0.7 * ng); tr = np.where(games < cut)[0]; te = np.where(games >= cut)[0]
+    cut = int(0.7 * ng) if not TRAIN_BEFORE else int((data['dates'] < TRAIN_BEFORE).sum())
+    tr = np.where(games < cut)[0]; te = np.where(games >= cut)[0]
     print(f'windows {len(games)} train {len(tr)} test {len(te)} device {DEV}', flush=True)
     if not (J / 'probe_handcrafted.json').exists():
         json.dump(probe(None, data, tr, te), open(J / 'probe_handcrafted.json', 'w'), indent=1)

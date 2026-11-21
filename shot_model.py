@@ -21,6 +21,10 @@ TRK = {
     'spacing': ['mate_mean_dist', 'off_hull', 'mates_open', 'def_hull', 'def_paint'],
 }
 K = 60  # prior strength in attempts
+import os
+from masked_paths import ROOT
+MAE = os.environ.get('MAE') == '1'  # add the MAE release-window embedding arms
+MAE_PC = 16
 
 
 def zone(r):
@@ -106,6 +110,18 @@ if __name__ == '__main__':
     idx = {g: [trk_cols.index(c) for c in cs] for g, cs in TRK.items()}
     for g, ii in idx.items():
         preds[f'A_plus_{g}'] = run(np.hstack([XA, XT[:, ii]]))
+    has = None
+    if MAE:  # MAE encoder embedding of the 2 s before release (mae_apply.py), top principal directions fit on train
+        e = np.load(ROOT / 'results/jepa/shot_emb.npz')
+        at = {(str(g), int(v)): i for i, (g, v) in enumerate(zip(e['game_id'], e['event_id']))}
+        ix = np.array([at.get((r['game_id'], r['event_id']), -1) for r in rows]); has = ix >= 0
+        E = e['E'][np.maximum(ix, 0)].astype(np.float64); E[~has] = np.nan
+        ok_tr = tr & has; mu = E[ok_tr].mean(0); sd = E[ok_tr].std(0) + 1e-6
+        _, _, Vt = np.linalg.svd((E[ok_tr] - mu) / sd, full_matrices=False)
+        XE = ((E - mu) / sd) @ Vt[:MAE_PC].T
+        print(f'shots with MAE window: train {ok_tr.mean() / tr.mean():.2f} test {(has & ~tr).sum() / (~tr).sum():.2f}')
+        preds['A_plus_mae'] = run(np.hstack([XA, XE]))
+        preds['B_plus_mae'] = run(np.hstack([XA, XT, XE]))
     res = {'split': SPLIT, 'n_train': int(tr.sum()), 'n_test': int((~tr).sum()),
            'test_games': int(len(set(gt))), 'models': {k: metrics(yt, p) for k, p in preds.items()}, 'vs_A': {}}
     for k, p in preds.items():
@@ -118,8 +134,16 @@ if __name__ == '__main__':
     for name, msk in [('two', ~three), ('three', three)]:
         res['by_class'][name] = {k: metrics(yt[msk], preds[k][msk]) for k in ['A_location_type_shooter', 'B_plus_all_tracking']}
         res['by_class'][name]['B_vs_A'] = boot_diff(yt[msk], preds['A_location_type_shooter'][msk], preds['B_plus_all_tracking'][msk], gt[msk])
-    json.dump(res, open(OUT / 'shot_model.json', 'w'), indent=1)
-    np.savez(OUT / 'shot_model_preds.npz', y=yt, games=gt, **preds)
+    if MAE:  # same comparison on the shots that have an MAE window
+        h = has[~tr]
+        res['with_window'] = {k: metrics(yt[h], preds[k][h]) for k in preds}
+        for a, b in (('A_location_type_shooter', 'A_plus_mae'), ('B_plus_all_tracking', 'B_plus_mae'), ('A_location_type_shooter', 'B_plus_all_tracking')):
+            res['with_window'][f'{b}_vs_{a}'] = boot_diff(yt[h], preds[a][h], preds[b][h], gt[h])
+        res['B_plus_mae_vs_B'] = boot_diff(yt, preds['B_plus_all_tracking'], preds['B_plus_mae'], gt)
+        print('with window', {k: (round(v['log_loss'], 4) if isinstance(v, dict) else v) for k, v in res['with_window'].items()})
+        print('B_plus_mae vs B (all test shots)', res['B_plus_mae_vs_B'])
+    json.dump(res, open(OUT / ('shot_model_mae.json' if MAE else 'shot_model.json'), 'w'), indent=1)
+    np.savez(OUT / ('shot_model_preds_mae.npz' if MAE else 'shot_model_preds.npz'), y=yt, games=gt, **preds)
     for k, v in res['models'].items():
         extra = res['vs_A'].get(k)
         print(f"{k:28s} ll={v['log_loss']:.4f} brier={v['brier']:.4f} auc={v['auc']:.4f}",
