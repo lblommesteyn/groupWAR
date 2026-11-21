@@ -8,7 +8,7 @@ Arms (ratings-only scorer unless noted):
   rapm_hist_trk   history + tracking descriptions fit on what history leaves unexplained
   anchored_comp_hist_trk   compressed embeddings + GCN on the rapm_hist_trk backbone
 """
-import json, pickle
+import json, os, pickle
 import numpy as np
 from sklearn.linear_model import LogisticRegression
 from sklearn.metrics import roc_auc_score, log_loss
@@ -19,39 +19,63 @@ import groupwar_t as gw
 import hist_prior as hp
 import metrics2 as m2
 from groupwar_rolling import BLOCKS
+from masked_paths import ROOT
 
 SEEDS = 3
 K_REL = 1500.0  # minutes at which a description gets half weight
 
 
+_EXTRA = None
+
+
+def extra_rows():
+    """EXTRA_PBP=1: 2025-26 stints from the fetched play-by-play (fetch_pbp.py -> ms_stints_2526.pkl) for games before
+    the tracking archive starts (2026-01-19), earlier than every test block, added to the in-season rating fits."""
+    global _EXTRA
+    if _EXTRA is None:
+        _EXTRA = []
+        if os.environ.get('EXTRA_PBP') == '1':
+            D = pickle.load(open(ROOT / 'results/latent/ms_stints_2526.pkl', 'rb'))
+            pre = {g for g, d in D['games'].items() if d['date'] < '2026-01-19' and not d['playoff']}
+            for st in D['stints']:
+                if st['game_id'] in pre:
+                    h, a = st['lineup']
+                    for k, (o, de) in enumerate(((h, a), (a, h))):
+                        if st['poss_team'][k] > 0:
+                            _EXTRA.append((st['game_id'], tuple(o), tuple(de), 1 - k, 100 * st['pts'][k] / st['poss_team'][k], st['poss_team'][k]))
+            print(f'extra 2025-26 play-by-play rows: {len(_EXTRA)} from {len(pre)} games', flush=True)
+    return _EXTRA
+
+
 def tables(G, shots, win, mapg, extra=False):
     R_win, R_map = ee.rows(G, win), ee.rows(G, mapg)
-    pids = sorted({p for Rr in (R_win, R_map) for r in Rr for p in r[1] + r[2]} | {p for d in G.values() for p in d['box']})
+    R_ext = extra_rows()
+    pids = sorted({p for Rr in (R_win, R_map, R_ext) for r in Rr for p in r[1] + r[2]} | {p for d in G.values() for p in d['box']})
     pidx = {p: i for i, p in enumerate(pids)}; n = len(pids)
     desc = m2.describe2(G, win, shots)
     embs, _ = e3.build(G, shots, win, mapg, R_win, R_map, pids, pidx, desc)
     Z = embs['shrunk'][:, :len(e3.ALL)]
     m, v, known = hp.prior_vectors(pids)
     rat = {}
-    _, th = ee.rapm_fit(R_win, pidx); rat['rapm'] = hp.net(th, pids)
+    _, th = ee.rapm_fit(R_win + R_ext, pidx); rat['rapm'] = hp.net(th, pids)
     # tracking prior without history (previous best)
     lam = ee.cv_lambda(R_map, Z, pidx); mdl = ee.Lin().fit(R_map, Z, pidx, lam)
     F_ = Z.shape[1]; pv = Z @ mdl.beta[2:2 + F_] - Z @ mdl.beta[2 + F_:]
     _, th2 = ee.rapm_fit(R_win, pidx, mdl.predict(R_win, Z, pidx))
     rat['rapm_trk'] = {p: pv[pidx[p]] + th2[pidx[p]] - th2[n + pidx[p]] for p in pids}
     rat['hist_only'] = hp.net(m, pids)
-    _, th3 = hp.prior_rapm(R_win, pidx, m, v); rat['rapm_hist'] = hp.net(th3, pids)
+    _, th3 = hp.prior_rapm(R_win + R_ext, pidx, m, v); rat['rapm_hist'] = hp.net(th3, pids)
     # descriptions explain what history does not: fit mapping on map rows after removing history
     Xm = ee.Lin().ind(R_map, pidx); hist_map = Xm @ m
     Rm2 = [r[:4] + (r[4] - h,) + r[5:] for r, h in zip(R_map, hist_map)]
     lam2 = ee.cv_lambda(Rm2, Z, pidx); mdl2 = ee.Lin().fit(Rm2, Z, pidx, lam2)
     add_o = Z @ mdl2.beta[2:2 + F_]; add_d = Z @ mdl2.beta[2 + F_:]
     m2_ = m + np.concatenate([add_o, add_d])
-    _, th4 = hp.prior_rapm(R_win, pidx, m2_, v); rat['rapm_hist_trk'] = hp.net(th4, pids)
+    _, th4 = hp.prior_rapm(R_win + R_ext, pidx, m2_, v); rat['rapm_hist_trk'] = hp.net(th4, pids)
     # reliability-scaled description adjustment: rho = minutes / (minutes + K_REL)
     mins = np.array([desc.get(p, {}).get('minutes', 0.0) for p in pids]); rho = mins / (mins + K_REL)
     m3_ = m + np.concatenate([rho * add_o, rho * add_d])
-    _, th5 = hp.prior_rapm(R_win, pidx, m3_, v); rat['rapm_hist_trk_rel'] = hp.net(th5, pids)
+    _, th5 = hp.prior_rapm(R_win + R_ext, pidx, m3_, v); rat['rapm_hist_trk_rel'] = hp.net(th5, pids)
     feats = {'comp': dict(zip(pids, embs['comp']))}
     if extra:  # prior means/variances of rapm_hist_trk and the shrunk descriptions (latent_skill)
         return rat, feats, dict(pids=pids, m=m2_, v=v, Z=Z)
