@@ -32,7 +32,9 @@ L2_GRID = [10.0, 100.0, 1000.0, 10000.0]
 ARMS = {'additive': (False, False), 'usage': (True, False), 'fit': (False, True), 'full': (True, True)}
 # load slope transferred from the four-season fit (ms_latent.py: softplus(g0) 0.93-1.15 across 2022-23 blocks)
 G0_MS = 1.08
-ARMS_FIX = {'usage_ms': G0_MS}  # usage arm with the population load slope fixed, not learned from one season
+# usage arms with the population load slope fixed (not learned from one season); _trk: the tracking/box descriptions
+# set each player's usage-logit and load-slope prior means (u ~ N(Z a_u, TAU_U^2), dg ~ N(Z a_g, TAU_G^2), a_* learned)
+ARMS_FIX = {'usage_ms': (G0_MS, False), 'usage_trk': (G0_MS, True)}
 
 
 def stint_rows(GU, gids):
@@ -49,7 +51,7 @@ def stint_rows(GU, gids):
 
 
 class Model(torch.nn.Module):
-    def __init__(self, n, m, v, Z, usage, fit, l2w=L2_W, g0_fix=None):
+    def __init__(self, n, m, v, Z, usage, fit, l2w=L2_W, g0_fix=None, trk=False):
         super().__init__()
         self.l2w = l2w
         self.usage, self.fit_ = usage, fit
@@ -64,6 +66,9 @@ class Model(torch.nn.Module):
             self.register_buffer('g0', torch.tensor(float(np.log(np.expm1(g0_fix))), dtype=torch.float64))
         self.dg = torch.nn.Parameter(torch.zeros(n))
         F = Z.shape[1]
+        self.trk = trk
+        if trk:
+            self.au = torch.nn.Parameter(torch.zeros(F, dtype=torch.float64)); self.ag = torch.nn.Parameter(torch.zeros(F, dtype=torch.float64))
         self.A = torch.nn.Parameter(0.01 * torch.randn(F, K, generator=torch.Generator().manual_seed(0)))
         # small random start: with z = 0 and W = 0 the fit term has zero gradient (saddle)
         self.dz = torch.nn.Parameter(0.1 * torch.randn(n, K, generator=torch.Generator().manual_seed(1)))
@@ -92,16 +97,19 @@ class Model(torch.nn.Module):
 
     def penalty(self, s2):
         p = ((self.th - self.m) ** 2 / (2 * self.v)).sum()  # = prior_rapm penalty (s2/v)(theta-m)^2 after dividing by 2 s2
-        p = p + (self.u ** 2).sum() / (2 * TAU_U ** 2)
+        mu_u = self.Z @ self.au if self.trk else 0.0
+        p = p + ((self.u - mu_u) ** 2).sum() / (2 * TAU_U ** 2)
+        if self.trk:
+            p = p + (self.au ** 2).sum() + (self.ag ** 2).sum()
         if self.usage:
-            p = p + (self.dg ** 2).sum() / (2 * TAU_G ** 2)
+            p = p + ((self.dg - (self.Z @ self.ag if self.trk else 0.0)) ** 2).sum() / (2 * TAU_G ** 2)
         if self.fit_:
             p = p + (self.dz ** 2).sum() / (2 * TAU_Z ** 2) + self.l2w * ((self.Wo ** 2).sum() + (self.Wd ** 2).sum() + (self.M ** 2).sum()) \
                 + 0.01 * self.l2w * (self.A ** 2).sum()
         return p
 
 
-def fit(R, ex, usage, fit_, iters=300, l2w=L2_W, wmult=None, g0_fix=None):
+def fit(R, ex, usage, fit_, iters=300, l2w=L2_W, wmult=None, g0_fix=None, trk=False):
     pidx = {p: i for i, p in enumerate(ex['pids'])}; n = len(pidx)
     O = torch.tensor([[pidx[p] for p in r[1]] for r in R]); D = torch.tensor([[pidx[p] for p in r[2]] for r in R])
     H = torch.tensor([r[3] for r in R], dtype=torch.float64); y = torch.tensor([r[4] for r in R]); w = torch.tensor([r[5] for r in R])
@@ -109,7 +117,7 @@ def fit(R, ex, usage, fit_, iters=300, l2w=L2_W, wmult=None, g0_fix=None):
     if wmult is not None:  # e.g. recency decay; also scales the usage counts
         w = w * torch.tensor(np.asarray(wmult, np.float64)); C = C * torch.tensor(np.asarray(wmult, np.float64))[:, None]
     Zs = ex['Z']; Zs = (Zs - Zs.mean(0)) / (Zs.std(0) + 1e-9)
-    mdl = Model(n, ex['m'], ex['v'], Zs, usage, fit_, l2w, g0_fix)
+    mdl = Model(n, ex['m'], ex['v'], Zs, usage, fit_, l2w, g0_fix, trk)
     with torch.no_grad():  # noise scale as in hist_prior.prior_rapm
         res = y - mdl(O, D, H)['yhat']; res = res - (w * res).sum() / w.sum()
         s2 = float((w * res ** 2).sum() / len(R))
@@ -152,7 +160,7 @@ def main():
         f = out / f'block_{b0}.npz'
         P = dict(np.load(f)) if f.exists() else {}
         todo = [a for a in list(ARMS) + list(ARMS_FIX) if f'lat_{a}' not in P] + (['additive'] if 'm_additive' not in P else [])
-        if not todo and 'lat_best_load' in P:
+        if not todo and 'lat_best_trk' in P:
             allp[b0] = P; continue
         print(f'block {b0}: arms {todo}', flush=True)
         hist = sorted(g for g, d in G.items() if d['date'] < b0)
@@ -171,15 +179,15 @@ def main():
         from sklearn.linear_model import LogisticRegression
         hy = np.array([int(G[g]['final'][0] > G[g]['final'][1]) for g in h1 + h2])
         R_ = {k: stint_rows(GU, v) for k, v in (('h1', h1), ('h2', h2), ('hist', h1 + h2), ('blk', blk))}
-        arms = {**{a: (u, f_, None) for a, (u, f_) in ARMS.items()}, **{a: (True, False, g) for a, g in ARMS_FIX.items()}}
-        for arm, (usage, fit_, g0f) in arms.items():
+        arms = {**{a: (u, f_, None, False) for a, (u, f_) in ARMS.items()}, **{a: (True, False, g, t) for a, (g, t) in ARMS_FIX.items()}}
+        for arm, (usage, fit_, g0f, trk) in arms.items():
             if arm not in todo:
                 continue
             best = None
             for lw in (L2_GRID if fit_ else [L2_W]):  # pick the fit penalty on cross-fitted history log loss
                 pr_h = {}
                 for name, win, tgt in (('h1', 'h2', 'h1'), ('h2', 'h1', 'h2')):
-                    mdl, pidx = fit(R_[win], ex[name], usage, fit_, l2w=lw, g0_fix=g0f)
+                    mdl, pidx = fit(R_[win], ex[name], usage, fit_, l2w=lw, g0_fix=g0f, trk=trk)
                     pr_h.update(predict_games(mdl, pidx, R_[tgt]))
                 hx_ = np.array([pr_h.get(g, 0.0) for g in h1 + h2])
                 c_ = LogisticRegression(C=1e4).fit(hx_[:, None], hy)
@@ -187,7 +195,13 @@ def main():
                 if best is None or l_ < best[0]:
                     best = (l_, lw, pr_h)
             _, lw, preds = best
-            mdl, pidx = fit(R_['hist'], ex['all'], usage, fit_, l2w=lw, g0_fix=g0f)
+            mdl, pidx = fit(R_['hist'], ex['all'], usage, fit_, l2w=lw, g0_fix=g0f, trk=trk)
+            if trk:  # which descriptions set usage and load-slope priors
+                import embed_v3 as e3
+                for nm_, v_ in (('usage', mdl.au), ('load', mdl.ag)):
+                    v_ = v_.detach().numpy(); o_ = np.argsort(-np.abs(v_))[:6]
+                    print(f'    {nm_} prior from: ' + ', '.join(f'{e3.ALL[j]} {v_[j]:+.2f}' for j in o_), flush=True)
+                P['au'] = mdl.au.detach().numpy(); P['ag'] = mdl.ag.detach().numpy()
             preds = dict(preds); preds.update(predict_games(mdl, pidx, R_['blk']))
             if fit_ or usage:
                 print(f'  {arm}: l2w {lw} g0 {torch.nn.functional.softplus(mdl.g0).item():.3f} '
@@ -204,10 +218,12 @@ def main():
         pb = np.clip(P['anchored_comp_hist_trk'], 1e-6, 1 - 1e-6)
         z = np.log(pb / (1 - pb)) + P['slope_usage_ms'] * (P['m_usage_ms'] - P['m_additive'])
         P['lat_best_load'] = 1 / (1 + np.exp(-z))
+        z2 = np.log(pb / (1 - pb)) + P['slope_usage_trk'] * (P['m_usage_trk'] - P['m_additive'])
+        P['lat_best_trk'] = 1 / (1 + np.exp(-z2))
         print(f'{b0} lat_best_load  auc {roc_auc_score(P["win"], P["lat_best_load"]):.3f} '
               f'(best {roc_auc_score(P["win"], pb):.3f})', flush=True)
         np.savez(f, **P); allp[b0] = P
-    names = [k for k in next(iter(allp.values())) if k != 'win' and not k.startswith(('m_', 'slope_'))]
+    names = [k for k in next(iter(allp.values())) if k not in ('win', 'au', 'ag') and not k.startswith(('m_', 'slope_'))]
     win = np.concatenate([p['win'] for p in allp.values()])
     pr = {k: np.concatenate([p[k] for p in allp.values()]) for k in names}
     rng = np.random.default_rng(0); Bs = rng.integers(0, len(win), (2000, len(win)))
