@@ -9,8 +9,9 @@ Ratings-only scorer for every arm (same as our rating arms), so only the player 
 Baselines reloaded from rolling_prior: rapm, rapm_hist_trk, anchored_comp_hist_trk.
 Unrated players get the replacement-ish value -2.0 (both public metrics are per 100 possessions).
 """
-import bisect, csv, json, pickle
+import bisect, csv, json, os, pickle
 import numpy as np
+from sklearn.linear_model import LogisticRegression
 from sklearn.metrics import roc_auc_score, log_loss
 
 import embed_eval as ee
@@ -48,7 +49,7 @@ def load_epm(f):
 
 
 def main():
-    out = gw.OUT / 'benchmark'; out.mkdir(parents=True, exist_ok=True)
+    out = gw.OUT / os.environ.get('BENCH_OUT', 'benchmark'); out.mkdir(parents=True, exist_ok=True)
     G = pickle.load(open(ee.E / 'player_games.pkl', 'rb'))
     shots = [json.loads(l) for l in open(ee.E / 'shots_xfg.jsonl')]
     G = {g: d for g, d in G.items() if d['stints']}
@@ -69,11 +70,13 @@ def main():
         tr = np.array([i for i, r in enumerate(sub) if r['game_id'] not in bset and ok[keep[i]]])
         te = np.array([i for i, r in enumerate(sub) if r['game_id'] in bset])
         A_, y_ = A[keep], y[keep]
-        base = dict(np.load(gw.OUT / 'rolling_prior' / f'block_{b0}.npz'))
+        base = dict(np.load(gw.OUT / os.environ.get('ROLLING_BASE', 'rolling_prior') / f'block_{b0}.npz'))
         P = {'win': (y_[te] > 0).astype(int)}
         assert (P['win'] == base['win']).all()
         for k in ('rapm', 'rapm_hist_trk', 'anchored_comp_hist_trk'):
-            P[k] = base[k]
+            for kk in (k, f'{k}_cal'):
+                if kk in base:
+                    P[kk] = base[kk]
         # our rapm_hist_trk tables (same cross-fit as rolling_prior) for the combined arm
         T1, T2, TT = rp.tables(G, shots, h2, h1), rp.tables(G, shots, h1, h2), rp.tables(G, shots, h1 + h2, h2)
         ours = {g: T1[0]['rapm_hist_trk'] for g in h1} | {g: T2[0]['rapm_hist_trk'] for g in h2} | {g: TT[0]['rapm_hist_trk'] for g in blk}
@@ -94,10 +97,16 @@ def main():
                 t = fn(r['game_id']); tab[r['game_id']] = (t, t, {'x': {p: np.zeros(1, np.float32) for p in t}})
             M, Rts, Xs = gw.tensors(sub, tab)
             zeros = np.zeros_like(Xs['x'])
-            P[name] = np.mean([gw.train_arm(zeros, A_, M, Rts['rapm'], y_, tr, te, False, True, seed=s) for s in range(SEEDS)], 0)
+            outs = [gw.train_arm(zeros, A_, M, Rts['rapm'], y_, tr, te, False, True, seed=s, oof=True) for s in range(SEEDS)]
+            P[name] = np.mean([o[0] for o in outs], 0)
+            lg = lambda p: np.log(np.clip(p, 1e-6, 1 - 1e-6) / (1 - np.clip(p, 1e-6, 1 - 1e-6)))
+            cal = LogisticRegression(C=1e4).fit(lg(np.mean([o[1][tr] for o in outs], 0))[:, None], (y_[tr] > 0).astype(int))
+            P[f'{name}_cal'] = cal.predict_proba(lg(P[name])[:, None])[:, 1]  # calibration fit on history only
             print(f'{b0} {name:18s} auc {roc_auc_score(P["win"], P[name]):.3f}', flush=True)
         np.savez(f, **P); allp[b0] = P
     names = [k for k in next(iter(allp.values())) if k != 'win']
+    cal = any(k.endswith('_cal') for k in names)
+    BASES = ('darko_pit_cal', 'anchored_comp_hist_trk_cal') if cal else ('darko_pit', 'anchored_comp_hist_trk')
     win = np.concatenate([p['win'] for p in allp.values()])
     pr = {n: np.concatenate([p[n] for p in allp.values()]) for n in names}
     rng = np.random.default_rng(0); Bs = rng.integers(0, len(win), (2000, len(win)))
@@ -105,7 +114,7 @@ def main():
     res = {'n_test': int(len(win)), 'arms': {}}
     for n in names:
         r = res['arms'][n] = dict(auc=float(roc_auc_score(win, pr[n])), log_loss=float(log_loss(win, np.clip(pr[n], 1e-6, 1 - 1e-6))))
-        for base in ('darko_pit', 'anchored_comp_hist_trk'):
+        for base in BASES:
             d = ll(pr[n]) - ll(pr[base])
             r[f'd_ll_vs_{base}'] = [float(v) for v in np.percentile([d[b].mean() for b in Bs], [2.5, 97.5])]
             r[f'd_auc_vs_{base}'] = [float(v) for v in np.percentile(
@@ -113,7 +122,7 @@ def main():
     json.dump(res, open(out / 'benchmark.json', 'w'), indent=1)
     print(f'\npooled {len(win)} games')
     for n, r in res['arms'].items():
-        print(f"{n:24s} auc {r['auc']:.3f} ll {r['log_loss']:.4f} | vs DARKO ΔAUC {np.round(r['d_auc_vs_darko_pit'], 3)} Δll {np.round(r['d_ll_vs_darko_pit'], 4)} | vs ours ΔAUC {np.round(r['d_auc_vs_anchored_comp_hist_trk'], 3)} Δll {np.round(r['d_ll_vs_anchored_comp_hist_trk'], 4)}")
+        print(f"{n:28s} auc {r['auc']:.3f} ll {r['log_loss']:.4f} | vs DARKO ΔAUC {np.round(r[f'd_auc_vs_{BASES[0]}'], 3)} Δll {np.round(r[f'd_ll_vs_{BASES[0]}'], 4)} | vs ours ΔAUC {np.round(r[f'd_auc_vs_{BASES[1]}'], 3)} Δll {np.round(r[f'd_ll_vs_{BASES[1]}'], 4)}")
 
 
 if __name__ == '__main__':

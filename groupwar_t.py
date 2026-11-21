@@ -203,11 +203,12 @@ def tensors(recs, tables):
 
 
 # ------------------------------------------------------------------ training
-def train_arm(X, A, M, Rt, y, tr_idx, te_idx, use_gcn, use_rating, folds=6, epochs=40, lr=1e-3, shrink=0.01, seed=0):
+def train_arm(X, A, M, Rt, y, tr_idx, te_idx, use_gcn, use_rating, folds=6, epochs=40, lr=1e-3, shrink=0.01, seed=0, oof=False):
+    """oof=True also returns out-of-fold predictions for the training games (nan elsewhere), for calibration."""
     X, A, M, Rt = (torch.tensor(v) for v in (X, A, M, Rt))
     yt = torch.sigmoid(torch.tensor(y, dtype=torch.float32) / SCALE)
     rng = np.random.default_rng(seed); fs = np.array_split(rng.permutation(tr_idx), folds)
-    preds = []
+    preds = []; oof_p = np.full(len(y), np.nan, np.float32)
     for k in range(folds):
         torch.manual_seed(100 * seed + k)
         val = torch.tensor(fs[k]); tr = torch.tensor(np.concatenate([fs[j] for j in range(folds) if j != k]))
@@ -235,7 +236,9 @@ def train_arm(X, A, M, Rt, y, tr_idx, te_idx, use_gcn, use_rating, folds=6, epoc
         with torch.no_grad():
             ti = torch.tensor(te_idx)
             preds.append(model(X[ti].to(DEV), A[ti].to(DEV), M[ti].to(DEV), Rt[ti].to(DEV)).cpu().numpy())
-    return np.mean(preds, 0)
+            if oof:
+                oof_p[fs[k]] = model(X[val].to(DEV), A[val].to(DEV), M[val].to(DEV), Rt[val].to(DEV)).cpu().numpy()
+    return (np.mean(preds, 0), oof_p) if oof else np.mean(preds, 0)
 
 
 def main():

@@ -4,7 +4,8 @@ Replays v3/nba_build_graphs lineup reconstruction (its period_starters / clock h
 stint: lineups, seconds, points, per-team possessions (FGA + 0.44 FTA - OREB + TOV) and per-player usage
 [FGA, FTA, TOV]. Event types: 1 made FG, 2 missed FG, 3 FT, 4 rebound, 5 turnover, 8 substitution.
 Output (court-model on the PC): results/latent/ms_stints.pkl = {'stints': [...], 'games': {gid: meta}}.
-Usage (PC): python ms_stints.py
+Usage (PC): python ms_stints.py                       (v3 2019-23 -> ms_stints.pkl)
+            python ms_stints.py PBP GAMES OUT.pkl     (e.g. fetch_pbp.py's 2023-25 files)
 """
 import pickle, sys
 from collections import defaultdict
@@ -83,8 +84,10 @@ def process(gid, ev_all, h, a):
 
 
 def main():
-    pbp = pd.read_parquet(V3 / 'data/nba/pbp.parquet')
-    games = pd.read_parquet(V3 / 'data/nba/games.parquet')
+    a = sys.argv[1:]
+    pbp = pd.read_parquet(a[0] if a else V3 / 'data/nba/pbp.parquet')
+    games = pd.read_parquet(a[1] if a else V3 / 'data/nba/games.parquet')
+    out_f = OUT / (a[2] if a else 'ms_stints.pkl')
     meta = games.drop_duplicates('game_id').set_index('game_id')
     out, G, fail = [], {}, 0
     for n, (gid, ev) in enumerate(pbp.groupby('game_id', sort=False)):
@@ -103,7 +106,7 @@ def main():
         if n % 500 == 0:
             print(n, len(G), fail, flush=True)
     OUT.mkdir(parents=True, exist_ok=True)
-    pickle.dump({'stints': out, 'games': G}, open(OUT / 'ms_stints.pkl', 'wb'))
+    pickle.dump({'stints': out, 'games': G}, open(out_f, 'wb'))
     fga = sum(x['fga'][0] + x['fga'][1] for x in out); att = sum(u[0] for x in out for u in x['use'].values())
     print(f'games {len(G)} failed {fail} stints {len(out)} fga {fga} attributed {att / max(fga, 1):.3f} '
           f'poss/game {sum(sum(x["poss_team"]) for x in out) / 2 / max(len(G), 1):.1f}')

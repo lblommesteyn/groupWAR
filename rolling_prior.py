@@ -10,6 +10,7 @@ Arms (ratings-only scorer unless noted):
 """
 import json, pickle
 import numpy as np
+from sklearn.linear_model import LogisticRegression
 from sklearn.metrics import roc_auc_score, log_loss
 
 import embed_eval as ee
@@ -84,16 +85,25 @@ def main():
         te = np.array([i for i, r in enumerate(sub) if r['game_id'] in bset])
         A_, y_ = A[keep], y[keep]
         P = {'win': (y_[te] > 0).astype(int)}
+        ytr = (y_[tr] > 0).astype(int)
+
+        def run(name, X, gcn):
+            outs = [gw.train_arm(X, A_, M, Rts['rapm'], y_, tr, te, gcn, True, seed=s, oof=True) for s in range(SEEDS)]
+            P[name] = np.mean([o[0] for o in outs], 0)
+            # calibration fit on history only: logistic on the out-of-fold logit of the training games
+            oo = np.mean([o[1][tr] for o in outs], 0)
+            lg = lambda p: np.log(np.clip(p, 1e-6, 1 - 1e-6) / (1 - np.clip(p, 1e-6, 1 - 1e-6)))
+            cal = LogisticRegression(C=1e4).fit(lg(oo)[:, None], ytr)
+            P[f'{name}_cal'] = cal.predict_proba(lg(P[name])[:, None])[:, 1]
+            print(f'  {name:24s} auc {roc_auc_score(P["win"], P[name]):.3f}  calibration slope {cal.coef_[0, 0]:.2f}', flush=True)
+
         for rk in RATS:
             tab = {r['game_id']: (which[r['game_id']][0][rk], which[r['game_id']][0][rk], which[r['game_id']][1]) for r in sub}
             M, Rts, Xs = gw.tensors(sub, tab)
             zeros = np.zeros_like(Xs['comp'][..., :1])
-            P[rk] = np.mean([gw.train_arm(zeros, A_, M, Rts['rapm'], y_, tr, te, False, True, seed=s) for s in range(SEEDS)], 0)
-            print(f'  {rk:24s} auc {roc_auc_score(P["win"], P[rk]):.3f}', flush=True)
+            run(rk, zeros, False)
             if rk == 'rapm_hist_trk':
-                P['anchored_comp_hist_trk'] = np.mean([gw.train_arm(Xs['comp'], A_, M, Rts['rapm'], y_, tr, te, True, True, seed=s)
-                                                       for s in range(SEEDS)], 0)
-                print(f'  {"anchored_comp_hist_trk":24s} auc {roc_auc_score(P["win"], P["anchored_comp_hist_trk"]):.3f}', flush=True)
+                run('anchored_comp_hist_trk', Xs['comp'], True)
         np.savez(f, **P); allp[b0] = P
     names = [k for k in next(iter(allp.values())) if k != 'win']
     win = np.concatenate([p['win'] for p in allp.values()])
