@@ -18,10 +18,14 @@ from masked_paths import ROOT
 E = ROOT / 'results/epv'
 import os
 ADJUST = os.environ.get('ADJUST', '1') == '1'
+SRC = os.environ.get('SRC', 'ghost')  # ghost: real vs ghost (epv_ghost.py); idghost: own-identity vs group-mean ghost (epv_ghost2.py)
 
 
 def main():
     g = np.load(E / 'out4/ghost.npz'); s, dV = g['s'], g['dV'].astype(float)
+    if SRC == 'idghost':
+        g2 = np.load(E / 'out4/ghost2.npz'); assert (g2['s'] == s).all()
+        dV = g2['dVid'].astype(float)
     v3 = np.load(E / 'v3.npz'); meta, gi, games, kind = v3['meta'][s], v3['gi'][s], v3['games'], v3['kind']
     c = np.load(E / 'out3/epv3_cf.npz'); ok = c['kind'] != 2
     slope = np.polyfit(c['epv'][ok].astype(float), c['y'][ok], 1)[0]
@@ -39,7 +43,7 @@ def main():
         for side, sl in (('off', range(5)), ('def', range(5, 10))):
             X, Y, R, Fo = [], [], [], []
             for i in sl:
-                m = off_mask[:, i] if side == 'off' else np.ones(len(s), bool)
+                m = (off_mask[:, i] if side == 'off' else np.ones(len(s), bool)) & np.isfinite(dV[:, i])
                 p_ = Fn[m, i, :2]; r_ = np.flatnonzero(m)
                 X.append(np.c_[p_[:, 0], np.abs(p_[:, 1]), np.hypot(p_[:, 0] - 41.75, p_[:, 1]), np.linalg.norm(p_ - ball[m], axis=1),
                                np.hypot(ball[m, 0] - 41.75, ball[m, 1]), np.linalg.norm(Fn[m, i, 2:], axis=1), glob[m, 0], glob[m, 4], g['epv'][m]])
@@ -51,19 +55,24 @@ def main():
                 base[Fo == k] = mdl.predict(X[Fo == k])
             print(f'{side}: baseline explains {1 - np.var(Y - base) / np.var(Y):.1%} of moment-level dV', flush=True)
             dV[R[:, 0], R[:, 1]] = Y - base
-    print('mean dV offense off-ball %.4f  holder %.4f  defense %.4f' % (dV[:, :5][off_mask].mean(), dV[:, :5][~off_mask].mean(), dV[:, 5:].mean()))
+    print('mean dV offense off-ball %.4f  holder %.4f  defense %.4f' % (np.nanmean(dV[:, :5][off_mask]), np.nanmean(dV[:, :5][~off_mask]), np.nanmean(dV[:, 5:])))
     # possession means
     acc = defaultdict(lambda: [0.0, 0])  # (game, poss, pid, side) -> [sum, n]
     for r in range(len(s)):
         key0 = (int(gi[r]), int(meta[r, 0]))
         for i in range(10):
-            if i < 5 and not off_mask[r, i]:
+            if (i < 5 and not off_mask[r, i]) or not np.isfinite(dV[r, i]):
                 continue
             a = acc[key0 + (int(ids[r, i]), 'off' if i < 5 else 'def')]
             a[0] += dV[r, i] if i < 5 else -dV[r, i]; a[1] += 1
     P = defaultdict(lambda: defaultdict(lambda: np.zeros((2, 2))))  # pid -> side -> [half][sum, poss]
+    pg = defaultdict(lambda: defaultdict(lambda: defaultdict(float)))  # game id -> pid -> per-game sums (metrics2 EPV=1)
     for (gg, k, pid, side), (sm, n) in acc.items():
         P[pid][side][gg % 2] += [sm / n, 1]
+        pre = 'id' if SRC == 'idghost' else 'ob'
+        c = pg[str(games[gg])][pid]; c[f'{pre}_{side}'] += sm / n; c[f'{pre}_{side}_n'] += 1
+    pickle.dump({g: {p: dict(c) for p, c in v.items()} for g, v in pg.items()},
+                open(E / (('idghost' if SRC == 'idghost' else 'offball' if ADJUST else 'offball_raw') + '_pg.pkl'), 'wb'))
     rel = {}
     for side in ('off', 'def'):
         a, b = [], []
@@ -85,7 +94,7 @@ def main():
                          off_100=o[0] / max(o[1], 1) * 100, def_100=df[0] / max(df[1], 1) * 100))
     for r in rows:
         r['total_100'] = r['off_100'] + r['def_100']
-    json.dump(dict(slope=slope, reliability=rel, players=sorted(rows, key=lambda r: -r['total_100'])), open(E / ('offball.json' if ADJUST else 'offball_raw.json'), 'w'), indent=1)
+    json.dump(dict(slope=slope, reliability=rel, players=sorted(rows, key=lambda r: -r['total_100'])), open(E / (('idghost' if SRC == 'idghost' else 'offball' if ADJUST else 'offball_raw') + '.json'), 'w'), indent=1)
     for key, lab in (('off_100', 'OFF-BALL OFFENSE'), ('def_100', 'DEFENSE')):
         rs = sorted(rows, key=lambda r: -r[key])
         print(f'\n{lab} (points per 100 possessions), top / bottom')

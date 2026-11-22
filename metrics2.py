@@ -37,6 +37,21 @@ if REB:
 if HOLES:
     NEW_OFF = NEW_OFF + HOLES_OFF
     NEW_DEF = NEW_DEF + HOLES_DEF
+EPV = os.environ.get('EPV', '')  # comma list of EPV credit groups: onball, offball, offball_raw, gravity, idghost
+EPV_FEATS = {'onball': (['epv_move', 'epv_finish'], []), 'offball': (['ob_off'], ['ob_def']),
+             'offball_raw': (['ob_off'], ['ob_def']), 'gravity': (['grav'], []), 'idghost': (['id_off'], ['id_def'])}
+EPV_FILES = {'onball': None, 'offball': 'offball_pg.pkl', 'offball_raw': 'offball_raw_pg.pkl',
+             'gravity': 'gravity_pg.pkl', 'idghost': 'idghost_pg.pkl'}
+for grp in filter(None, EPV.split(',')):
+    if grp == 'onball':  # epv_credit.py: (gid, pid) -> move / finish residual sums, off_poss
+        for (g, p), v in pickle.load(open(ROOT / 'results/epv/credit_pg.pkl', 'rb')).items():
+            EV.setdefault(str(g), {}).setdefault(int(p), {}).update({'e_' + k: x for k, x in v.items()})
+    else:
+        for g, c in pickle.load(open(ROOT / 'results/epv' / EPV_FILES[grp], 'rb')).items():
+            for p, v in c.items():
+                EV.setdefault(str(g), {}).setdefault(int(p), {}).update(v)
+    NEW_OFF = NEW_OFF + EPV_FEATS[grp][0]
+    NEW_DEF = NEW_DEF + EPV_FEATS[grp][1]
 MAE = os.environ.get('MAE') == '1'
 MAE_K = 8
 MAE_OFF = [f'mae_o{k}' for k in range(MAE_K)]
@@ -135,6 +150,15 @@ def describe2(G, gids, shots):
                 h_cover_rate=shrink(g_('h_cover'), g_('h_def_n'), lg('h_cover', 'h_def_n'), 2000),
                 h_oppA=shrink(g_('h_oppA'), g_('h_def_n'), lg('h_oppA', 'h_def_n'), 2000),
                 h_onball_A=shrink(g_('h_onball_A'), g_('h_onball_n'), lg('h_onball_A', 'h_onball_n'), 500))
+        if EPV:
+            f.update(
+                epv_move=100 * shrink(g_('e_move'), g_('e_off_poss'), lg('e_move', 'e_off_poss'), 300),
+                epv_finish=100 * shrink(g_('e_finish'), g_('e_off_poss'), lg('e_finish', 'e_off_poss'), 300),
+                ob_off=100 * shrink(g_('ob_off'), g_('ob_off_n'), lg('ob_off', 'ob_off_n'), 300),
+                ob_def=100 * shrink(g_('ob_def'), g_('ob_def_n'), lg('ob_def', 'ob_def_n'), 300),
+                grav=shrink(g_('grav'), g_('grav_n'), lg('grav', 'grav_n'), 2000),
+                id_off=100 * shrink(g_('id_off'), g_('id_off_n'), lg('id_off', 'id_off_n'), 300),
+                id_def=100 * shrink(g_('id_def'), g_('id_def_n'), lg('id_def', 'id_def_n'), 300))
         if MAE:
             f.update({c: shrink(g_(c), g_('mae_off_n'), lg(c, 'mae_off_n'), 300) for c in MAE_OFF})
             f.update({c: shrink(g_(c), g_('mae_def_n'), lg(c, 'mae_def_n'), 300) for c in MAE_DEF})
