@@ -40,9 +40,11 @@ if HOLES:
 EPV = os.environ.get('EPV', '')  # comma list of EPV credit groups: onball, offball, offball_raw, gravity, idghost
 EPV_FEATS = {'onball': (['epv_move', 'epv_finish'], []), 'offball': (['ob_off'], ['ob_def']),
              'offball_raw': (['ob_off'], ['ob_def']), 'gravity': (['grav'], []), 'idghost': (['id_off'], ['id_def']),
-             'coverage': ([], ['cov_drop', 'cov_switch', 'cov_up'])}
+             'coverage': ([], ['cov_drop', 'cov_switch', 'cov_up']),
+             'noise1': (['nz'], []), 'noise3': ([], ['nz_drop', 'nz_switch', 'nz_up'])}  # make_noise.py controls
 EPV_FILES = {'onball': None, 'offball': 'offball_pg.pkl', 'offball_raw': 'offball_raw_pg.pkl',
-             'gravity': 'gravity_pg.pkl', 'idghost': 'idghost_pg.pkl', 'coverage': 'coverage_pg.pkl'}
+             'gravity': 'gravity_pg.pkl', 'idghost': 'idghost_pg.pkl', 'coverage': 'coverage_pg.pkl',
+             'noise1': 'noise1_pg.pkl', 'noise3': 'noise3_pg.pkl'}
 # EPV_MODE=append: the groups' columns stay out of the shared descriptions (and so out of the PCA and the backbone);
 # embed_v3 appends them, shrunk and standardised, to the compressed embedding as extra dimensions
 APPEND_MODE = os.environ.get('EPV_MODE') == 'append'
@@ -169,7 +171,11 @@ def describe2(G, gids, shots):
                 id_def=100 * shrink(g_('id_def'), g_('id_def_n'), lg('id_def', 'id_def_n'), 300),
                 cov_drop=shrink(g_('pnr_drop'), g_('pnr_n'), lg('pnr_drop', 'pnr_n'), 30),
                 cov_switch=shrink(g_('pnr_switch'), g_('pnr_n'), lg('pnr_switch', 'pnr_n'), 30),
-                cov_up=shrink(g_('pnr_up'), g_('pnr_n'), lg('pnr_up', 'pnr_n'), 30))
+                cov_up=shrink(g_('pnr_up'), g_('pnr_n'), lg('pnr_up', 'pnr_n'), 30),
+                nz=shrink(g_('nz'), g_('nz_n'), lg('nz', 'nz_n'), 2000),
+                nz_drop=shrink(g_('nz_drop'), g_('nz3_n'), lg('nz_drop', 'nz3_n'), 30),
+                nz_switch=shrink(g_('nz_switch'), g_('nz3_n'), lg('nz_switch', 'nz3_n'), 30),
+                nz_up=shrink(g_('nz_up'), g_('nz3_n'), lg('nz_up', 'nz3_n'), 30))
         if MAE:
             f.update({c: shrink(g_(c), g_('mae_off_n'), lg(c, 'mae_off_n'), 300) for c in MAE_OFF})
             f.update({c: shrink(g_(c), g_('mae_def_n'), lg(c, 'mae_def_n'), 300) for c in MAE_DEF})
