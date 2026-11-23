@@ -55,7 +55,7 @@ def shrunk_matrix(desc, cols, pids, k):
 
 def build(G, shots, win_games, map_games, R_win, R_map, pids, pidx, desc):
     """Return dict of embedding matrices aligned with pids: raw, shrunk, comp."""
-    k, mh = reliability(G, win_games, shots, ALL)
+    k, mh = reliability(G, win_games, shots, ALL + m2.APPEND)
     Zraw = ee.matrix(desc, ALL, pids)
     Zs, lmz = shrunk_matrix(desc, ALL, pids, k)
     # supervised quality factors on shrunk features
@@ -77,6 +77,9 @@ def build(G, shots, win_games, map_games, R_win, R_map, pids, pidx, desc):
     pcs = pcs / (pcs.std(0) + 1e-9)
     q = np.column_stack([offq, defq]); q = q / (q.std(0) + 1e-9)
     comp = np.column_stack([q, pcs, lmz]).astype(np.float32)
+    if m2.APPEND:  # extra dimensions kept outside the PCA (metrics2 EPV_MODE=append)
+        Za, _ = shrunk_matrix(desc, m2.APPEND, pids, k)
+        comp = np.column_stack([comp, Za]).astype(np.float32)
     info = dict(k=k, stable=[ALL[j] for j in stable], explained=(sv[:N_PC] ** 2 / (sv ** 2).sum()).round(3).tolist(),
                 loadings={f'pc{i}': sorted(zip([ALL[j] for j in stable], Vt[i].round(2)), key=lambda t: -abs(t[1]))[:5]
                           for i in range(N_PC)})

@@ -39,10 +39,15 @@ if HOLES:
     NEW_DEF = NEW_DEF + HOLES_DEF
 EPV = os.environ.get('EPV', '')  # comma list of EPV credit groups: onball, offball, offball_raw, gravity, idghost
 EPV_FEATS = {'onball': (['epv_move', 'epv_finish'], []), 'offball': (['ob_off'], ['ob_def']),
-             'offball_raw': (['ob_off'], ['ob_def']), 'gravity': (['grav'], []), 'idghost': (['id_off'], ['id_def'])}
+             'offball_raw': (['ob_off'], ['ob_def']), 'gravity': (['grav'], []), 'idghost': (['id_off'], ['id_def']),
+             'coverage': ([], ['cov_drop', 'cov_switch', 'cov_up'])}
 EPV_FILES = {'onball': None, 'offball': 'offball_pg.pkl', 'offball_raw': 'offball_raw_pg.pkl',
-             'gravity': 'gravity_pg.pkl', 'idghost': 'idghost_pg.pkl'}
-for grp in filter(None, EPV.split(',')):
+             'gravity': 'gravity_pg.pkl', 'idghost': 'idghost_pg.pkl', 'coverage': 'coverage_pg.pkl'}
+# EPV_MODE=append: the groups' columns stay out of the shared descriptions (and so out of the PCA and the backbone);
+# embed_v3 appends them, shrunk and standardised, to the compressed embedding as extra dimensions
+APPEND_MODE = os.environ.get('EPV_MODE') == 'append'
+APPEND = []
+for grp in filter(None, EPV.replace('+', ',').split(',')):
     if grp == 'onball':  # epv_credit.py: (gid, pid) -> move / finish residual sums, off_poss
         for (g, p), v in pickle.load(open(ROOT / 'results/epv/credit_pg.pkl', 'rb')).items():
             EV.setdefault(str(g), {}).setdefault(int(p), {}).update({'e_' + k: x for k, x in v.items()})
@@ -50,8 +55,11 @@ for grp in filter(None, EPV.split(',')):
         for g, c in pickle.load(open(ROOT / 'results/epv' / EPV_FILES[grp], 'rb')).items():
             for p, v in c.items():
                 EV.setdefault(str(g), {}).setdefault(int(p), {}).update(v)
-    NEW_OFF = NEW_OFF + EPV_FEATS[grp][0]
-    NEW_DEF = NEW_DEF + EPV_FEATS[grp][1]
+    if APPEND_MODE:
+        APPEND = APPEND + EPV_FEATS[grp][0] + EPV_FEATS[grp][1]
+    else:
+        NEW_OFF = NEW_OFF + EPV_FEATS[grp][0]
+        NEW_DEF = NEW_DEF + EPV_FEATS[grp][1]
 MAE = os.environ.get('MAE') == '1'
 MAE_K = 8
 MAE_OFF = [f'mae_o{k}' for k in range(MAE_K)]
@@ -158,7 +166,10 @@ def describe2(G, gids, shots):
                 ob_def=100 * shrink(g_('ob_def'), g_('ob_def_n'), lg('ob_def', 'ob_def_n'), 300),
                 grav=shrink(g_('grav'), g_('grav_n'), lg('grav', 'grav_n'), 2000),
                 id_off=100 * shrink(g_('id_off'), g_('id_off_n'), lg('id_off', 'id_off_n'), 300),
-                id_def=100 * shrink(g_('id_def'), g_('id_def_n'), lg('id_def', 'id_def_n'), 300))
+                id_def=100 * shrink(g_('id_def'), g_('id_def_n'), lg('id_def', 'id_def_n'), 300),
+                cov_drop=shrink(g_('pnr_drop'), g_('pnr_n'), lg('pnr_drop', 'pnr_n'), 30),
+                cov_switch=shrink(g_('pnr_switch'), g_('pnr_n'), lg('pnr_switch', 'pnr_n'), 30),
+                cov_up=shrink(g_('pnr_up'), g_('pnr_n'), lg('pnr_up', 'pnr_n'), 30))
         if MAE:
             f.update({c: shrink(g_(c), g_('mae_off_n'), lg(c, 'mae_off_n'), 300) for c in MAE_OFF})
             f.update({c: shrink(g_(c), g_('mae_def_n'), lg(c, 'mae_def_n'), 300) for c in MAE_DEF})
