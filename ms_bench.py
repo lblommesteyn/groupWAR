@@ -171,7 +171,7 @@ def summary():
     rows = defaultdict(list)
     for f in sorted(OUT.glob('msb_*.npz')):
         rows[int(f.name.split('_')[1])].append(dict(np.load(f)))
-    ALL = ['additive', 'usage', 'prior_add', 'prior_usage', 'darko_cal', 'blend', 'blend_prior']
+    ALL = ['additive', 'usage', 'prior_add', 'prior_usage', 'rapm', 'spm_prior', 'spm', 'spm_luck', 'spm_lpit', 'spm_lpit_h', 'darko_cal', 'blend', 'blend_prior']
     ll = lambda w, p: -(w * np.log(np.clip(p, 1e-6, 1)) + (1 - w) * np.log(np.clip(1 - p, 1e-6, 1)))
     rng = np.random.default_rng(0)
     res = {}
@@ -187,22 +187,30 @@ def summary():
             r[a]['d_ll_vs_darko'] = [float(x) for x in np.percentile([d[b].mean() for b in bs], [2.5, 97.5])]
             r[a]['d_auc_vs_darko'] = [float(x) for x in np.percentile(
                 [roc_auc_score(w[b], P[a][b]) - roc_auc_score(w[b], P['darko_cal'][b]) for b in bs[:500]], [2.5, 97.5])]
+        lgt = lambda p: np.log(np.clip(p, 1e-6, 1 - 1e-6) / np.clip(1 - p, 1e-6, 1))
+        if 'margin' in P:  # calibration-free margin check: correlation of each arm's logit with the final margin
+            M = P['margin']
+            for a in arms:
+                r[a]['margin_corr'] = float(np.corrcoef(lgt(P[a]), M)[0, 1])
+                if a != 'darko_cal':
+                    dc = [np.corrcoef(lgt(P[a][b]), M[b])[0, 1] - np.corrcoef(lgt(P['darko_cal'][b]), M[b])[0, 1] for b in bs[:500]]
+                    r[a]['d_corr_vs_darko'] = [float(x) for x in np.percentile(dc, [2.5, 97.5])]
         res[name] = r
-        print(f"{name:7s} n {r['n']:5d} " + ' '.join(f"{a} {r[a]['auc']:.3f}/{r[a]['log_loss']:.4f}" for a in arms)
+        print(f"{name:7s} n {r['n']:5d} " + ' '.join(f"{a} {r[a]['auc']:.3f}/{r[a]['log_loss']:.4f}/r{r[a].get('margin_corr', 0):.3f}" for a in arms)
               + ' | dll vs darko: ' + ' '.join(f"{a} {np.round(r[a]['d_ll_vs_darko'], 4)}" for a in arms if a != 'darko_cal'))
     allP = defaultdict(list)
     full = [a for a in ALL if all(a in p for Ps in rows.values() for p in Ps)]
     for s, Ps in sorted(rows.items()):
-        P = {k: np.concatenate([p[k] for p in Ps]) for k in ['win'] + [a for a in ALL if all(a in p for p in Ps)]}
+        P = {k: np.concatenate([p[k] for p in Ps]) for k in ['win', 'margin'] + [a for a in ALL if all(a in p for p in Ps)]}
         one(P, str(s))
-        for k in ['win'] + full:
+        for k in ['win', 'margin'] + full:
             allP[k].append(P[k])
     if allP:
         one({k: np.concatenate(v) for k, v in allP.items()}, 'pooled')
         pr = [s for s, Ps in sorted(rows.items()) if all('prior_usage' in p for p in Ps)]
         if pr and len(pr) < len(rows):  # pooled over the seasons that have the prior arms
             one({k: np.concatenate([np.concatenate([p[k] for p in rows[s]]) for s in pr])
-                 for k in ['win'] + [a for a in ALL if all(a in p for s in pr for p in rows[s])]}, 'pooled_prior')
+                 for k in ['win', 'margin'] + [a for a in ALL if all(a in p for s in pr for p in rows[s])]}, 'pooled_prior')
     json.dump(res, open(OUT / 'ms_bench.json', 'w'), indent=1)
 
 

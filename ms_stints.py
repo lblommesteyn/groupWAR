@@ -3,6 +3,7 @@
 Replays v3/nba_build_graphs lineup reconstruction (its period_starters / clock helpers, unchanged) and records per
 stint: lineups, seconds, points, per-team possessions (FGA + 0.44 FTA - OREB + TOV) and per-player usage
 [FGA, FTA, TOV]. Event types: 1 made FG, 2 missed FG, 3 FT, 4 rebound, 5 turnover, 8 substitution.
+Also per team 3PA/3PM/FTM and per shooter [3PA, 3PM, FTA, FTM] for the luck-adjusted target (ms_bench).
 Output (court-model on the PC): results/latent/ms_stints.pkl = {'stints': [...], 'games': {gid: meta}}.
 Usage (PC): python ms_stints.py                       (v3 2019-23 -> ms_stints.pkl)
             python ms_stints.py PBP GAMES OUT.pkl     (e.g. fetch_pbp.py's 2023-25 files)
@@ -22,7 +23,8 @@ OUT = Path(__file__).parent / 'results/latent'
 
 def new_stint(gid, on, h, a, t0, score):
     return dict(game_id=gid, lineup=(tuple(sorted(on[h])), tuple(sorted(on[a]))), t0=t0, t1=t0, score0=score,
-                fga=[0, 0], fta=[0, 0], oreb=[0, 0], tov=[0, 0], use={})
+                fga=[0, 0], fta=[0, 0], oreb=[0, 0], tov=[0, 0], use={},
+                fg3a=[0, 0], fg3m=[0, 0], ftm=[0, 0], shoot={})  # shoot: player -> [3PA, 3PM, FTA, FTM] (luck adjustment)
 
 
 def close(st, t1, score):
@@ -65,12 +67,19 @@ def process(gid, ev_all, h, a):
                 else:
                     continue
             u = st['use'].setdefault(p1, [0, 0, 0]) if p1 and p1 in on.get(t1, []) else [0, 0, 0]
+            desc = (r['homedescription'] if side == 0 else r['visitordescription']) or ''
+            sh = st['shoot'].setdefault(p1, [0, 0, 0, 0]) if p1 else [0, 0, 0, 0]
             if et in (1, 2):
                 st['fga'][side] += 1; u[0] += 1
                 last_miss = side if et == 2 else None
+                if '3PT' in desc:
+                    st['fg3a'][side] += 1; sh[0] += 1
+                    if et == 1:
+                        st['fg3m'][side] += 1; sh[1] += 1
             elif et == 3:
-                st['fta'][side] += 1; u[1] += 1
-                desc = (r['homedescription'] if side == 0 else r['visitordescription']) or ''
+                st['fta'][side] += 1; u[1] += 1; sh[2] += 1
+                if 'MISS' not in desc:
+                    st['ftm'][side] += 1; sh[3] += 1
                 last_miss = side if 'MISS' in desc and r['eventmsgactiontype'] in (10, 12, 15) else None
             elif et == 5:
                 st['tov'][side] += 1; u[2] += 1
