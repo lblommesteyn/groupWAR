@@ -30,7 +30,7 @@ from masked_paths import ROOT
 
 OUT = ROOT / 'results/latent'
 TRK = list(dict.fromkeys(ee.TRK_OFF + ee.TRK_DEF + m2.NEW_OFF + m2.NEW_DEF))
-ARMS = ['trk_prior', 'trk_x', 'trk_both']
+ARMS = ['trk_prior', 'trk_x', 'trk_both', 'trk_prior_l']  # trk_prior_l: tracking prior + half luck-adjusted target (best Phase 1 base)
 BLOCKS = ['2026-02-18', '2026-03-20', '2026-04-19', '2026-05-19']
 MIN_TRK_GAMES = 30
 
@@ -90,11 +90,11 @@ class TData(sp.Data):
 
 
 def fit_arm(Dt, arm, cut, lam):
-    y = Dt.YX if arm in ('trk_x', 'trk_both') else Dt.Y
+    y = Dt.YX if arm in ('trk_x', 'trk_both') else Dt.luck_target(cut, 0.5) if arm in ('trk_prior_l', 'spm_lpit_h') else Dt.Y
     rows = np.flatnonzero(Dt.DAY < cut)
     m = Dt.spm_prior(cut, y)
     info = {}
-    if arm in ('trk_prior', 'trk_both'):
+    if arm in ('trk_prior', 'trk_both', 'trk_prior_l'):
         adj, info = Dt.trk_adjust(cut, y, m); m = m + adj
     th, b = Dt.ridge(rows, y, m, lam, cut)
     return th, b, info
@@ -113,18 +113,21 @@ def main():
         test_rows = np.concatenate([Dt.rows_of[gix[g]] for g in test]).astype(int)
         val_rows = np.flatnonzero((Dt.DAY >= vcut) & (Dt.DAY < cut))
         rowpred = {}
-        for arm in ARMS + ['spm']:
+        for arm in ['trk_prior', 'trk_prior_l', 'spm', 'spm_lpit_h']:  # trk_x / trk_both: done, both hurt
             best = None
             for lam in sp.LAMS:
-                th, b, _ = (fit_arm(Dt, arm, vcut, lam) if arm != 'spm' else (*sp.fit_arm(Dt, 'spm', vcut, lam), {}))
+                th, b, _ = (fit_arm(Dt, arm, vcut, lam) if arm not in ('spm', 'spm_lpit_h') else (*sp.fit_arm(Dt, arm, vcut, lam), {}))
                 x = Dt.margins(th, b, [gix[g] for g in val])
                 cal = LogisticRegression(C=1e4).fit(x[:, None], win(val))
                 l = -np.mean(np.log(np.clip(cal.predict_proba(x[:, None])[np.arange(len(val)), win(val)], 1e-9, 1)))
                 if best is None or l < best[0]:
                     best = (l, lam, cal, th, b)
             _, lam, cal, thv, bv = best
-            th, b, info = (fit_arm(Dt, arm, cut, lam) if arm != 'spm' else (*sp.fit_arm(Dt, 'spm', cut, lam), {}))
-            P[arm] = cal.predict_proba(Dt.margins(th, b, [gix[g] for g in test])[:, None])[:, 1]
+            th, b, info = (fit_arm(Dt, arm, cut, lam) if arm not in ('spm', 'spm_lpit_h') else (*sp.fit_arm(Dt, arm, cut, lam), {}))
+            if arm in ('spm', 'spm_lpit_h'):
+                pass  # keep the Phase-1 game predictions already saved
+            else:
+                P[arm] = cal.predict_proba(Dt.margins(th, b, [gix[g] for g in test])[:, None])[:, 1]
             log[f'{b0}_{arm}'] = dict(lam=lam, **info)
             pv = bv[0] + bv[1] * Dt.H[val_rows] + thv[Dt.O[val_rows]].sum(1) + thv[Dt.n + Dt.D[val_rows]].sum(1)
             pt = b[0] + b[1] * Dt.H[test_rows] + th[Dt.O[test_rows]].sum(1) + th[Dt.n + Dt.D[test_rows]].sum(1)
@@ -152,8 +155,8 @@ def main():
     res = dict(n=int(len(w)), games={}, log=log)
     for k in [a for a in A if a not in ('win', 'margin')]:
         e = dict(auc=float(roc_auc_score(w, A[k])), log_loss=float(ll(A[k]).mean()), margin_corr=float(np.corrcoef(lg(A[k]), M)[0, 1]))
-        for ref in ('spm', 'darko_cal'):
-            if k != ref:
+        for ref in ('spm', 'spm_lpit_h', 'darko_cal'):
+            if k != ref and ref in A:
                 d = ll(A[k]) - ll(A[ref])
                 e[f'd_ll_vs_{ref}'] = [float(x) for x in np.percentile([d[b].mean() for b in bs], [2.5, 97.5])]
                 dc = [np.corrcoef(lg(A[k][b]), M[b])[0, 1] - np.corrcoef(lg(A[ref][b]), M[b])[0, 1] for b in bs[:1000]]
@@ -168,17 +171,17 @@ def main():
     for tgt in ('y', 'yx'):
         y, ww = S[tgt], S['w']
         sst = np.bincount(gi, ww * (y - np.average(y, weights=ww)) ** 2, len(games))
-        sse = {k: np.bincount(gi, ww * (y - S[k]) ** 2, len(games)) for k in ['spm', 'darko'] + ARMS}
+        sse = {k: np.bincount(gi, ww * (y - S[k]) ** 2, len(games)) for k in ['spm', 'spm_lpit_h', 'darko', 'trk_prior', 'trk_prior_l']}
         res['stint'][tgt] = {}
         for k in sse:
             e = dict(r2=float(1 - sse[k].sum() / sst.sum()))
-            for ref in ('spm', 'darko'):
+            for ref in ('spm', 'spm_lpit_h', 'darko'):
                 if k != ref:
                     dd = [(sse[ref][b].sum() - sse[k][b].sum()) / sst[b].sum() for b in bsg]
                     e[f'd_r2_vs_{ref}'] = [float(np.percentile(dd, 2.5)), float(np.percentile(dd, 97.5))]
             res['stint'][tgt][k] = e
         print(f'stint R2 vs {tgt}:', ' '.join(f"{k} {v['r2']:.5f}" for k, v in res['stint'][tgt].items()),
-              '| trk_both - spm', np.round(res['stint'][tgt]['trk_both']['d_r2_vs_spm'], 5), '| spm - darko', np.round(res['stint'][tgt]['spm']['d_r2_vs_darko'], 5))
+              '| trk_prior_l - darko', np.round(res['stint'][tgt]['trk_prior_l']['d_r2_vs_darko'], 5), '- lpit_h', np.round(res['stint'][tgt]['trk_prior_l']['d_r2_vs_spm_lpit_h'], 5), '| spm - darko', np.round(res['stint'][tgt]['spm']['d_r2_vs_darko'], 5))
     json.dump(res, open(OUT / 'ms_trk.json', 'w'), indent=1)
 
 
