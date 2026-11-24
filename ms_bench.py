@@ -171,7 +171,8 @@ def summary():
     rows = defaultdict(list)
     for f in sorted(OUT.glob('msb_*.npz')):
         rows[int(f.name.split('_')[1])].append(dict(np.load(f)))
-    ALL = ['additive', 'usage', 'prior_add', 'prior_usage', 'rapm', 'spm_prior', 'spm', 'spm_luck', 'spm_lpit', 'spm_lpit_h', 'darko_cal', 'blend', 'blend_prior']
+    ALL = ['additive', 'usage', 'prior_add', 'prior_usage', 'rapm', 'spm_prior', 'spm', 'spm_luck', 'spm_lpit', 'spm_lpit_h',
+           'spm_bio', 'spm_sq', 'kal', 'kal_bio', 'kal_sq', 'kal_sq_fitr', 'kal_sq_fitg', 'darko_cal', 'blend', 'blend_prior']
     ll = lambda w, p: -(w * np.log(np.clip(p, 1e-6, 1)) + (1 - w) * np.log(np.clip(1 - p, 1e-6, 1)))
     rng = np.random.default_rng(0)
     res = {}

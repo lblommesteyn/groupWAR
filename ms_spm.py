@@ -38,7 +38,8 @@ K3, KFT = 300.0, 100.0  # pseudo-attempts for shooter 3P% / FT%
 VAL_DAYS = 30
 BOX = ['pts', 'fga', 'fg3a', 'fta', 'oreb', 'dreb', 'ast', 'stl', 'blk', 'tov', 'pf']
 SC = 1000.0       # intercept columns scaled so the ridge penalty on them is negligible
-ARMS = ['rapm', 'spm_prior', 'spm', 'spm_luck', 'spm_lpit', 'spm_lpit_h']  # lpit: point-in-time luck (full / half)
+ARMS = ['rapm', 'spm_prior', 'spm', 'spm_luck', 'spm_lpit', 'spm_lpit_h',  # lpit: point-in-time luck (full / half)
+        'spm_bio', 'spm_sq']  # bio: + draft/physical prior; sq: + shot-quality luck target (half strength)
 
 
 def dnum(s):
@@ -70,6 +71,7 @@ class Data:
         O, D, H, Y, YL, W, GI, DAY = [], [], [], [], [], [], [], []
         SR, SP, S3, SF = [], [], [], []          # per row: on-court offense shooter attempts (row, player, 3PA, FTA)
         UNA3, UNAF, M3, MFT, EV = [], [], [], [], []  # unattributed attempts, makes; EV: (player, day, 3PA, 3PM, FTA, FTM)
+        SHOT = []  # (row, player index or -1, distance, is3, made, class) for every field goal (shot-quality target)
         self.gids = sorted(G, key=lambda g: (G[g]['date'], g)); gix = {g: i for i, g in enumerate(self.gids)}
         for s in S:
             g = s['game_id']; se = G[g]['season']; dy = dnum(G[g]['date'])
@@ -92,6 +94,8 @@ class Data:
                 pts = s['pts'][k]
                 O.append([self.pix[p] for p in off]); D.append([self.pix[p] for p in de]); H.append(1 - k)
                 Y.append(100 * pts / poss); YL.append(100 * (pts - 3 * (s['fg3m'][k] - e3) - (s['ftm'][k] - eft)) / poss)
+                for (sp_, dist, i3, mk, cl) in s.get('shots', ([], []))[k]:
+                    SHOT.append((len(W), self.pix.get(sp_, -1), dist, i3, mk, cl))  # row index (W not yet appended)
                 W.append(poss); GI.append(gix[g]); DAY.append(dy)
                 UNA3.append(s['fg3a'][k] - a3); UNAF.append(s['fta'][k] - aft); M3.append(s['fg3m'][k]); MFT.append(s['ftm'][k])
             for p, v in s['shoot'].items():
@@ -104,6 +108,9 @@ class Data:
         self.A3 = csr_matrix((S3, (SR, SP)), shape=(m, n)); self.AF = csr_matrix((SF, (SR, SP)), shape=(m, n))
         self.UNA3, self.UNAF, self.M3, self.MFT = map(np.array, (UNA3, UNAF, M3, MFT))
         self.EV = np.array(EV, float)
+        self.SHOT = np.array(SHOT, np.int64).reshape(-1, 6)
+        self.SHOT_DAY = self.DAY[self.SHOT[:, 0]] if len(self.SHOT) else np.zeros(0)
+        self.FTM_ROW = self.MFT  # free-throw part handled as in luck_target
         cols = np.concatenate([self.O, self.D + n], 1)
         self.X = csr_matrix((np.ones(m * 10), (np.repeat(np.arange(m), 10), cols.ravel())), shape=(m, 2 * n))
         self.rows_of = defaultdict(list)
@@ -129,6 +136,68 @@ class Data:
             e3 = self.A3 @ r3 + self.UNA3 * self.L3; ef = self.AF @ rf + self.UNAF * self.LFT
             self._lc[key] = self.Y - alpha * 100 * (3 * (self.M3 - e3) + (self.MFT - ef)) / self.W
         return self._lc[key]
+
+    def shotq_target(self, cut, alpha=0.5, k_cell=50.0, k_sh=(400.0, 300.0)):
+        """Points per 100 with alpha x (shot-making luck) removed, all field goals and free throws.
+
+        Expected points of each field goal = value x (make rate of its (distance, 2/3, shot class) cell, shrunk to its
+        distance, + the shooter's shrunk make-rate residual for 2s / 3s); free throws as luck_target. Every rate uses
+        only shots before `cut` (point-in-time)."""
+        key = ('sq', cut, alpha)
+        if not hasattr(self, '_lc'):
+            self._lc = {}
+        if key in self._lc:
+            return self._lc[key]
+        self._lc = {k: v for k, v in self._lc.items() if k[1] >= cut - 40}
+        S = self.SHOT; past = self.SHOT_DAY < cut
+        dist = np.minimum(S[:, 2], 35); i3, mk, cl = S[:, 3], S[:, 4].astype(float), S[:, 5]
+        dcell = dist * 2 + i3; cell = dcell * 16 + cl
+        nd, md = np.bincount(dcell[past], minlength=72), np.bincount(dcell[past], mk[past], 72)
+        g = md.sum() / max(nd.sum(), 1)
+        rd = (md + 20 * g) / (nd + 20)
+        nc, mc = np.bincount(cell[past], minlength=72 * 16), np.bincount(cell[past], mk[past], 72 * 16)
+        rc = (mc + k_cell * np.repeat(rd, 16)) / (nc + k_cell)
+        xp = rc[cell]
+        sk = np.zeros(len(S))
+        pl = S[:, 1]
+        for t, K in ((0, k_sh[0]), (1, k_sh[1])):
+            sel = past & (i3 == t) & (pl >= 0)
+            res = np.bincount(pl[sel], (mk - xp)[sel], self.n); cnt = np.bincount(pl[sel], minlength=self.n)
+            skill = res / (cnt + K)
+            m = (i3 == t) & (pl >= 0)
+            sk[m] = skill[pl[m]]
+        exp_pts = (2 + i3) * np.clip(xp + sk, 0.01, 0.99)
+        fg_luck = np.bincount(S[:, 0], (2 + i3) * mk - exp_pts, len(self.Y))
+        e = self.EV[self.EV[:, 1] < cut]; p = e[:, 0].astype(int)
+        cf = [np.bincount(p, e[:, j], self.n) for j in (4, 5)]
+        rf = (cf[1] + KFT * self.LFT) / (cf[0] + KFT)
+        ef = self.AF @ rf + self.UNAF * self.LFT
+        self._lc[key] = self.Y - alpha * 100 * (fg_luck + (self.MFT - ef)) / self.W
+        return self._lc[key]
+
+    def bio_features(self, cut, mins):
+        """Pre-NBA / physical features (age, height, weight, wingspan, draft pick, years since draft), plus the same
+        features x exp(-minutes/1000) so they can matter more for players the box score knows little about."""
+        if not hasattr(self, '_bio'):
+            b = pd.read_parquet(OUT / 'bio.parquet')
+            b = b[b.player_id.isin(self.pix)].copy()
+            b['ws'] = b.wingspan.fillna(b.height * 1.055)
+            b['ws_known'] = b.wingspan.notna().astype(float)
+            b['lpick'] = np.log(b.draft_pick.fillna(75).clip(1, 75))
+            self._bio = {pid: g.sort_values('season') for pid, g in b.groupby('player_id')}
+        d = date.fromordinal(int(cut)); se = d.year + (d.month >= 8)
+        cols = ['age', 'height', 'weight', 'ws', 'ws_known', 'lpick', 'undrafted', 'yrs']
+        B = np.full((self.n, len(cols)), np.nan)
+        for pid, g in self._bio.items():
+            r = g[g.season <= se]
+            r = r.iloc[-1] if len(r) else g.iloc[0]
+            age = r.age + (se - r.season)
+            yrs = se - r.draft_year if r.draft_year == r.draft_year else np.nan
+            B[self.pix[pid]] = [age, r.height, r.weight, r.ws, r.ws_known, r.lpick, r.undrafted, yrs]
+        mu = np.nanmean(B, 0)
+        B = np.where(np.isnan(B), mu, B)
+        u = np.exp(-mins / 1000.0)[:, None]
+        return np.column_stack([B, B * u, u])
 
     def box_features(self, cut):
         """Decayed box features per player from games before day `cut`. Returns F (n x f), decayed minutes."""
@@ -156,22 +225,26 @@ class Data:
         sol = lsqr(hstack([A, csr_matrix(C)]).tocsr(), sw * r, damp=np.sqrt(lam), atol=1e-7, btol=1e-7, iter_lim=2000)[0]
         return m + sol[:2 * self.n], sol[2 * self.n:] * SC
 
-    def spm_prior(self, cut, y):
-        key = (cut, id(y))
+    def spm_prior(self, cut, y, bio=False):
+        key = (cut, id(y), bio)
         if not hasattr(self, '_pc'):
             self._pc = {}
         if key not in self._pc:
             self._pc = {k: v for k, v in self._pc.items() if k[0] >= cut - 40}  # keep this block's cutoffs only
-            self._pc[key] = self._spm_prior(cut, y)
+            self._pc[key] = self._spm_prior(cut, y, bio)
         return self._pc[key]
 
-    def _spm_prior(self, cut, y):
+    def _spm_prior(self, cut, y, bio=False):
         rows = np.flatnonzero(self.DAY < cut)
         th, _ = self.ridge(rows, y, np.zeros(2 * self.n), LAM_TARGET, cut)
         F, mins = self.box_features(cut)
         ok = mins > 50
         mu, sd = F[ok].mean(0), F[ok].std(0) + 1e-9
         Z = (F - mu) / sd; sw = np.minimum(mins[ok], 3000)
+        if bio:  # second stage: bio / draft features fit to what the box model misses (applies to unseen players too)
+            Bf = self.bio_features(cut, mins)
+            bmu, bsd = Bf[ok].mean(0), Bf[ok].std(0) + 1e-9
+            ZB = (Bf - bmu) / bsd
         n = self.n; m = np.zeros(2 * n)
         for blk, sign in ((0, 1), (1, -1)):  # defence target: -d (higher = better)
             t = sign * th[blk * n:(blk + 1) * n]
@@ -179,6 +252,9 @@ class Data:
             pred = reg.predict(Z)
             low = ok & (mins < 300)
             pred[~ok] = np.average(pred[low], weights=np.maximum(mins[low], 1)) if low.any() else 0.0
+            if bio:
+                rb = Ridge(alpha=100.0).fit(ZB[ok], (t - pred)[ok], sample_weight=sw)
+                pred += np.clip(rb.predict(ZB), -3, 3)
             m[blk * n:(blk + 1) * n] = sign * pred
         return m
 
@@ -191,11 +267,16 @@ class Data:
         return out
 
 
+def arm_target(Dt, arm, cut):
+    return (Dt.YL if arm == 'spm_luck' else Dt.luck_target(cut, 1.0) if arm == 'spm_lpit'
+            else Dt.luck_target(cut, 0.5) if arm in ('spm_lpit_h', 'spm_bio') else Dt.shotq_target(cut, 0.5)
+            if arm == 'spm_sq' else Dt.Y)
+
+
 def fit_arm(Dt, arm, cut, lam):
-    y = (Dt.YL if arm == 'spm_luck' else Dt.luck_target(cut, 1.0) if arm == 'spm_lpit'
-         else Dt.luck_target(cut, 0.5) if arm == 'spm_lpit_h' else Dt.Y)
+    y = arm_target(Dt, arm, cut)
     rows = np.flatnonzero(Dt.DAY < cut)
-    m = np.zeros(2 * Dt.n) if arm == 'rapm' else Dt.spm_prior(cut, y)
+    m = np.zeros(2 * Dt.n) if arm == 'rapm' else Dt.spm_prior(cut, y, bio=arm in ('spm_bio', 'spm_sq'))
     if arm == 'spm_prior':
         _, b = Dt.ridge(rows, y, m, 1e9, cut)  # intercepts only
         return m, b

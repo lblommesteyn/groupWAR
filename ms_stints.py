@@ -3,12 +3,13 @@
 Replays v3/nba_build_graphs lineup reconstruction (its period_starters / clock helpers, unchanged) and records per
 stint: lineups, seconds, points, per-team possessions (FGA + 0.44 FTA - OREB + TOV) and per-player usage
 [FGA, FTA, TOV]. Event types: 1 made FG, 2 missed FG, 3 FT, 4 rebound, 5 turnover, 8 substitution.
-Also per team 3PA/3PM/FTM and per shooter [3PA, 3PM, FTA, FTM] for the luck-adjusted target (ms_bench).
+Also per team 3PA/3PM/FTM and per shooter [3PA, 3PM, FTA, FTM] for the luck-adjusted target (ms_bench), and every
+field goal as (shooter, distance ft, is3, made, shot class from the description) for the shot-quality target.
 Output (court-model on the PC): results/latent/ms_stints.pkl = {'stints': [...], 'games': {gid: meta}}.
 Usage (PC): python ms_stints.py                       (v3 2019-23 -> ms_stints.pkl)
             python ms_stints.py PBP GAMES OUT.pkl     (e.g. fetch_pbp.py's 2023-25 files)
 """
-import pickle, sys
+import pickle, re, sys
 from collections import defaultdict
 from pathlib import Path
 
@@ -24,7 +25,22 @@ OUT = Path(__file__).parent / 'results/latent'
 def new_stint(gid, on, h, a, t0, score):
     return dict(game_id=gid, lineup=(tuple(sorted(on[h])), tuple(sorted(on[a]))), t0=t0, t1=t0, score0=score,
                 fga=[0, 0], fta=[0, 0], oreb=[0, 0], tov=[0, 0], use={},
-                fg3a=[0, 0], fg3m=[0, 0], ftm=[0, 0], shoot={})  # shoot: player -> [3PA, 3PM, FTA, FTM] (luck adjustment)
+                fg3a=[0, 0], fg3m=[0, 0], ftm=[0, 0], shoot={},  # shoot: player -> [3PA, 3PM, FTA, FTM] (luck adjustment)
+                shots=([], []))  # per side: (player, distance ft, is3, made, shot class) for the shot-quality target
+
+
+DIST = re.compile(r"(\d+)' ")
+CLASSES = [('dunk', 'Dunk'), ('tip', 'Tip'), ('putback', 'Putback'), ('alley', 'Alley'), ('layup', 'Layup'),
+           ('hook', 'Hook'), ('floating', 'Float'), ('fadeaway', 'Fadeaway'), ('turnaround', 'Turnaround'),
+           ('step', 'Step'), ('pullup', 'Pullup'), ('pull-up', 'Pull-Up'), ('driving', 'Driving'), ('jump', 'Jump')]
+SHOT_CLASS = {k: i + 1 for i, (k, _) in enumerate(CLASSES)}  # 0 = unknown
+
+
+def shot_info(desc):
+    m = DIST.search(desc)
+    d = desc.lower()
+    cls = next((SHOT_CLASS[k] for k, w in CLASSES if w.lower() in d), 0)
+    return (int(m.group(1)) if m else 0), cls
 
 
 def close(st, t1, score):
@@ -72,10 +88,13 @@ def process(gid, ev_all, h, a):
             if et in (1, 2):
                 st['fga'][side] += 1; u[0] += 1
                 last_miss = side if et == 2 else None
-                if '3PT' in desc:
+                is3 = '3PT' in desc
+                if is3:
                     st['fg3a'][side] += 1; sh[0] += 1
                     if et == 1:
                         st['fg3m'][side] += 1; sh[1] += 1
+                dist, cls = shot_info(desc)
+                st['shots'][side].append((p1 or 0, dist, int(is3), int(et == 1), cls))
             elif et == 3:
                 st['fta'][side] += 1; u[1] += 1; sh[2] += 1
                 if 'MISS' not in desc:
