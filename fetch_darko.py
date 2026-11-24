@@ -16,8 +16,12 @@ def decode(payload):
 
 
 def main():
-    G = pickle.load(open(ROOT / 'results/embed/player_games.pkl', 'rb'))
-    pids = sorted({p for d in G.values() for p in d['box']})
+    import sys
+    if len(sys.argv) > 1:  # a file of player ids, one per line (e.g. every player in the multi-season stints)
+        pids = sorted({int(l) for l in open(sys.argv[1]) if l.strip()})
+    else:
+        G = pickle.load(open(ROOT / 'results/embed/player_games.pkl', 'rb'))
+        pids = sorted({p for d in G.values() for p in d['box']})
     res = json.load(open(OUT)) if OUT.exists() else {}
     for k, p in enumerate(pids):
         if str(p) in res:
