@@ -47,9 +47,12 @@ def dnum(s):
 
 
 class Data:
-    def __init__(self):
+    def __init__(self, live=False):
         S, G = [], {}
-        for f in ('ms2_stints.pkl', 'ms2_stints_2325.pkl', 'ms2_stints_2526.pkl'):
+        # live=True adds the current season (live_forecast.py); backtests keep the fixed 2020-26 set so their
+        # on-disk caches (indexed by player order) stay valid
+        files = ('ms2_stints.pkl', 'ms2_stints_2325.pkl', 'ms2_stints_2526.pkl') + (('ms2_stints_2627.pkl',) if live else ())
+        for f in files:
             d = pickle.load(open(OUT / f, 'rb')); S += d['stints']; G.update(d['games'])
         self.G = G
         pids = sorted({p for s in S for side in s['lineup'] for p in side})
