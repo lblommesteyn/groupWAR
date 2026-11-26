@@ -13,4 +13,5 @@ python live_forecast.py --live C:\Users\LukeB\dev\court-live >> logs\daily.log 2
 cd /d C:\Users\LukeB\dev\court-live
 git add forecasts data/darko data/injury
 git -c user.name=lblommesteyn -c user.email=lblommesteyn@icloud.com commit -q -m "forecast %date%" >> ..\court-model\logs\daily.log 2>&1
+git pull --rebase -q >> ..\court-model\logs\daily.log 2>&1
 git push -q >> ..\court-model\logs\daily.log 2>&1
