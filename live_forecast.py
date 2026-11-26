@@ -15,6 +15,7 @@ from datetime import date, datetime, timezone
 from pathlib import Path
 import numpy as np
 
+import injuries as inj
 import ms_spm as sp
 from calibrate_live import our_margin
 from masked_paths import ROOT
@@ -55,8 +56,10 @@ def schedule(day):
     return out
 
 
-def shares(rows, team):
-    t = [(int(r['nba_id']), float(r['x_minutes'] or 0)) for r in rows if r['tm_id'] == team and (r['x_minutes'] or 0) > 0]
+def shares(rows, team, avail=None):
+    a = lambda p: avail.get(p, (None, 1.0))[1] if avail else 1.0
+    t = [(int(r['nba_id']), float(r['x_minutes'] or 0) * a(int(r['nba_id']))) for r in rows if r['tm_id'] == team and (r['x_minutes'] or 0) > 0]
+    t = [(p, m) for p, m in t if m > 0]
     tot = sum(m for _, m in t)
     return [(p, 5 * m / tot) for p, m in t] if tot > 0 else None
 
@@ -65,6 +68,7 @@ def main():
     ap = argparse.ArgumentParser()
     ap.add_argument('--date', default=str(date.today()))
     ap.add_argument('--live', default=r'C:\Users\LukeB\dev\court-live')
+    ap.add_argument('--run', default='am', choices=['am', 'pm'], help='pm: second run before evening tips, latest injury report')
     a = ap.parse_args()
     live = Path(a.live); day = a.date
     cal = json.load(open(OUT / 'live_calib.json'))
@@ -75,38 +79,51 @@ def main():
         print(day, 'no games'); return
     dk, dk_through = darko_table(live / 'data' / 'darko' / f'{day}.json.gz')
     dkx = {int(r['nba_id']): r for r in dk}
+    rep_url, rep = inj.latest(day, save_dir=live / 'data' / 'injury')
+    avail, missed = inj.match(rep, dk)
+    print('injury report', rep_url, len(rep), 'rows', len(avail), 'matched', 'unmatched:', missed, flush=True)
 
     # our ratings: lambda frozen at the most recent backtest block's choice
     last = sorted(OUT.glob('msb_*.npz'), key=lambda f: f.stem.split('_')[2])[-1]
     lam = float(np.load(last)[ARM + '_lam'])
-    Dt = sp.Data(live=True); cut = sp.dnum(day)
-    th, b = sp.fit_arm(Dt, ARM, cut, lam)
-    through = max(Dt.G[g]['date'] for g in Dt.gids if sp.dnum(Dt.G[g]['date']) < cut)
-    np.savez(OUT / f'live_ratings_{day}.npz', pids=np.array(Dt.pids), theta=th, b=b)
+    rf = OUT / f'live_ratings_{day}.npz'
+    if a.run == 'pm' and rf.exists():  # same day: reuse the morning's ratings
+        z = np.load(rf, allow_pickle=True)
+        pix = {int(p): i for i, p in enumerate(z['pids'])}; th, b = z['theta'], z['b']; through = str(z['through'])
+    else:
+        Dt = sp.Data(live=True); cut = sp.dnum(day)
+        th, b = sp.fit_arm(Dt, ARM, cut, lam); pix = Dt.pix
+        through = max(Dt.G[g]['date'] for g in Dt.gids if sp.dnum(Dt.G[g]['date']) < cut)
+        np.savez(rf, pids=np.array(Dt.pids), theta=th, b=b, through=through)
     h = hashlib.sha256(th.tobytes() + np.asarray(b).tobytes()).hexdigest()[:12]
 
+    v = lambda x: -1.0 if x is None else float(x)
+    net = lambda side: sum(w * (v(dkx[p]['o_dpm']) + v(dkx[p]['d_dpm'])) for p, w in side)
     out = []
     for g in games:
         H, A = shares(dk, g['home_id']), shares(dk, g['away_id'])
         if not H or not A:
             out.append({**g, 'skipped': 'no projected minutes'}); continue
-        mo = our_margin(Dt.pix, th, b, (H, A))
-        v = lambda x: -1.0 if x is None else float(x)
-        net = lambda side: sum(w * (v(dkx[p]['o_dpm']) + v(dkx[p]['d_dpm'])) for p, w in side)
-        md = net(H) - net(A)
-        po, pd_ = prob('ours', mo), prob('darko', md)
+        Hi, Ai = shares(dk, g['home_id'], avail) or H, shares(dk, g['away_id'], avail) or A
+        mo, md = our_margin(pix, th, b, (H, A)), net(H) - net(A)
+        mi, mdi = our_margin(pix, th, b, (Hi, Ai)), net(Hi) - net(Ai)
+        po, pd_, poi, pdi = prob('ours', mo), prob('darko', md), prob('ours', mi), prob('darko', mdi)
+        adj = sorted({p for p, _ in H + A if p in avail and avail[p][1] < 1}, key=lambda p: avail[p][1])
         out.append({**g, 'ours_margin': round(float(mo), 3), 'darko_margin': round(float(md), 3),
                     'ours_p': round(po, 4), 'darko_p': round(pd_, 4), 'blend_p': round((po + pd_) / 2, 4),
-                    'home_minutes': H, 'away_minutes': A,
-                    'unrated_by_us': [p for p, _ in H + A if p not in Dt.pix]})
+                    'ours_inj_margin': round(float(mi), 3), 'darko_inj_margin': round(float(mdi), 3),
+                    'ours_inj_p': round(poi, 4), 'darko_inj_p': round(pdi, 4), 'blend_inj_p': round((poi + pdi) / 2, 4),
+                    'injuries': [[p, dkx[p]['player_name'], avail[p][0]] for p in adj],
+                    'home_minutes': H, 'away_minutes': A, 'home_minutes_inj': Hi, 'away_minutes_inj': Ai,
+                    'unrated_by_us': [p for p, _ in H + A if p not in pix]})
     doc = dict(date=day, generated_utc=datetime.now(timezone.utc).isoformat(timespec='seconds'), model=ARM,
                lam=lam, ratings_through=through, ratings_hash=h, darko_ratings_through=dk_through,
-               calibration=cal, games=out)
-    f = live / 'forecasts' / f'{day}.json'; f.parent.mkdir(parents=True, exist_ok=True)
+               calibration=cal, run=a.run, injury_report=rep_url, games=out)
+    f = live / 'forecasts' / (f'{day}.json' if a.run == 'am' else f'{day}-pm.json'); f.parent.mkdir(parents=True, exist_ok=True)
     json.dump(doc, open(f, 'w'), indent=1)
     for g in out:
         if 'ours_p' in g:
-            print(f"{g['code']:>18} ours {g['ours_p']:.3f} ({g['ours_margin']:+.1f})  darko {g['darko_p']:.3f} ({g['darko_margin']:+.1f})")
+            print(f"{g['code']:>18} ours {g['ours_p']:.3f} -> {g['ours_inj_p']:.3f}  darko {g['darko_p']:.3f} -> {g['darko_inj_p']:.3f}  out/limited: {', '.join(n for _, n, _ in g['injuries'][:4])}")
     print('wrote', f, 'ratings through', through, 'darko through', dk_through)
 
 
