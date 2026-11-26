@@ -19,7 +19,7 @@ from pathlib import Path
 
 import numpy as np
 
-ZIP = Path.home() / "Downloads/NBA-2025-26-Available-Tracking.zip"
+from masked_paths import ARCHIVE as ZIP  # TRK_ARCHIVE env selects the season
 OUT = Path(__file__).parent / "results/rapm"
 SPLIT_DATE = "2026-04-15"
 LAMBDAS = [10, 30, 100, 300, 1000, 2000, 3000, 5000, 10000, 30000]

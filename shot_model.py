@@ -11,7 +11,7 @@ from sklearn.ensemble import HistGradientBoostingClassifier
 from sklearn.metrics import log_loss, brier_score_loss, roc_auc_score
 from shot_align import OUT
 
-SPLIT = '2026-04-01'
+SPLIT = __import__('os').environ.get('XFG_SPLIT', '2026-04-01')  # 2026-27 run: XFG_SPLIT=2099-01-01 (cross-fit every game)
 ACTIONS = ['driving', 'pullup', 'running', 'floating', 'step back', 'turnaround', 'fadeaway', 'cutting',
            'finger roll', 'tip', 'putback', 'reverse', 'alley oop', 'bank', 'hook', 'dunk', 'layup']
 SUBTYPES = ['Jump Shot', 'Layup', 'DUNK', 'Hook']

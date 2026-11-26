@@ -7,7 +7,8 @@ import zipfile
 import numpy as np
 
 ROOT = Path(__file__).parent
-ARCHIVE = Path.home()/'Downloads/NBA-2025-26-Available-Tracking.zip'
+import os
+ARCHIVE = Path(os.environ.get('TRK_ARCHIVE', Path.home()/'Downloads/NBA-2025-26-Available-Tracking.zip'))
 SAMPLES = 300
 
 
