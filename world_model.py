@@ -29,6 +29,10 @@ STEPS, BATCH, FRAMES = 12000, 192, 6
 # live-play frames only (dead ball = shot clock frozen over the last two frames). Neither set = the original model.
 MIX = int(os.environ.get('WM_MIX', '1')); LIVE = os.environ.get('WM_LIVE') == '1'
 STEPS = int(os.environ.get('WM_STEPS', STEPS))
+# WM_HIER=1: hierarchical conditioning. Team scheme = team (across seasons) + team-season deviation, each with a learned
+# spread sigma that shrinks it toward the level above; plus a defender term (his habit) with its own learned spread,
+# dropped with probability P_DROP_PLAYER in training so one model gives three readouts: league, scheme, scheme+player.
+HIER = os.environ.get('WM_HIER') == '1'; P_DROP_PLAYER = 0.5; HPEN = 1e-7; N_TEAM = 1; N_DEF = 1
 RIM = 41.75
 
 
@@ -56,6 +60,11 @@ def load():
     ts = sorted({(int(t), int(s)) for t, s in zip(out['def_team'], out['season'])})
     tix = {k: i + 1 for i, k in enumerate(ts)}
     out['ts'] = np.array([tix[(int(t), int(s))] for t, s in zip(out['def_team'], out['season'])])
+    global N_TEAM, N_DEF
+    teams = {t: i + 1 for i, t in enumerate(sorted(set(int(t) for t in out['def_team'])))}
+    out['tm'] = np.array([teams[int(t)] for t in out['def_team']]); N_TEAM = len(teams) + 1
+    pids = {p: i + 1 for i, p in enumerate(sorted(set(int(p) for p in out['deff'].ravel())))}
+    out['df'] = np.vectorize(lambda p: pids[int(p)])(out['deff']); N_DEF = len(pids) + 1
     return out, len(ts) + 1
 
 
@@ -69,8 +78,28 @@ class Net(nn.Module):
         self.zenc = enc(2); self.zgru = nn.GRU(D, D, batch_first=True, bidirectional=True)
         self.zhead = nn.Linear(2 * D, 2 * ZD)
         self.tse = nn.Embedding(n_ts, TD); nn.init.zeros_(self.tse.weight)
-        self.cond = nn.Linear(ZD + TD, D); self.nocond = nn.Parameter(torch.zeros(D))
+        if HIER:
+            self.team = nn.Embedding(N_TEAM, TD); nn.init.zeros_(self.team.weight)
+            self.dfe = nn.Embedding(N_DEF, TD); nn.init.zeros_(self.dfe.weight)
+            self.ls = nn.Parameter(torch.full((3,), -1.0))       # log sigma: team, team-season, defender
+        self.cond = nn.Linear(ZD + TD + (TD if HIER else 0), D); self.nocond = nn.Parameter(torch.zeros(D))
         self.out = nn.Sequential(nn.Linear(D, D), nn.GELU(), nn.Linear(D, 3 if MIX == 1 else 4 * MIX))
+
+    def teamvec(self, TS, TM):
+        return self.tse(TS) + self.team(TM) if HIER else self.tse(TS)
+
+    def condvec(self, z, TS, TM, pv):
+        parts = [z, self.teamvec(TS, TM)] + ([pv] if HIER else [])
+        return self.cond(torch.cat(parts, -1))
+
+    def prior(self):
+        # Gaussian hierarchy: each level's rows ~ N(level above = 0 after the sum, sigma^2); MAP penalty with learned sigma
+        if not HIER:
+            return torch.zeros((), device=self.tse.weight.device)
+        pen = 0.0
+        for E, ls in ((self.team.weight, self.ls[0]), (self.tse.weight, self.ls[1]), (self.dfe.weight, self.ls[2])):
+            pen = pen + (E ** 2).sum() / (2 * torch.exp(2 * ls)) + E.numel() * ls
+        return pen
 
     def tokens(self, pos, vel, ball, hold, desc, others, glob):
         # pos/vel [B, 10, 2]; others: bool mask of defenders to include [B, 5]
@@ -128,7 +157,8 @@ def tens(Dd, idx):
     ok = torch.isfinite(P).all(-1).all(-1) & (torch.arange(T).unsqueeze(0) < L.unsqueeze(1))
     P = torch.nan_to_num(P); V = torch.nan_to_num(V).clamp(-30, 30); Bl = torch.nan_to_num(Bl)
     De = torch.tensor(Dd['desc'][idx]); TS = torch.tensor(Dd['ts'][idx])
-    return [x.to(DEV) for x in (P, V, Bl, Ho, De, G, L, ok, TS, LV)]
+    TM = torch.tensor(Dd['tm'][idx]); DF = torch.tensor(Dd['df'][idx])
+    return [x.to(DEV) for x in (P, V, Bl, Ho, De, G, L, ok, TS, LV, TM, DF)]
 
 
 def mix_nll(y, m, lv, logit):
@@ -137,7 +167,7 @@ def mix_nll(y, m, lv, logit):
 
 
 def step(net, batch, train=True):
-    P, V, Bl, Ho, De, G, L, ok, TS, LV = batch
+    P, V, Bl, Ho, De, G, L, ok, TS, LV, TM, DF = batch
     if LIVE:
         ok = ok & LV
     B_ = P.shape[0]
@@ -145,7 +175,10 @@ def step(net, batch, train=True):
     mu, lv = net.scheme(P, V, Bl, Ho, De, G, L, k)
     z = mu + torch.randn_like(mu) * (0.5 * lv).exp() if train else mu
     kl = 0.5 * (mu ** 2 + lv.exp() - 1 - lv).sum(-1).mean()
-    cond = net.cond(torch.cat([z, net.tse(TS)], -1))
+    pv = net.dfe(DF[torch.arange(B_, device=DEV), k]) if HIER else None
+    if HIER and train:
+        pv = pv * (torch.rand(B_, 1, device=DEV) >= P_DROP_PLAYER).float()
+    cond = net.condvec(z, TS, TM, pv)
     if train:
         drop = torch.rand(B_, device=DEV) < P_DROP
         cond = torch.where(drop.unsqueeze(-1), net.nocond.expand_as(cond), cond)
@@ -160,7 +193,7 @@ def step(net, batch, train=True):
     y = sel(P)[torch.arange(len(kk), device=DEV), 5 + kk]
     valid = sel(ok.float())
     nll = (mix_nll(y, m, lvar, logit) * valid).sum() / valid.sum().clamp(min=1)
-    return nll + BETA * kl, nll.item(), kl.item()
+    return nll + BETA * kl + HPEN * net.prior(), nll.item(), kl.item()
 
 
 @torch.no_grad()
@@ -169,12 +202,14 @@ def predict(net, Dd, idx):
     net.eval(); out = []; zs = []
     for s in range(0, len(idx), 64):
         b = idx[s:s + 64]
-        P, V, Bl, Ho, De, G, L, ok, TS, LV = tens(Dd, b)
+        P, V, Bl, Ho, De, G, L, ok, TS, LV, TM, DF = tens(Dd, b)
         B_, T = P.shape[:2]
         for k in range(5):
             kk = torch.full((B_,), k, device=DEV)
             mu, _ = net.scheme(P, V, Bl, Ho, De, G, L, kk)
-            c_s = net.cond(torch.cat([mu, net.tse(TS)], -1)); c_b = net.nocond.expand_as(c_s)
+            zero_p = torch.zeros(B_, TD, device=DEV) if HIER else None
+            c_s = net.condvec(mu, TS, TM, zero_p); c_b = net.nocond.expand_as(c_s)          # scheme (no player term), league
+            c_p = net.condvec(mu, TS, TM, net.dfe(DF[:, k])) if HIER else None            # scheme + this defender's habit
             fl = lambda X: X.reshape(B_ * T, *X.shape[2:])
             kf = kk.unsqueeze(1).expand(B_, T).reshape(-1)
             Dx = De.unsqueeze(1).expand(B_, T, 5, 11).reshape(-1, 5, 11)
@@ -191,6 +226,10 @@ def predict(net, Dd, idx):
                             mb=mb[sel].cpu().numpy().astype(np.float16), lb=lb[sel].cpu().numpy().astype(np.float16),
                             nll_s=mix_nll(y, Ms, Ls, Gs)[sel].cpu().numpy().astype(np.float16), nll_b=mix_nll(y, Mb, Lb, Gb)[sel].cpu().numpy().astype(np.float16),
                             live=fl(LV)[sel].cpu().numpy().astype(np.int8)))
+            if HIER:
+                Mp, Lp, Gp = net.decode(fl(P), fl(V), fl(Bl), fl(Ho), Dx, fl(G), kf, c_p.unsqueeze(1).expand(B_, T, D).reshape(-1, D))
+                i_p = Gp.argmax(-1)
+                out[-1].update(mp=Mp[ar, i_p][sel].cpu().numpy().astype(np.float16), nll_p=mix_nll(y, Mp, Lp, Gp)[sel].cpu().numpy().astype(np.float16))
     res = {key: np.concatenate([o[key] for o in out]) for key in out[0]}
     Z = np.zeros((len(Dd['gid']), 5, ZD), np.float16)
     for b, k, z in zs:
@@ -210,7 +249,9 @@ def main():
     preds = []
     for f in (0, 1):
         tr = np.flatnonzero(fold != f); te = np.flatnonzero(fold == f)
-        va = rng.choice(te, 3000, replace=False)
+        global HPEN
+        HPEN = 1.0 / float(Dd['length'][tr].sum() * 5)        # MAP: prior once over all training defender-frames
+        va = rng.choice(te, min(3000, len(te)), replace=False)
         net = Net(n_ts).to(DEV); opt = torch.optim.AdamW(net.parameters(), 3e-4, weight_decay=1e-4)
         sched = torch.optim.lr_scheduler.OneCycleLR(opt, 1e-3, total_steps=STEPS)
         t0 = time.time()
@@ -228,6 +269,8 @@ def main():
         e_s = np.hypot(*(p['y'].astype(float) - p['ms'].astype(float)).T); e_b = np.hypot(*(p['y'].astype(float) - p['mb'].astype(float)).T)
         print(f'fold {f}: held-out mean error scheme {e_s.mean():.2f} ft, baseline {e_b.mean():.2f} ft', flush=True)
     P = {k: np.concatenate([p[k] for p in preds]) for k in preds[0]}
+    if HIER:
+        print('learned spreads (sigma): team, team-season, defender', np.exp(net.ls.detach().cpu().numpy()).round(4), flush=True)
     meta = {k: Dd[k] for k in ('gid', 'date', 'season', 'off', 'deff', 'off_team', 'def_team', 'ts')}
     np.savez_compressed(OUTDIR / 'pred.npz', **P, z=Zall, fold=fold, **{'meta_' + k: v for k, v in meta.items()})
     print('saved', len(P['y']), 'defender-frames', flush=True)
