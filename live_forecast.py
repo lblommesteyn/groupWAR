@@ -1,4 +1,5 @@
-"""Daily pregame forecasts for the live head-to-head: our frozen model (spm_lpit_h) against DARKO.
+"""Daily pregame forecasts for the live head-to-head: DUNCAN (Daily-Updated, Noise-Cancelled Adjusted Net; code arm
+spm_lpit_h) against DARKO.
 
 Both models get the same playing time: DARKO's own projected minutes (x_minutes) and team assignments from its
 daily ratings table, normalised to 5 players on court. So the comparison is ratings against ratings.

@@ -1,4 +1,4 @@
-"""Fluid archetypes: cluster every (player, half-court possession) into an offensive and a defensive archetype, then
+"""BORIS (Blended Occupation of Roles, In Sequence) fluid archetypes: cluster every (player, half-court possession) into an offensive and a defensive archetype, then
 describe each player as a mix that moves with context.
 
 Input results/archetypes/poss_{2026,2027}.npz (archetypes.py). Features are standardised (touches clipped at 3,
