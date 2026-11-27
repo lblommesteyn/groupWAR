@@ -1,6 +1,6 @@
-"""Does DRAYMOND (world_model.py) predict defense beyond DUNCAN? A defensive-prior test like ms_trk2.
+"""Does BOWEN (formerly DRAYMOND) (world_model.py) predict defense beyond DUNCAN? A defensive-prior test like ms_trk2.
 
-At each cutoff inside the tracked seasons, per defender, from DRAYMOND frames of games BEFORE the cutoff only:
+At each cutoff inside the tracked seasons, per defender, from BOWEN (formerly DRAYMOND) frames of games BEFORE the cutoff only:
   exec_depth (signed distance to rim vs scheme spot), exec_ft (distance to scheme spot), scheme_depth, and the
   same split by situation (defender within 12 ft of the rim at the scheme spot vs outside).
 Prior adjustment: RidgeCV of (plain RAPM defense - box prior defense) on those features, weights min(frames/2500, 1)

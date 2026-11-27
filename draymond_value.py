@@ -1,4 +1,4 @@
-"""DRAYMOND value: what do execution gaps cost in points?
+"""BOWEN (formerly DRAYMOND) value: what do execution gaps cost in points?
 
 1. Shot timestamps: for every aligned shot (results/shots/alignment.jsonl, both seasons) the release timestamp from
    the game's tracking frames (shot_align.load_frames, the index the alignment used).

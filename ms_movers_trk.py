@@ -1,9 +1,9 @@
-"""Movers with tracking: replace DUNCAN-2's uniform mover pull with a per-player pull set by BORIS and DRAYMOND.
+"""Movers with tracking: replace DUNCAN-2's uniform mover pull with a per-player pull set by BORIS and BOWEN.
 
 DUNCAN-2 pulls every player who changed teams halfway to his box prior: theta <- m + 0.5 (theta - m).
-DRAYMOND found that a defender's scheme follows the team and his execution follows him; BORIS gives each player's
+BOWEN found that a defender's scheme follows the team and his execution follows him; BORIS gives each player's
 offensive role mix. So the pull should depend on how different the new context is:
-  defense   scheme change   ds_i = | S(new team) - S(old team) |, S = the team's mean DRAYMOND scheme depth shift
+  defense   scheme change   ds_i = | S(new team) - S(old team) |, S = the team's mean BOWEN scheme depth shift
                             (scheme spot minus league-baseline spot, distance to rim, ft), from its possessions in the
                             365 days before the cutoff.
   offense   role crowding   dr_i = | p_i . occ(new) - p_i . occ(old) |, p_i = his BORIS offensive mix from months
@@ -14,7 +14,7 @@ Per event, z-score each among the movers who have it (others z = 0), then
 so the average pull stays 0.5 and only its allocation across movers changes. b = 0 is DUNCAN-2.
 Pre-declared primary arm: b_off = b_def = 0.15. Negative b (pull LESS when the context changes more) is the
 placebo direction. Events: the two cutoffs with tracking before them, 2026 deadline and 2026 offseason.
-Caveats: DRAYMOND's network was cross-fitted on both seasons, so its scheme representation saw post-cutoff games
+Caveats: BOWEN's network was cross-fitted on both seasons, so its scheme representation saw post-cutoff games
 (team scheme values used here are pre-cutoff only); two events, so this is a small test.
 Metric: stint R2 on post-cutoff stints (ms_shrink_d2 harness: linear map fit on the 30 days before the cutoff),
 all stints and stints with a mover; 95% CI vs DUNCAN-2 by resampling games.

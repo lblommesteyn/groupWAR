@@ -1,4 +1,4 @@
-"""DRAYMOND decomposition checks, from results/world/pred.npz (world_model.py, cross-fitted).
+"""BOWEN (formerly DRAYMOND) decomposition checks, from results/world/pred.npz (world_model.py, cross-fitted).
 
 Per defender-frame: baseline spot mb (league), scheme spot ms (league + his team's scheme), actual y.
   scheme shift  = ms - mb       (what the scheme asks for beyond the league norm)
