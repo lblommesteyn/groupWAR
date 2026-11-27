@@ -1,15 +1,15 @@
 {
  "provenance": {
-  "revision": "a8a1ec8dc173f99551b3bed66040b89134b2ac4d",
+  "revision": "7ed37e3459e35690f06f9a409d8592e3b428325e",
   "script": "iggy_minutes.py",
-  "script_sha256": "7a66336cdd4f5e60",
-  "run_utc": "2026-11-27T08:17:34+00:00",
+  "script_sha256": "9c8abd212ff1e36c",
+  "run_utc": "2026-11-27T18:13:57+00:00",
   "data": [
    {
     "path": "results/latent/gamelogs.parquet",
-    "bytes": 4225056,
-    "mtime": "2026-11-27T06:15:15+00:00",
-    "sha256_first_mib": "d5c5085ab8a797da"
+    "bytes": 4224343,
+    "mtime": "2026-11-27T16:00:18+00:00",
+    "sha256_first_mib": "c0efcc1c2a4ebe14"
    },
    {
     "path": "results/latent/ms2_stints.pkl",
@@ -32,7 +32,7 @@
    {
     "path": "results/latent/ms2_stints_2627.pkl",
     "bytes": 4305228,
-    "mtime": "2026-11-26T21:23:22+00:00",
+    "mtime": "2026-11-27T16:00:22+00:00",
     "sha256_first_mib": "5cdde2bf900ad0c7"
    }
   ]
@@ -41,7 +41,36 @@
   "cap": 44.0,
   "rotation": ">= 10 min over last 10 team games",
   "candidates": "played for team in prior 30 days",
-  "split": "train <=2024, validate 2025, test 2026-2027 (season end years)"
+  "split": "train <=2024, validate 2025, test 2026-2027 (season end years)",
+  "evaluation": "conditional on realised rotation absences; NOT end-to-end pregame",
+  "benchmark_before": "2026-11-27",
+  "role_scaler": {
+   "fit_before": "2024-08-01",
+   "mean": [
+    15.525543020527268,
+    12.41123783322343,
+    4.905396690795607,
+    3.0657988473968873,
+    1.6572072722998523,
+    5.019875733211369,
+    3.4081887057199842,
+    1.1160966425070227,
+    0.7625509003854418,
+    1.9066447697151543
+   ],
+   "sd": [
+    5.0081577852151336,
+    3.5721853920542537,
+    2.7067982642117063,
+    1.8410041815613094,
+    1.2837983747957726,
+    1.9882026556048442,
+    2.0084084861586384,
+    0.45433291293217803,
+    0.665803976186904,
+    0.7920937065920122
+   ]
+  }
  },
  "rows": {
   "train": 158970,
@@ -64,8 +93,8 @@
     "rmse": 5.219
    },
    "B3": {
-    "mae": 3.812,
-    "rmse": 5.221
+    "mae": 3.811,
+    "rmse": 5.219
    }
   },
   "single": {
@@ -83,8 +112,8 @@
     "rmse": 5.904
    },
    "B3": {
-    "mae": 4.333,
-    "rmse": 5.888
+    "mae": 4.334,
+    "rmse": 5.891
    }
   },
   "multi": {
@@ -102,8 +131,8 @@
     "rmse": 7.378
    },
    "B3": {
-    "mae": 5.509,
-    "rmse": 7.351
+    "mae": 5.508,
+    "rmse": 7.343
    }
   }
  },
@@ -142,8 +171,8 @@
     "rmse": 6.124
    },
    "B3": {
-    "mae": 4.509,
-    "rmse": 6.134
+    "mae": 4.506,
+    "rmse": 6.132
    }
   },
   "multi": {
@@ -161,12 +190,13 @@
     "rmse": 7.405
    },
    "B3": {
-    "mae": 5.581,
-    "rmse": 7.391
+    "mae": 5.586,
+    "rmse": 7.396
    }
   }
  },
  "selected": "B3",
+ "working_baseline": "B2",
  "test_team_game_abs_error_sum": {
   "B0": {
    "single": 82.86,
@@ -181,15 +211,15 @@
    "multi": 74.8
   },
   "B3": {
-   "single": 66.22,
-   "multi": 74.77
+   "single": 66.18,
+   "multi": 74.84
   }
  },
  "mae_B3_minus_B2_test_absence": {
-  "mean": 0.0015,
+  "mean": 0.0029,
   "ci": [
-   -0.007,
-   0.0101
+   -0.0062,
+   0.0118
   ]
  },
  "mae_B2_minus_B1_test_absence": {
@@ -200,67 +230,73 @@
   ]
  },
  "mae_B3_minus_B0_test_absence": {
-  "mean": -0.9907,
+  "mean": -0.9892,
   "ci": [
-   -1.0518,
-   -0.9309
+   -1.051,
+   -0.9282
   ]
  },
  "team_forecast": {
   "calibration": "rolling within 2025-26 (fit on earlier blocks only)",
   "games_total": 1004,
+  "evaluation": "conditional on realised rotation absences; NOT end-to-end pregame",
+  "selected_model": "B3",
+  "working_baseline": "B2",
   "games_tested": 822,
   "naive": 0.58849,
   "B0": 0.57718,
-  "iggy": 0.57084,
+  "B2": 0.57086,
+  "B3": 0.57074,
+  "iggy": 0.57074,
   "realised_DIAGNOSTIC": 0.5741,
   "iggy_minus_B0": {
-   "mean": -0.00634,
+   "mean": -0.00644,
    "ci": [
-    -0.01084,
-    -0.00187
+    -0.01091,
+    -0.00192
+   ]
+  },
+  "B2_minus_B0": {
+   "mean": -0.00632,
+   "ci": [
+    -0.01097,
+    -0.00174
+   ]
+  },
+  "B3_minus_B0": {
+   "mean": -0.00644,
+   "ci": [
+    -0.01087,
+    -0.00176
+   ]
+  },
+  "B3_minus_B2": {
+   "mean": -0.00012,
+   "ci": [
+    -0.00072,
+    0.00051
    ]
   },
   "iggy_minus_naive": {
-   "mean": -0.01766,
+   "mean": -0.01775,
    "ci": [
-    -0.02768,
-    -0.00786
+    -0.02735,
+    -0.00831
    ]
   },
   "B0_minus_naive": {
    "mean": -0.01131,
    "ci": [
-    -0.01972,
-    -0.00288
+    -0.01971,
+    -0.00344
    ]
   },
   "realised_DIAGNOSTIC_minus_iggy": {
-   "mean": 0.00327,
+   "mean": 0.00336,
    "ci": [
-    -0.00236,
-    0.00957
+    -0.00273,
+    0.00935
    ]
   }
- },
- "team_forecast_provenance": {
-  "revision": "88d9f530bd2026dd9c2fcb1ee2b6db3d2a3cefde",
-  "script": "iggy_minutes.py",
-  "script_sha256": "7a66336cdd4f5e60",
-  "run_utc": "2026-11-27T08:17:54+00:00",
-  "data": [
-   {
-    "path": "results/iggy/minutes_predictions.parquet",
-    "bytes": 13628620,
-    "mtime": "2026-11-27T08:17:36+00:00",
-    "sha256_first_mib": "408bd9a5eb973870"
-   },
-   {
-    "path": "results/latent/spm_ratings.pkl",
-    "bytes": 1934815,
-    "mtime": "2026-11-24T21:25:34+00:00",
-    "sha256_first_mib": "0be83bf85d49508e"
-   }
-  ]
  }
 }

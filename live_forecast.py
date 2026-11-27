@@ -75,6 +75,10 @@ def main():
     ap.add_argument('--run', default='am', choices=['am', 'pm'], help='pm: second run before evening tips, latest injury report')
     a = ap.parse_args()
     live = Path(a.live); day = a.date
+    f = live / 'forecasts' / (f'{day}.json' if a.run == 'am' else f'{day}-pm.json')
+    if f.exists():
+        print('forecast already exists; preserving original:', f)
+        return
     V = VERSIONS[MODEL_VERSION]
     cal = json.load(open(OUT / V['calib']))
     prob = lambda k, x: float(1 / (1 + np.exp(-(cal[k]['intercept'] + cal[k]['slope'] * x))))
@@ -143,7 +147,8 @@ def main():
                lam=lam, ratings_through=through, ratings_hash=h, darko_ratings_through=dk_through,
                calibration=cal, run=a.run, injury_report=rep_url, games=out)
     f = live / 'forecasts' / (f'{day}.json' if a.run == 'am' else f'{day}-pm.json'); f.parent.mkdir(parents=True, exist_ok=True)
-    json.dump(doc, open(f, 'w'), indent=1)
+    with f.open('x') as handle:   # never overwrite an earlier forecast, including concurrent retries
+        json.dump(doc, handle, indent=1)
     for g in out:
         if 'ours_p' in g:
             print(f"{g['code']:>18} ours {g['ours_p']:.3f} -> {g['ours_inj_p']:.3f}  darko {g['darko_p']:.3f} -> {g['darko_inj_p']:.3f}  out/limited: {', '.join(n for _, n, _ in g['injuries'][:4])}")

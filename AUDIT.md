@@ -1,5 +1,25 @@
 # Evidence audit: DUNCAN, BORIS, BOWEN, IGGY (2026-11-27)
 
+## Follow-up corrections (2026-11-27)
+
+The original audit did not establish that all remaining code was correct. Follow-up inspection found:
+
+- IGGY's role normalization used validation/test feature distributions. It now fits only on training-period
+  vectors; a future-data perturbation regression test protects the boundary. Development data is capped before
+  2026-11-27. The affected benchmark was rerun on the PC; originals were preserved in `review/fixes-20261127/`.
+- IGGY's absence set comes from actual participation. All reported results are **conditional on observed rotation
+  absences**, not end-to-end pregame forecasts. This limitation is not repaired by merely relabelling: an actual
+  pregame availability evaluation still requires archived inputs.
+- The published team-forecast gain was for selected B3, although B2 was the working baseline. Both are now scored
+  separately: B2 0.57086 vs B0 0.57718 (difference CI −0.01097..−0.00174); B3 0.57074, with no clear gain over B2.
+  See IGGY_MINUTES.md and the saved per-arm results. These historical results remain development evidence.
+- court-live's scorer trusted a timestamp in the forecast JSON. It now requires independent GitHub receipt evidence
+  for exact committed bytes. Missing or post-tip receipts are excluded. Historical publication cannot be backfilled.
+
+Existing uses of "tie" below mean an inconclusive difference, not a statistical equivalence result. BOWEN remains a
+positioning-deviation descriptor pending blinded human review. Corrected code and saved artifacts are not proof that
+the whole pipeline, all modelling assumptions, or the project's causal claims are validated.
+
 Every headline claim traced to code, data, split and saved result. **Type**: D = descriptive (reliability, how
 players play), P = predictive (out-of-sample improvement), C = causal / counterfactual. **Status**: supported,
 provisional (plausible, but a named issue could change it), unsupported (evidence does not show the claim as stated),

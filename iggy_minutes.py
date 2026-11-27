@@ -1,11 +1,12 @@
-"""IGGY v0: how a team redistributes minutes when players are absent (pregame information only).
+"""IGGY v0: minutes redistribution CONDITIONAL ON OBSERVED ROTATION ABSENCES.
 
 Unit: (game, team). Candidates = players with a game for that team in the 30 days before the date. Rotation player =
 candidate averaging >= 10 minutes over the team's previous 10 games of the SAME season (0 for missed games); the
 first 10 games of each season are not covered (no in-season rotation to start from). An ABSENCE = a rotation
 player with no minutes in this game; the absent set is the scenario input (in live use it comes from the injury
 report). Target: each non-absent candidate's minutes, rescaled to 240 regulation minutes in overtime games.
-Everything about a game is computed from games strictly before its date.
+Predictor histories are pre-date; the absent set is derived from realised participation.
+This is NOT an end-to-end pregame injury/availability forecast.
 
 Predictors (all projected onto the feasible set: absent players 0, 0 <= m_i <= cap_i = min(44, max(B0_i, 10) + 14), sum = 240, by water-filling):
   B0 recent     mean minutes over the team's last 10 games when he played ("minutes when available")
@@ -33,6 +34,7 @@ LAT = ROOT / 'results/latent'
 OUT = ROOT / 'results/iggy'
 CAP = 44.0
 ROLE = ['pts', 'fga', 'fg3a', 'fta', 'oreb', 'dreb', 'ast', 'stl', 'blk', 'tov']
+BENCHMARK_CUTOFF = '2026-11-27'  # prospective games must never enter this development benchmark
 
 
 def project(pred, cap, total=240.0):
@@ -74,7 +76,8 @@ def starters():
 
 def build():
     gl = pd.read_parquet(LAT / 'gamelogs.parquet')
-    gl = gl[~gl.playoff & (gl['min'] > 0)].copy(); gl['d'] = pd.to_datetime(gl.game_date)
+    gl = gl[~gl.playoff & (gl['min'] > 0) & (pd.to_datetime(gl.game_date) < pd.Timestamp(BENCHMARK_CUTOFF))].copy()
+    gl['d'] = pd.to_datetime(gl.game_date)
     ST = starters()
     gl['start'] = [((g, int(p)) in ST) for g, p in zip(gl.game_id, gl.player_id)]
     tot = gl.groupby(['game_id', 'team_id'])['min'].transform('sum')
@@ -113,6 +116,15 @@ def build():
     return D, gl, pg
 
 
+def fit_role_scaler(rv, train_end='2024-08-01'):
+    """Freeze preprocessing before validation/test; future feature values cannot affect it."""
+    values = [v for (_, d), v in rv.items() if v is not None and pd.Timestamp(d) < pd.Timestamp(train_end)]
+    if not values:
+        raise ValueError('No training-period role vectors')
+    a = np.asarray(values)
+    return a.mean(0), a.std(0) + 1e-9
+
+
 def add_features(D, pg):
     """team absent minutes, rank, prior-absence response, role similarity (all from earlier games)."""
     D = D.sort_values(['d', 'gid', 'team']).reset_index(drop=True)
@@ -129,7 +141,8 @@ def add_features(D, pg):
     rv = {}
     for p, d in D[['pid', 'd']].drop_duplicates().itertuples(index=False):
         rv[(p, d)] = role(p, d)
-    allv = np.array([v for v in rv.values() if v is not None]); mu, sd = allv.mean(0), allv.std(0) + 1e-9
+    mu, sd = fit_role_scaler(rv)
+    D.attrs['role_scaler'] = dict(fit_before='2024-08-01', mean=mu.tolist(), sd=sd.tolist())
     # prior-absence response: when teammate j was out (rotation, absent) in the past 365 days, i's minutes - i's base
     hist = defaultdict(list)   # (team, i, j) -> [(d, delta)]
     sim, resp = np.zeros(len(D)), np.full(len(D), np.nan)
@@ -192,7 +205,10 @@ def main():
                                                 'results/latent/ms2_stints_2325.pkl', 'results/latent/ms2_stints_2526.pkl',
                                                 'results/latent/ms2_stints_2627.pkl']),
                config=dict(cap=CAP, rotation='>= 10 min over last 10 team games', candidates='played for team in prior 30 days',
-                           split='train <=2024, validate 2025, test 2026-2027 (season end years)'),
+                           split='train <=2024, validate 2025, test 2026-2027 (season end years)',
+                           evaluation='conditional on realised rotation absences; NOT end-to-end pregame',
+                           benchmark_before=BENCHMARK_CUTOFF,
+                           role_scaler=D.attrs['role_scaler']),
                rows=dict(train=int(tr.sum()), validate=int(va.sum()), test=int(te.sum())), validate={}, test={})
     for name, S in strata.items():
         res['validate'][name] = dict(rows=int((va & S & ok).sum()), **errs((va & S & ok).values))
@@ -204,6 +220,7 @@ def main():
         return round(float(np.mean(e)), 2)
     sel = min(('B0', 'B1', 'B2', 'B3'), key=lambda k: res['validate']['single'][k]['mae'] + res['validate']['multi'][k]['mae'])
     res['selected'] = sel
+    res['working_baseline'] = 'B2'
     res['test_team_game_abs_error_sum'] = {k: {s: absorbed((te & strata[s]).values, k) for s in ('single', 'multi')} for k in P}
     # roles: does B3 beat B2 on test absence games? paired team-game bootstrap of MAE difference
     rng = np.random.default_rng(0)
@@ -259,7 +276,8 @@ def team_forecasts(D, sel):
             o = sum(s * th[pix[p]] for p, s in zip(g.pid, sh) if p in pix)
             dd = sum(s * th[n + pix[p]] for p, s in zip(g.pid, sh) if p in pix)
             return o, dd
-        schemes = {'naive': g.base.values, 'B0': g.pred_B0.values, 'iggy': g[f'pred_{sel}'].values,
+        schemes = {'naive': g.base.values, 'B0': g.pred_B0.values, 'B2': g.pred_B2.values,
+                   'B3': g.pred_B3.values, 'iggy': g[f'pred_{sel}'].values,
                    'realised_DIAGNOSTIC': g.y.values}
         for k, mins in schemes.items():
             out[(gid, d)][k].append((team == home[gid][0], val(mins)))
@@ -276,7 +294,9 @@ def team_forecasts(D, sel):
             (hh, (ho, hd)), (aa, (ao, ad)) = sorted(v, key=lambda t: not t[0])
             m[k] = (ho + ad) - (ao + hd)
         rowsg.append((bidx[blk], int(home[gid][1]), m))
-    res = dict(calibration='rolling within 2025-26 (fit on earlier blocks only)', games_total=len(rowsg))
+    res = dict(calibration='rolling within 2025-26 (fit on earlier blocks only)', games_total=len(rowsg),
+               evaluation='conditional on realised rotation absences; NOT end-to-end pregame',
+               selected_model=sel, working_baseline='B2')
     keys = list(rowsg[0][2]) if rowsg else []
     lls = {k: [] for k in keys}; tested = 0
     for j in range(1, len(blocks)):
@@ -293,7 +313,8 @@ def team_forecasts(D, sel):
     for k, v in lls.items():
         res[k] = round(float(v.mean()), 5)
     rng = np.random.default_rng(1)
-    for a_, b_ in (('iggy', 'B0'), ('iggy', 'naive'), ('B0', 'naive'), ('realised_DIAGNOSTIC', 'iggy')):
+    for a_, b_ in (('iggy', 'B0'), ('B2', 'B0'), ('B3', 'B0'), ('B3', 'B2'),
+                   ('iggy', 'naive'), ('B0', 'naive'), ('realised_DIAGNOSTIC', 'iggy')):
         if a_ in lls and b_ in lls:
             d_ = lls[a_] - lls[b_]
             res[f'{a_}_minus_{b_}'] = dict(mean=round(float(d_.mean()), 5), ci=np.percentile([d_[rng.integers(0, len(d_), len(d_))].mean() for _ in range(2000)], [2.5, 97.5]).round(5).tolist())
