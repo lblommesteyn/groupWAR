@@ -58,3 +58,19 @@ ratings fairly, but it is **not** a pregame forecast. Only the live test (court-
 6. **BOWEN scheme-follows-team, leave-self-out (W3).** Recompute the team mean excluding the player; report the new r. Cheap, read-only.
 7. **DARKO point-in-time spot check (I6).** Compare a handful of dates against archived snapshots (e.g. web archive copies of darko.app) if any exist. If none exist, mark D1-D4 "DARKO PIT unverified".
 8. **Save what was only printed:** pair_validate, darko_hindsight, ms_duncan2 CIs → json.
+
+## Corrected runs (2026-11-27, provenance saved in each output)
+
+All conditional evaluations are labelled **given realized lineups**. Only `corrected_calibration.py`'s "pregame" arm
+and the live test are pregame.
+
+| Run | Fixes | Result | Original | What survives |
+|---|---|---|---|---|
+| `corrected_movers.py` → `results/corrected/movers.json` (rev be1fb58) | I2: transaction-time movers from nba.com player movement (`fetch_transactions.py`); future-playing-time set kept only as the "eligible" / "orig" strata; point-in-time λ added | Held events (2024-26 deadlines, 2025/26 offseasons), tx-mover stints: flat 0.5 pull 0.003258 vs no pull 0.003085 (gain CI +0.000026..+0.000316). Original future-defined pull on the same stints: 0.003268. vs DARKO (0.002428): CI spans 0 at λ 3000. With point-in-time λ: 0.003557, beats DARKO (CI +0.000273..+0.002042); all stints too (+0.000259..+0.001642) | 0.0034 vs 0.0027 (orig stratum: reproduced, 0.003395 vs 0.002668) | **D4 supported**: the 0.5 pull helps for transaction-time movers; future info inflated it only slightly. New: chronologically chosen λ beats DARKO on held-out stints (given lineups). The deployed λ 3000 is unchanged (chosen for game log loss). |
+| `corrected_calibration.py` → `results/corrected/calibration.json` | I1: availability-blind pregame minutes (players for that team in the prior 30 days, previous-10 minutes) vs realised roster; calibration fit 2024-25, tested 2025-26 | Slopes 0.142 (pregame) vs 0.139 (realised) for ours; frozen 0.146. Frozen calibration on pregame margins: log loss 0.6062 (vs refit 0.6073), reliability bins within ±0.04. Pregame ours − DARKO: −0.0043 (CI −0.011..+0.002); realised: −0.0073 (−0.016..+0.001) | calibration fit on realised margins | **L1 supported**: the realised-roster issue barely moved the calibration; the live probabilities are well calibrated on true-pregame inputs. Realised rosters flatter both models by ~0.016 log loss. |
+| `block_bootstrap.py` → `results/corrected/block_bootstrap.json` | I5: resample 30-day blocks | D1 log loss diff +0.0035: block CI −0.0014..+0.0081 (game CI −0.0012..+0.0083). D2 margin r diff +0.020: block CI +0.009..+0.031. S1 synergy: total gain positive in 19/26 test blocks, block CI +0.30..+0.69 (×1e-6, λ_s 1e6); 3e5 arm +0.26..+0.97 | game-level CIs | **D1 tie, D2 and S1 survive** block resampling (all given-lineup). |
+| `pair_validate.py` rerun | save | r 0.007 (n 282), −0.15 (n 19) | r −0.06 | S3 qualitatively supported; exact number not reproducible |
+| `darko_hindsight.py` rerun | — | 15,073 player-dates identical to 2026-11-23 copy | — | D10: only "stable over 4 days" supported (I6 open) |
+| `corrected_movers_trk.py` (needs `chrono_reps.py` + `world_model.py` WM_CUT runs) | I2 + I3 for D5 | *pending: chronological BOWEN retrains running on the PC* | 0.003430 vs 0.003343 | — |
+
+**Data blockers.** BOWEN for the 2026 deadline cutoff can only learn from 114 tracked games (tracking starts 2026-01-19), so that event's scheme values are weak by construction. Historical injury reports and DARKO's own historical projected minutes are not archived here, so a pregame backtest with real availability information is **untestable** (the availability-blind arm is the closest valid substitute). DARKO's point-in-time status (I6) needs archived snapshots we do not have.
