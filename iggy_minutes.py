@@ -1,12 +1,13 @@
 """IGGY v0: how a team redistributes minutes when players are absent (pregame information only).
 
 Unit: (game, team). Candidates = players with a game for that team in the 30 days before the date. Rotation player =
-candidate averaging >= 10 minutes over the team's previous 10 games (0 for missed games). An ABSENCE = a rotation
+candidate averaging >= 10 minutes over the team's previous 10 games of the SAME season (0 for missed games); the
+first 10 games of each season are not covered (no in-season rotation to start from). An ABSENCE = a rotation
 player with no minutes in this game; the absent set is the scenario input (in live use it comes from the injury
 report). Target: each non-absent candidate's minutes, rescaled to 240 regulation minutes in overtime games.
 Everything about a game is computed from games strictly before its date.
 
-Predictors (all projected onto the feasible set: absent players 0, 0 <= m_i <= cap_i, sum = 240, by water-filling):
+Predictors (all projected onto the feasible set: absent players 0, 0 <= m_i <= cap_i = min(44, max(B0_i, 10) + 14), sum = 240, by water-filling):
   B0 recent     mean minutes over the team's last 10 games when he played ("minutes when available")
   B1 +usage     gradient boosting on B0, availability rate, start rate, rank, team absent minutes
   B2 +history   + his mean minutes above B0 in past games (365 days) where each currently absent teammate was out
@@ -49,6 +50,10 @@ def project(pred, cap, total=240.0):
         if not over.any():
             break
         m[over] = cap[over]; fixed |= over
+    short = total - m.sum()
+    if short > 1e-6:                # every player at his limit: raise the limits evenly (never beyond 48)
+        room = np.minimum(48.0, cap + short) - m
+        m += room * short / max(room.sum(), 1e-9)
     return m
 
 
@@ -83,7 +88,10 @@ def build():
         for r in g.itertuples():
             i, j = gix[r.game_id], pix[r.player_id]; M[i, j] = r.min; S[i, j] = r.start; Y[i, j] = r.min240
         dates = games[:, 1].astype('datetime64[ns]')
+        sea = np.array([d.year + (d.month >= 8) for d in pd.to_datetime(games[:, 1])])
         for k in range(10, len(games)):
+            if sea[k - 10] != sea[k]:      # same-season windows only: the first 10 games of a season are not covered
+                continue
             prev = M[k - 10:k]; played = ~np.isnan(prev)
             lo = np.searchsorted(dates, dates[k] - np.timedelta64(30, 'D'))
             cand = np.flatnonzero((~np.isnan(M[lo:k])).any(0))
@@ -159,7 +167,7 @@ def predict_all(D, models):
     out = {k: np.zeros(len(D)) for k in P}
     for (gid, team), g in D.groupby(['gid', 'team'], sort=False):
         ix = g.index.values; avail = ~g.absent.values
-        cap = np.full(avail.sum(), CAP)
+        cap = np.minimum(CAP, np.maximum(g.base.values[avail], 10.0) + 14.0)   # realistic individual limits
         for k, v in P.items():
             out[k][ix[avail]] = project(v[ix[avail]], cap)
     return out
