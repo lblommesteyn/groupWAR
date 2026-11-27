@@ -40,14 +40,26 @@ def darko_margin(Dk, asof, T):
 
 
 def main():
+    import argparse
+    import ms_spm as sp
+    ap = argparse.ArgumentParser()
+    ap.add_argument('--lam', type=float, help='refit each block at this lambda (else the saved duncan-1 ratings)')
+    ap.add_argument('--k', type=float, default=1.0, help='pull toward the box prior: theta <- m + k (theta - m)')
+    ap.add_argument('--out', default='live_calib.json')
+    a = ap.parse_args()
     saved = pickle.load(open(OUT / 'spm_ratings.pkl', 'rb'))
     Dk = load_darko_od(); PG = Pregame(None)
+    Dt = sp.Data() if a.lam else None
     xo, xd, y = [], [], []
     for f in sorted(OUT.glob('msb_*.npz')):
         season, b0 = int(f.stem.split('_')[1]), f.stem.split('_')[2]
         if season not in SEASONS or 'spm_lpit_h' not in saved.get(b0, {}):
             continue
         r = saved[b0]['spm_lpit_h']; pix = {p: i for i, p in enumerate(r['pids'])}
+        if a.lam:
+            cut = sp.dnum(b0); y_ = Dt.luck_target(cut, 0.5); m_ = Dt.spm_prior(cut, y_)
+            th_, b_ = Dt.ridge(np.flatnonzero(Dt.DAY < cut), y_, m_, a.lam, cut)
+            r = dict(theta=m_ + a.k * (th_ - m_), b=b_); pix = Dt.pix
         P = np.load(f)
         for g, w in zip(P['gid'], P['win']):
             T = PG.teams(g)
@@ -61,7 +73,8 @@ def main():
         p = m.predict_proba(x[:, None])[:, 1]
         ll = -np.mean(np.log(np.where(y == 1, p, 1 - p)))
         out[k] = {'intercept': float(m.intercept_[0]), 'slope': float(m.coef_[0, 0]), 'in_sample_ll': float(ll)}
-    json.dump(out, open(OUT / 'live_calib.json', 'w'), indent=1)
+    out.update(lam=a.lam or 1000.0, k=a.k)
+    json.dump(out, open(OUT / a.out, 'w'), indent=1)
     print(json.dumps(out, indent=1))
 
 

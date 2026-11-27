@@ -73,7 +73,7 @@ def main():
         trn = np.flatnonzero((Dt.DAY < cut) & (Dt.DAY >= cut - WINDOW))
         A, w, sw = design(Dt, trn, cut)
         r0 = sw * (y[trn] - Dt.X[trn] @ m)
-        full = lsqr(A, r0, damp=np.sqrt(LAM), atol=1e-7, btol=1e-7, iter_lim=3000)[0]
+        full = lsqr(A, r0, damp=np.sqrt(LAM), atol=1e-9, btol=1e-9, iter_lim=5000)[0]
         th0 = m + full[:2 * n]; b0 = full[2 * n:] * sp.SC
         # per evaluated player: held-out fit and residual sums
         H = {}
@@ -81,7 +81,7 @@ def main():
         for j in movers + stay:
             in_o = (On == j).any(1); in_d = (Dn == j).any(1); keep = ~(in_o | in_d)
             x0 = full.copy()
-            sol = lsqr(A[keep], r0[keep], damp=np.sqrt(LAM), atol=1e-6, btol=1e-6, iter_lim=400, x0=x0)[0]
+            sol = lsqr(A[keep], r0[keep], damp=np.sqrt(LAM), atol=1e-9, btol=1e-9, iter_lim=5000, x0=x0)[0]  # tight: hapm_conv.py showed 1e-6 stops after ~6 iterations
             th, bb = m + sol[:2 * n], sol[2 * n:] * sp.SC
             th[j] = 0.0; th[n + j] = 0.0                         # average player in j's slot
             ro = trn[in_o]; rd = trn[in_d]

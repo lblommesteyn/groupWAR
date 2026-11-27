@@ -23,6 +23,9 @@ from masked_paths import ROOT
 
 OUT = ROOT / 'results/latent'
 ARM = 'spm_lpit_h'
+MODEL_VERSION = 'duncan-2'   # see court-live/HOLDOUT.md; bump for any change
+VERSIONS = {'duncan-1': dict(lam=None, k_all=1.0, k_mv=1.0, calib='live_calib.json'),
+            'duncan-2': dict(lam=3000.0, k_all=1.0, k_mv=0.5, calib='live_calib_v2.json')}  # ms_duncan2 / ms_shrink  # lam None = last block's choice
 
 
 def darko_table(save_to):
@@ -72,7 +75,8 @@ def main():
     ap.add_argument('--run', default='am', choices=['am', 'pm'], help='pm: second run before evening tips, latest injury report')
     a = ap.parse_args()
     live = Path(a.live); day = a.date
-    cal = json.load(open(OUT / 'live_calib.json'))
+    V = VERSIONS[MODEL_VERSION]
+    cal = json.load(open(OUT / V['calib']))
     prob = lambda k, x: float(1 / (1 + np.exp(-(cal[k]['intercept'] + cal[k]['slope'] * x))))
 
     games = schedule(day)
@@ -92,8 +96,26 @@ def main():
         z = np.load(rf, allow_pickle=True)
         pix = {int(p): i for i, p in enumerate(z['pids'])}; th, b = z['theta'], z['b']; through = str(z['through'])
     else:
-        Dt = sp.Data(live=True); cut = sp.dnum(day)
-        th, b = sp.fit_arm(Dt, ARM, cut, lam); pix = Dt.pix
+        from ms_fix import FData
+        Dt = FData(); cut = sp.dnum(day); lam = V['lam'] or lam
+        y_ = Dt.luck_target(cut, 0.5); m_ = Dt.spm_prior(cut, y_)
+        th, b = Dt.ridge(np.flatnonzero(Dt.DAY < cut), y_, m_, lam, cut); pix = Dt.pix
+        k = np.full(2 * Dt.n, V['k_all'])
+        if V['k_mv'] < 1:  # movers: current DARKO team differs from the team of most possessions in the last 120 days
+            rec = np.flatnonzero((Dt.DAY < cut) & (Dt.DAY >= cut - 120))
+            cnt = {}
+            for i in rec:
+                for p_ in Dt.O[i]:
+                    cnt[(p_, Dt.off_team[i])] = cnt.get((p_, Dt.off_team[i]), 0) + Dt.W[i]
+            last = {}
+            for (p_, t_), w_ in cnt.items():
+                if w_ > last.get(p_, (0, 0))[1]:
+                    last[p_] = (t_, w_)
+            for p_, (t_, _) in last.items():
+                cur = dkx.get(int(Dt.pids[p_]), {}).get('tm_id')
+                if cur and cur != t_:
+                    k[p_] *= V['k_mv']; k[Dt.n + p_] *= V['k_mv']
+        th = m_ + k * (th - m_)
         through = max(Dt.G[g]['date'] for g in Dt.gids if sp.dnum(Dt.G[g]['date']) < cut)
         np.savez(rf, pids=np.array(Dt.pids), theta=th, b=b, through=through)
     h = hashlib.sha256(th.tobytes() + np.asarray(b).tobytes()).hexdigest()[:12]
@@ -117,7 +139,7 @@ def main():
                     'injuries': [[p, dkx[p]['player_name'], avail[p][0]] for p in adj],
                     'home_minutes': H, 'away_minutes': A, 'home_minutes_inj': Hi, 'away_minutes_inj': Ai,
                     'unrated_by_us': [p for p, _ in H + A if p not in pix]})
-    doc = dict(date=day, generated_utc=datetime.now(timezone.utc).isoformat(timespec='seconds'), model=ARM,
+    doc = dict(date=day, model_version=MODEL_VERSION, generated_utc=datetime.now(timezone.utc).isoformat(timespec='seconds'), model=ARM,
                lam=lam, ratings_through=through, ratings_hash=h, darko_ratings_through=dk_through,
                calibration=cal, run=a.run, injury_report=rep_url, games=out)
     f = live / 'forecasts' / (f'{day}.json' if a.run == 'am' else f'{day}-pm.json'); f.parent.mkdir(parents=True, exist_ok=True)
