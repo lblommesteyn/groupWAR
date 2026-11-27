@@ -21,6 +21,7 @@ cd /d %LIVE%
 python collect_stats.py >> C:\Users\LukeB\dev\court-model\logs\daily.log 2>&1
 python collect_companion.py >> C:\Users\LukeB\dev\court-model\logs\daily.log 2>&1
 python score.py >> C:\Users\LukeB\dev\court-model\logs\daily.log 2>&1
+if errorlevel 1 set FAIL=1
 cd /d C:\Users\LukeB\dev\court-model
 rem last night's live positions + companion history -> normalized tracking (outside the repo; summary committed)
 python %LIVE%\convert_live.py --date %Y% --root %LIVE% --out C:\Users\LukeB\dev\tracking-live --summary %LIVE%\data\tracking_summary\%Y%.json >> logs\daily.log 2>&1
