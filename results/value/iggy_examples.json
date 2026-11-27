@@ -1,0 +1,3359 @@
+{
+ "model": "B2 minutes model (iggy_minutes.py), same model for both scenarios; 2.05 possessions per minute",
+ "note": "(a) fixed-minutes substitution; (b) roster change with the minutes redistributed by the same minutes model; b - a = depth/redistribution effect (who absorbs the minutes and how good they are). No synergy terms, so this is not \"fit\".",
+ "examples": [
+  {
+   "team": 1610612737,
+   "as_of_game": "0022600280",
+   "pid": 1630552,
+   "name": "Jalen Johnson",
+   "net": -1.1,
+   "minutes_with": 33.7,
+   "past_games_without_him": 52,
+   "per_game_points": {
+    "a_fixed_minutes_vs_replacement": 0.37,
+    "a_fixed_minutes_vs_top_absorber": 0.46,
+    "top_absorber": {
+     "pid": 1630557,
+     "name": "Corey Kispert",
+     "net": -1.76,
+     "extra_minutes": 6.2
+    },
+    "b_roster_change_redistributed": -0.11,
+    "depth_effect_b_minus_a": -0.48
+   },
+   "per_82_games_wins": {
+    "a": 0.85,
+    "b": -0.24
+   },
+   "redistribution": {
+    "Dorian Finney-Smith": 1.7,
+    "Jock Landale": 2.4,
+    "Luguentz Dort": 3.0,
+    "Corey Kispert": 6.2,
+    "Aaron Wiggins": 3.4,
+    "RayJ Dennis": 3.8,
+    "Asa Newell": 5.2,
+    "Kingston Flemings": 2.3,
+    "Zuby Ejiofor": 2.9
+   }
+  },
+  {
+   "team": 1610612737,
+   "as_of_game": "0022600280",
+   "pid": 1629638,
+   "name": "Nickeil Alexander-Walker",
+   "net": 0.66,
+   "minutes_with": 32.1,
+   "past_games_without_him": 3,
+   "per_game_points": {
+    "a_fixed_minutes_vs_replacement": 1.51,
+    "a_fixed_minutes_vs_top_absorber": 1.59,
+    "top_absorber": {
+     "pid": 1630557,
+     "name": "Corey Kispert",
+     "net": -1.76,
+     "extra_minutes": 6.3
+    },
+    "b_roster_change_redistributed": 1.05,
+    "depth_effect_b_minus_a": -0.46
+   },
+   "per_82_games_wins": {
+    "a": 3.44,
+    "b": 2.39
+   },
+   "redistribution": {
+    "Dorian Finney-Smith": 1.5,
+    "Jock Landale": 1.9,
+    "Luguentz Dort": 2.9,
+    "Jalen Johnson": 1.2,
+    "Corey Kispert": 6.3,
+    "Aaron Wiggins": 3.3,
+    "Dyson Daniels": 1.3,
+    "RayJ Dennis": 3.1,
+    "Asa Newell": 4.9,
+    "Kingston Flemings": 2.1,
+    "Zuby Ejiofor": 2.8
+   }
+  },
+  {
+   "team": 1610612737,
+   "as_of_game": "0022600280",
+   "pid": 1643412,
+   "name": "Kingston Flemings",
+   "net": -1.97,
+   "minutes_with": 21.3,
+   "past_games_without_him": 3,
+   "per_game_points": {
+    "a_fixed_minutes_vs_replacement": -0.14,
+    "a_fixed_minutes_vs_top_absorber": -0.09,
+    "top_absorber": {
+     "pid": 1630557,
+     "name": "Corey Kispert",
+     "net": -1.76,
+     "extra_minutes": 4.3
+    },
+    "b_roster_change_redistributed": -0.47,
+    "depth_effect_b_minus_a": -0.33
+   },
+   "per_82_games_wins": {
+    "a": -0.33,
+    "b": -1.08
+   },
+   "redistribution": {
+    "Jock Landale": 1.1,
+    "Corey Kispert": 4.3,
+    "Aaron Wiggins": 1.9,
+    "RayJ Dennis": 2.9,
+    "Asa Newell": 4.2,
+    "Zuby Ejiofor": 2.0
+   }
+  },
+  {
+   "team": 1610612738,
+   "as_of_game": "0022600053",
+   "pid": 1628369,
+   "name": "Jayson Tatum",
+   "net": 2.51,
+   "minutes_with": 33.9,
+   "past_games_without_him": 49,
+   "per_game_points": {
+    "a_fixed_minutes_vs_replacement": 2.89,
+    "a_fixed_minutes_vs_top_absorber": 1.38,
+    "top_absorber": {
+     "pid": 201144,
+     "name": "Mike Conley",
+     "net": 0.52,
+     "extra_minutes": 6.2
+    },
+    "b_roster_change_redistributed": 1.59,
+    "depth_effect_b_minus_a": -1.3
+   },
+   "per_82_games_wins": {
+    "a": 6.57,
+    "b": 3.62
+   },
+   "redistribution": {
+    "Mike Conley": 6.2,
+    "Neemias Queta": 1.2,
+    "Payton Pritchard": 2.4,
+    "Luka Garza": 3.9,
+    "Sam Hauser": 2.8,
+    "Ron Harper Jr.": 2.7,
+    "Baylor Scheierman": 3.6,
+    "Jordan Walsh": 3.2,
+    "Hugo Gonz\u00e1lez": 4.2,
+    "Chris Cenac Jr.": 2.2
+   }
+  },
+  {
+   "team": 1610612738,
+   "as_of_game": "0022600053",
+   "pid": 1628401,
+   "name": "Derrick White",
+   "net": 3.83,
+   "minutes_with": 30.5,
+   "past_games_without_him": 19,
+   "per_game_points": {
+    "a_fixed_minutes_vs_replacement": 3.42,
+    "a_fixed_minutes_vs_top_absorber": 2.07,
+    "top_absorber": {
+     "pid": 201144,
+     "name": "Mike Conley",
+     "net": 0.52,
+     "extra_minutes": 4.4
+    },
+    "b_roster_change_redistributed": 2.18,
+    "depth_effect_b_minus_a": -1.24
+   },
+   "per_82_games_wins": {
+    "a": 7.79,
+    "b": 4.96
+   },
+   "redistribution": {
+    "Mike Conley": 4.4,
+    "Paul George": 1.2,
+    "Neemias Queta": 1.8,
+    "Payton Pritchard": 2.5,
+    "Luka Garza": 3.2,
+    "Sam Hauser": 2.7,
+    "Ron Harper Jr.": 1.6,
+    "Baylor Scheierman": 4.3,
+    "Jordan Walsh": 3.3,
+    "Hugo Gonz\u00e1lez": 2.5,
+    "Chris Cenac Jr.": 2.1
+   }
+  },
+  {
+   "team": 1610612738,
+   "as_of_game": "0022600053",
+   "pid": 1631248,
+   "name": "Baylor Scheierman",
+   "net": -0.45,
+   "minutes_with": 17.1,
+   "past_games_without_him": 1,
+   "per_game_points": {
+    "a_fixed_minutes_vs_replacement": 0.42,
+    "a_fixed_minutes_vs_top_absorber": -0.34,
+    "top_absorber": {
+     "pid": 201144,
+     "name": "Mike Conley",
+     "net": 0.52,
+     "extra_minutes": 3.2
+    },
+    "b_roster_change_redistributed": -0.6,
+    "depth_effect_b_minus_a": -1.02
+   },
+   "per_82_games_wins": {
+    "a": 0.95,
+    "b": -1.37
+   },
+   "redistribution": {
+    "Mike Conley": 3.2,
+    "Paul George": 1.1,
+    "Jayson Tatum": 1.7,
+    "Derrick White": 1.3,
+    "Neemias Queta": 1.4,
+    "Payton Pritchard": 1.8,
+    "Luka Garza": 1.6,
+    "Sam Hauser": 1.3,
+    "Hugo Gonz\u00e1lez": 1.8
+   }
+  },
+  {
+   "team": 1610612739,
+   "as_of_game": "0022600057",
+   "pid": 201935,
+   "name": "James Harden",
+   "net": 0.85,
+   "minutes_with": 31.9,
+   "past_games_without_him": 5,
+   "per_game_points": {
+    "a_fixed_minutes_vs_replacement": 1.63,
+    "a_fixed_minutes_vs_top_absorber": 1.33,
+    "top_absorber": {
+     "pid": 1626209,
+     "name": "Mario Hezonja",
+     "net": -1.18,
+     "extra_minutes": 5.1
+    },
+    "b_roster_change_redistributed": 1.2,
+    "depth_effect_b_minus_a": -0.43
+   },
+   "per_82_games_wins": {
+    "a": 3.71,
+    "b": 2.74
+   },
+   "redistribution": {
+    "Mario Hezonja": 5.1,
+    "Thomas Bryant": 2.3,
+    "Sam Merrill": 1.1,
+    "Norchad Omier": 4.9,
+    "Craig Porter Jr.": 5.1,
+    "Riley Minix": 4.8,
+    "Tyrese Proctor": 2.8,
+    "Meleek Thomas": 4.3
+   }
+  },
+  {
+   "team": 1610612739,
+   "as_of_game": "0022600057",
+   "pid": 1628378,
+   "name": "Donovan Mitchell",
+   "net": 2.97,
+   "minutes_with": 31.1,
+   "past_games_without_him": 56,
+   "per_game_points": {
+    "a_fixed_minutes_vs_replacement": 2.94,
+    "a_fixed_minutes_vs_top_absorber": 2.65,
+    "top_absorber": {
+     "pid": 1626209,
+     "name": "Mario Hezonja",
+     "net": -1.18,
+     "extra_minutes": 5.2
+    },
+    "b_roster_change_redistributed": 2.52,
+    "depth_effect_b_minus_a": -0.42
+   },
+   "per_82_games_wins": {
+    "a": 6.7,
+    "b": 5.74
+   },
+   "redistribution": {
+    "Mario Hezonja": 5.2,
+    "Thomas Bryant": 1.8,
+    "Sam Merrill": 1.0,
+    "Norchad Omier": 4.9,
+    "Craig Porter Jr.": 4.8,
+    "Riley Minix": 4.8,
+    "Tyrese Proctor": 2.9,
+    "Meleek Thomas": 4.3
+   }
+  },
+  {
+   "team": 1610612739,
+   "as_of_game": "0022600057",
+   "pid": 1626209,
+   "name": "Mario Hezonja",
+   "net": -1.18,
+   "minutes_with": 16.2,
+   "past_games_without_him": 0,
+   "per_game_points": {
+    "a_fixed_minutes_vs_replacement": 0.15,
+    "a_fixed_minutes_vs_top_absorber": 0.23,
+    "top_absorber": {
+     "pid": 1642434,
+     "name": "Riley Minix",
+     "net": -1.88,
+     "extra_minutes": 3.4
+    },
+    "b_roster_change_redistributed": -0.23,
+    "depth_effect_b_minus_a": -0.39
+   },
+   "per_82_games_wins": {
+    "a": 0.35,
+    "b": -0.53
+   },
+   "redistribution": {
+    "Thomas Bryant": 1.8,
+    "Sam Merrill": 1.4,
+    "Norchad Omier": 1.6,
+    "Craig Porter Jr.": 2.1,
+    "Riley Minix": 3.4,
+    "Meleek Thomas": 1.1
+   }
+  },
+  {
+   "team": 1610612740,
+   "as_of_game": "0022600293",
+   "pid": 1630180,
+   "name": "Saddiq Bey",
+   "net": -1.46,
+   "minutes_with": 31.6,
+   "past_games_without_him": 10,
+   "per_game_points": {
+    "a_fixed_minutes_vs_replacement": 0.12,
+    "a_fixed_minutes_vs_top_absorber": 0.23,
+    "top_absorber": {
+     "pid": 1643555,
+     "name": "Jaron Pierre Jr.",
+     "net": -1.82,
+     "extra_minutes": 4.8
+    },
+    "b_roster_change_redistributed": 0.23,
+    "depth_effect_b_minus_a": 0.11
+   },
+   "per_82_games_wins": {
+    "a": 0.27,
+    "b": 0.52
+   },
+   "redistribution": {
+    "DeAndre Jordan": 2.2,
+    "Jordan Poole": 2.2,
+    "Herbert Jones": 2.1,
+    "Trey Murphy III": 1.5,
+    "Trendon Watford": 2.3,
+    "Bennedict Mathurin": 1.8,
+    "Bryce McGowens": 3.0,
+    "Karlo Matkovi\u0107": 1.6,
+    "Yves Missi": 2.7,
+    "Derik Queen": 3.5,
+    "Julian Reese": 1.1,
+    "Jaron Pierre Jr.": 4.8
+   }
+  },
+  {
+   "team": 1610612740,
+   "as_of_game": "0022600293",
+   "pid": 1642847,
+   "name": "Jeremiah Fears",
+   "net": -3.58,
+   "minutes_with": 30.9,
+   "past_games_without_him": 0,
+   "per_game_points": {
+    "a_fixed_minutes_vs_replacement": -1.23,
+    "a_fixed_minutes_vs_top_absorber": -1.12,
+    "top_absorber": {
+     "pid": 1643555,
+     "name": "Jaron Pierre Jr.",
+     "net": -1.82,
+     "extra_minutes": 5.0
+    },
+    "b_roster_change_redistributed": -1.14,
+    "depth_effect_b_minus_a": 0.09
+   },
+   "per_82_games_wins": {
+    "a": -2.8,
+    "b": -2.6
+   },
+   "redistribution": {
+    "DeAndre Jordan": 2.0,
+    "Zion Williamson": 1.1,
+    "Jordan Poole": 2.5,
+    "Saddiq Bey": 1.4,
+    "Herbert Jones": 2.0,
+    "Trendon Watford": 2.4,
+    "Bennedict Mathurin": 1.6,
+    "Bryce McGowens": 2.5,
+    "Karlo Matkovi\u0107": 1.5,
+    "Yves Missi": 2.8,
+    "Derik Queen": 3.2,
+    "Julian Reese": 1.1,
+    "Jaron Pierre Jr.": 5.0
+   }
+  },
+  {
+   "team": 1610612740,
+   "as_of_game": "0022600293",
+   "pid": 1642852,
+   "name": "Derik Queen",
+   "net": -2.54,
+   "minutes_with": 19.8,
+   "past_games_without_him": 1,
+   "per_game_points": {
+    "a_fixed_minutes_vs_replacement": -0.37,
+    "a_fixed_minutes_vs_top_absorber": -0.6,
+    "top_absorber": {
+     "pid": 1631255,
+     "name": "Karlo Matkovi\u0107",
+     "net": -1.06,
+     "extra_minutes": 3.4
+    },
+    "b_roster_change_redistributed": -0.43,
+    "depth_effect_b_minus_a": -0.06
+   },
+   "per_82_games_wins": {
+    "a": -0.83,
+    "b": -0.97
+   },
+   "redistribution": {
+    "DeAndre Jordan": 1.1,
+    "Zion Williamson": 1.5,
+    "Jordan Poole": 1.2,
+    "Saddiq Bey": 1.4,
+    "Herbert Jones": 1.0,
+    "Trey Murphy III": 1.2,
+    "Trendon Watford": 1.3,
+    "Bryce McGowens": 1.5,
+    "Karlo Matkovi\u0107": 3.4,
+    "Yves Missi": 1.1,
+    "Jeremiah Fears": 1.3,
+    "Jaron Pierre Jr.": 2.5
+   }
+  },
+  {
+   "team": 1610612741,
+   "as_of_game": "0022600056",
+   "pid": 1641824,
+   "name": "Matas Buzelis",
+   "net": -1.7,
+   "minutes_with": 31.1,
+   "past_games_without_him": 6,
+   "per_game_points": {
+    "a_fixed_minutes_vs_replacement": -0.04,
+    "a_fixed_minutes_vs_top_absorber": 0.49,
+    "top_absorber": {
+     "pid": 1630172,
+     "name": "Patrick Williams",
+     "net": -2.47,
+     "extra_minutes": 5.8
+    },
+    "b_roster_change_redistributed": -0.05,
+    "depth_effect_b_minus_a": -0.01
+   },
+   "per_82_games_wins": {
+    "a": -0.09,
+    "b": -0.12
+   },
+   "redistribution": {
+    "Buddy Hield": 3.3,
+    "Zach Collins": 1.8,
+    "Nic Claxton": 4.0,
+    "Isaac Okoro": 1.2,
+    "Patrick Williams": 5.8,
+    "Tre Jones": 2.1,
+    "Josh Giddey": 1.3,
+    "Leonard Miller": 2.5,
+    "Jordan Hawkins": 2.4,
+    "Noa Essengue": 2.5,
+    "Caleb Wilson": 1.1,
+    "Jaylin Sellers": 2.3
+   }
+  },
+  {
+   "team": 1610612741,
+   "as_of_game": "0022600056",
+   "pid": 1630171,
+   "name": "Isaac Okoro",
+   "net": -1.16,
+   "minutes_with": 30.2,
+   "past_games_without_him": 18,
+   "per_game_points": {
+    "a_fixed_minutes_vs_replacement": 0.3,
+    "a_fixed_minutes_vs_top_absorber": 0.18,
+    "top_absorber": {
+     "pid": 1629651,
+     "name": "Nic Claxton",
+     "net": -1.45,
+     "extra_minutes": 4.2
+    },
+    "b_roster_change_redistributed": 0.22,
+    "depth_effect_b_minus_a": -0.08
+   },
+   "per_82_games_wins": {
+    "a": 0.68,
+    "b": 0.5
+   },
+   "redistribution": {
+    "Buddy Hield": 3.7,
+    "Zach Collins": 1.5,
+    "Nic Claxton": 4.2,
+    "Patrick Williams": 4.1,
+    "Tre Jones": 2.2,
+    "Josh Giddey": 1.9,
+    "Leonard Miller": 2.0,
+    "Jordan Hawkins": 1.8,
+    "Matas Buzelis": 1.7,
+    "Noa Essengue": 2.5,
+    "Caleb Wilson": 1.3,
+    "Jaylin Sellers": 2.5
+   }
+  },
+  {
+   "team": 1610612741,
+   "as_of_game": "0022600056",
+   "pid": 1630200,
+   "name": "Tre Jones",
+   "net": -0.16,
+   "minutes_with": 20.4,
+   "past_games_without_him": 20,
+   "per_game_points": {
+    "a_fixed_minutes_vs_replacement": 0.62,
+    "a_fixed_minutes_vs_top_absorber": 0.54,
+    "top_absorber": {
+     "pid": 1629651,
+     "name": "Nic Claxton",
+     "net": -1.45,
+     "extra_minutes": 3.1
+    },
+    "b_roster_change_redistributed": 0.59,
+    "depth_effect_b_minus_a": -0.03
+   },
+   "per_82_games_wins": {
+    "a": 1.41,
+    "b": 1.35
+   },
+   "redistribution": {
+    "Buddy Hield": 2.8,
+    "Zach Collins": -1.5,
+    "Nic Claxton": 3.1,
+    "Isaac Okoro": 1.2,
+    "Patrick Williams": 2.1,
+    "Josh Giddey": 1.4,
+    "Leonard Miller": 1.2,
+    "Jordan Hawkins": 1.5,
+    "Matas Buzelis": 1.2,
+    "Noa Essengue": 2.4,
+    "Caleb Wilson": 1.9,
+    "Jaylin Sellers": 2.2
+   }
+  },
+  {
+   "team": 1610612742,
+   "as_of_game": "0022600054",
+   "pid": 1642843,
+   "name": "Cooper Flagg",
+   "net": 1.6,
+   "minutes_with": 33.5,
+   "past_games_without_him": 12,
+   "per_game_points": {
+    "a_fixed_minutes_vs_replacement": 2.23,
+    "a_fixed_minutes_vs_top_absorber": 2.67,
+    "top_absorber": {
+     "pid": 1642258,
+     "name": "Zaccharie Risacher",
+     "net": -2.29,
+     "extra_minutes": 3.7
+    },
+    "b_roster_change_redistributed": 1.76,
+    "depth_effect_b_minus_a": -0.47
+   },
+   "per_82_games_wins": {
+    "a": 5.07,
+    "b": 4.0
+   },
+   "redistribution": {
+    "Kyrie Irving": 2.8,
+    "Caleb Martin": 2.6,
+    "P.J. Washington": 2.8,
+    "Daniel Gafford": 2.0,
+    "Naji Marshall": 3.3,
+    "Santi Aldama": 3.1,
+    "Max Christie": 2.7,
+    "Marcus Sasser": 1.9,
+    "Zaccharie Risacher": 3.7,
+    "Walter Clayton Jr.": 3.1,
+    "Morez Johnson Jr.": 3.3
+   }
+  },
+  {
+   "team": 1610612742,
+   "as_of_game": "0022600054",
+   "pid": 202681,
+   "name": "Kyrie Irving",
+   "net": 3.35,
+   "minutes_with": 31.5,
+   "past_games_without_him": 43,
+   "per_game_points": {
+    "a_fixed_minutes_vs_replacement": 3.22,
+    "a_fixed_minutes_vs_top_absorber": 3.38,
+    "top_absorber": {
+     "pid": 1631204,
+     "name": "Marcus Sasser",
+     "net": -1.89,
+     "extra_minutes": 4.2
+    },
+    "b_roster_change_redistributed": 3.15,
+    "depth_effect_b_minus_a": -0.07
+   },
+   "per_82_games_wins": {
+    "a": 7.33,
+    "b": 7.18
+   },
+   "redistribution": {
+    "Caleb Martin": 2.0,
+    "P.J. Washington": 1.1,
+    "Naji Marshall": 3.6,
+    "Santi Aldama": 2.4,
+    "Max Christie": 3.2,
+    "Marcus Sasser": 4.2,
+    "Zaccharie Risacher": 4.1,
+    "Walter Clayton Jr.": 2.7,
+    "Morez Johnson Jr.": 3.6,
+    "Tobi Lawal": 2.1
+   }
+  },
+  {
+   "team": 1610612742,
+   "as_of_game": "0022600054",
+   "pid": 1629655,
+   "name": "Daniel Gafford",
+   "net": 0.89,
+   "minutes_with": 20.0,
+   "past_games_without_him": 33,
+   "per_game_points": {
+    "a_fixed_minutes_vs_replacement": 1.04,
+    "a_fixed_minutes_vs_top_absorber": 0.79,
+    "top_absorber": {
+     "pid": 1630230,
+     "name": "Naji Marshall",
+     "net": -1.04,
+     "extra_minutes": 2.5
+    },
+    "b_roster_change_redistributed": 0.63,
+    "depth_effect_b_minus_a": -0.41
+   },
+   "per_82_games_wins": {
+    "a": 2.36,
+    "b": 1.43
+   },
+   "redistribution": {
+    "Kyrie Irving": 2.2,
+    "Caleb Martin": 2.2,
+    "P.J. Washington": 1.9,
+    "Naji Marshall": 2.5,
+    "Santi Aldama": 1.4,
+    "Max Christie": 1.2,
+    "Zaccharie Risacher": 2.2,
+    "Walter Clayton Jr.": 1.8,
+    "Cooper Flagg": 1.9,
+    "Morez Johnson Jr.": 1.2
+   }
+  },
+  {
+   "team": 1610612743,
+   "as_of_game": "0022600054",
+   "pid": 203999,
+   "name": "Nikola Joki\u0107",
+   "net": 7.25,
+   "minutes_with": 35.7,
+   "past_games_without_him": 45,
+   "per_game_points": {
+    "a_fixed_minutes_vs_replacement": 6.51,
+    "a_fixed_minutes_vs_top_absorber": 7.52,
+    "top_absorber": {
+     "pid": 1626145,
+     "name": "Tyus Jones",
+     "net": -3.01,
+     "extra_minutes": 4.9
+    },
+    "b_roster_change_redistributed": 6.06,
+    "depth_effect_b_minus_a": -0.45
+   },
+   "per_82_games_wins": {
+    "a": 14.83,
+    "b": 13.8
+   },
+   "redistribution": {
+    "DeMar DeRozan": 3.6,
+    "Aaron Gordon": 3.1,
+    "Tyus Jones": 4.9,
+    "Jamal Murray": 2.8,
+    "Marvin Bagley III": 3.1,
+    "Cameron Johnson": 3.2,
+    "Christian Braun": 3.4,
+    "Trevon Brazile": 3.1,
+    "Spencer Jones": 4.2,
+    "Bryce Hopkins": 2.0
+   }
+  },
+  {
+   "team": 1610612743,
+   "as_of_game": "0022600054",
+   "pid": 1627750,
+   "name": "Jamal Murray",
+   "net": 1.08,
+   "minutes_with": 35.3,
+   "past_games_without_him": 65,
+   "per_game_points": {
+    "a_fixed_minutes_vs_replacement": 1.97,
+    "a_fixed_minutes_vs_top_absorber": 2.96,
+    "top_absorber": {
+     "pid": 1626145,
+     "name": "Tyus Jones",
+     "net": -3.01,
+     "extra_minutes": 5.5
+    },
+    "b_roster_change_redistributed": 1.26,
+    "depth_effect_b_minus_a": -0.71
+   },
+   "per_82_games_wins": {
+    "a": 4.49,
+    "b": 2.88
+   },
+   "redistribution": {
+    "DeMar DeRozan": 3.4,
+    "Aaron Gordon": 2.6,
+    "Nikola Joki\u0107": 2.6,
+    "Tyus Jones": 5.5,
+    "Marvin Bagley III": 3.0,
+    "Cameron Johnson": 3.0,
+    "Christian Braun": 3.3,
+    "Trevon Brazile": 3.0,
+    "Spencer Jones": 4.7,
+    "Bryce Hopkins": 1.9
+   }
+  },
+  {
+   "team": 1610612743,
+   "as_of_game": "0022600054",
+   "pid": 1642461,
+   "name": "Spencer Jones",
+   "net": -2.24,
+   "minutes_with": 17.5,
+   "past_games_without_him": 9,
+   "per_game_points": {
+    "a_fixed_minutes_vs_replacement": -0.22,
+    "a_fixed_minutes_vs_top_absorber": -1.34,
+    "top_absorber": {
+     "pid": 1631128,
+     "name": "Christian Braun",
+     "net": 1.49,
+     "extra_minutes": 3.0
+    },
+    "b_roster_change_redistributed": -1.2,
+    "depth_effect_b_minus_a": -0.99
+   },
+   "per_82_games_wins": {
+    "a": -0.49,
+    "b": -2.74
+   },
+   "redistribution": {
+    "DeMar DeRozan": 1.4,
+    "Aaron Gordon": 2.2,
+    "Nikola Joki\u0107": 2.3,
+    "Jamal Murray": 2.4,
+    "Cameron Johnson": 2.8,
+    "Christian Braun": 3.0
+   }
+  },
+  {
+   "team": 1610612744,
+   "as_of_game": "0022600062",
+   "pid": 1641764,
+   "name": "Brandin Podziemski",
+   "net": 0.95,
+   "minutes_with": 33.3,
+   "past_games_without_him": 14,
+   "per_game_points": {
+    "a_fixed_minutes_vs_replacement": 1.77,
+    "a_fixed_minutes_vs_top_absorber": 1.45,
+    "top_absorber": {
+     "pid": 1629646,
+     "name": "Charles Bassey",
+     "net": -1.17,
+     "extra_minutes": 4.2
+    },
+    "b_roster_change_redistributed": 1.11,
+    "depth_effect_b_minus_a": -0.66
+   },
+   "per_82_games_wins": {
+    "a": 4.03,
+    "b": 2.52
+   },
+   "redistribution": {
+    "Al Horford": 3.1,
+    "Draymond Green": 2.7,
+    "Georges Niang": 2.7,
+    "Gary Payton II": 3.2,
+    "De'Anthony Melton": 2.7,
+    "Charles Bassey": 4.2,
+    "Brandon Williams": 3.2,
+    "Gui Santos": 4.1,
+    "Malevy Leons": 2.1,
+    "Will Richard": 2.8,
+    "Graham Ike": 1.6
+   }
+  },
+  {
+   "team": 1610612744,
+   "as_of_game": "0022600062",
+   "pid": 1642865,
+   "name": "Yaxel Lendeborg",
+   "net": -3.09,
+   "minutes_with": 32.5,
+   "past_games_without_him": 0,
+   "per_game_points": {
+    "a_fixed_minutes_vs_replacement": -0.97,
+    "a_fixed_minutes_vs_top_absorber": -1.28,
+    "top_absorber": {
+     "pid": 1629646,
+     "name": "Charles Bassey",
+     "net": -1.17,
+     "extra_minutes": 4.3
+    },
+    "b_roster_change_redistributed": -1.65,
+    "depth_effect_b_minus_a": -0.69
+   },
+   "per_82_games_wins": {
+    "a": -2.2,
+    "b": -3.77
+   },
+   "redistribution": {
+    "Al Horford": 3.1,
+    "Draymond Green": 2.5,
+    "Georges Niang": 2.8,
+    "Gary Payton II": 2.4,
+    "De'Anthony Melton": 2.7,
+    "Charles Bassey": 4.3,
+    "Brandon Williams": 3.2,
+    "Gui Santos": 4.2,
+    "Malevy Leons": 2.1,
+    "Will Richard": 2.8,
+    "Graham Ike": 1.6
+   }
+  },
+  {
+   "team": 1610612744,
+   "as_of_game": "0022600062",
+   "pid": 1630611,
+   "name": "Gui Santos",
+   "net": 0.63,
+   "minutes_with": 19.0,
+   "past_games_without_him": 9,
+   "per_game_points": {
+    "a_fixed_minutes_vs_replacement": 0.88,
+    "a_fixed_minutes_vs_top_absorber": 0.7,
+    "top_absorber": {
+     "pid": 1629646,
+     "name": "Charles Bassey",
+     "net": -1.17,
+     "extra_minutes": 4.7
+    },
+    "b_roster_change_redistributed": 0.65,
+    "depth_effect_b_minus_a": -0.23
+   },
+   "per_82_games_wins": {
+    "a": 2.01,
+    "b": 1.48
+   },
+   "redistribution": {
+    "Al Horford": 1.4,
+    "Draymond Green": 1.2,
+    "Georges Niang": 1.8,
+    "Gary Payton II": 1.1,
+    "De'Anthony Melton": 1.1,
+    "Charles Bassey": 4.7,
+    "Brandon Williams": 1.4,
+    "Malevy Leons": 2.3,
+    "Will Richard": 2.2,
+    "Graham Ike": 1.1
+   }
+  },
+  {
+   "team": 1610612745,
+   "as_of_game": "0022600061",
+   "pid": 201142,
+   "name": "Kevin Durant",
+   "net": 1.49,
+   "minutes_with": 33.6,
+   "past_games_without_him": 4,
+   "per_game_points": {
+    "a_fixed_minutes_vs_replacement": 2.16,
+    "a_fixed_minutes_vs_top_absorber": 2.61,
+    "top_absorber": {
+     "pid": 1642384,
+     "name": "Isaiah Crawford",
+     "net": -2.3,
+     "extra_minutes": 4.2
+    },
+    "b_roster_change_redistributed": 1.0,
+    "depth_effect_b_minus_a": -1.15
+   },
+   "per_82_games_wins": {
+    "a": 4.91,
+    "b": 2.28
+   },
+   "redistribution": {
+    "Steven Adams": 2.4,
+    "Marcus Smart": 3.5,
+    "Bogdan Bogdanovi\u0107": 2.5,
+    "Fred VanVleet": 1.9,
+    "Jae'Sean Tate": 2.4,
+    "Alperen Sengun": 2.1,
+    "Jabari Smith Jr.": 2.2,
+    "Tari Eason": 3.7,
+    "Oscar Tshiebwe": 2.1,
+    "Amen Thompson": 2.1,
+    "Reed Sheppard": 3.8,
+    "Isaiah Crawford": 4.2
+   }
+  },
+  {
+   "team": 1610612745,
+   "as_of_game": "0022600061",
+   "pid": 1641708,
+   "name": "Amen Thompson",
+   "net": 2.73,
+   "minutes_with": 31.8,
+   "past_games_without_him": 18,
+   "per_game_points": {
+    "a_fixed_minutes_vs_replacement": 2.85,
+    "a_fixed_minutes_vs_top_absorber": 3.53,
+    "top_absorber": {
+     "pid": 1642263,
+     "name": "Reed Sheppard",
+     "net": -2.68,
+     "extra_minutes": 4.8
+    },
+    "b_roster_change_redistributed": 1.98,
+    "depth_effect_b_minus_a": -0.87
+   },
+   "per_82_games_wins": {
+    "a": 6.49,
+    "b": 4.5
+   },
+   "redistribution": {
+    "Steven Adams": 4.5,
+    "Marcus Smart": 2.9,
+    "Bogdan Bogdanovi\u0107": 4.5,
+    "Jae'Sean Tate": 2.0,
+    "Alperen Sengun": 1.2,
+    "Jabari Smith Jr.": 1.2,
+    "Tari Eason": 2.2,
+    "Oscar Tshiebwe": 1.9,
+    "Reed Sheppard": 4.8,
+    "Isaiah Crawford": 4.0,
+    "Bruce Thornton": 1.2
+   }
+  },
+  {
+   "team": 1610612745,
+   "as_of_game": "0022600061",
+   "pid": 1642263,
+   "name": "Reed Sheppard",
+   "net": -2.68,
+   "minutes_with": 18.0,
+   "past_games_without_him": 4,
+   "per_game_points": {
+    "a_fixed_minutes_vs_replacement": -0.38,
+    "a_fixed_minutes_vs_top_absorber": -1.28,
+    "top_absorber": {
+     "pid": 1630578,
+     "name": "Alperen Sengun",
+     "net": 0.8,
+     "extra_minutes": 2.6
+    },
+    "b_roster_change_redistributed": -1.47,
+    "depth_effect_b_minus_a": -1.09
+   },
+   "per_82_games_wins": {
+    "a": -0.87,
+    "b": -3.35
+   },
+   "redistribution": {
+    "Kevin Durant": 2.3,
+    "Marcus Smart": 1.5,
+    "Fred VanVleet": 2.4,
+    "Alperen Sengun": 2.6,
+    "Jabari Smith Jr.": 2.6,
+    "Tari Eason": 1.4,
+    "Amen Thompson": 2.4
+   }
+  },
+  {
+   "team": 1610612746,
+   "as_of_game": "0022600059",
+   "pid": 1629636,
+   "name": "Darius Garland",
+   "net": -0.87,
+   "minutes_with": 33.1,
+   "past_games_without_him": 3,
+   "per_game_points": {
+    "a_fixed_minutes_vs_replacement": 0.52,
+    "a_fixed_minutes_vs_top_absorber": 0.03,
+    "top_absorber": {
+     "pid": 1642920,
+     "name": "Kobe Sanders",
+     "net": -0.91,
+     "extra_minutes": 4.9
+    },
+    "b_roster_change_redistributed": 0.05,
+    "depth_effect_b_minus_a": -0.47
+   },
+   "per_82_games_wins": {
+    "a": 1.19,
+    "b": 0.12
+   },
+   "redistribution": {
+    "Brook Lopez": 2.3,
+    "Kris Dunn": 3.3,
+    "Brandon Ingram": 3.5,
+    "Derrick Jones Jr.": 2.2,
+    "Rui Hachimura": 1.9,
+    "Max Strus": 2.9,
+    "Isaiah Jackson": 2.4,
+    "Gradey Dick": 3.4,
+    "Baba Miller": 1.5,
+    "Kobe Sanders": 4.9,
+    "Yanic Konan Niederh\u00e4user": 1.2,
+    "Keaton Wagler": 2.4
+   }
+  },
+  {
+   "team": 1610612746,
+   "as_of_game": "0022600059",
+   "pid": 1629060,
+   "name": "Rui Hachimura",
+   "net": -1.24,
+   "minutes_with": 28.9,
+   "past_games_without_him": 0,
+   "per_game_points": {
+    "a_fixed_minutes_vs_replacement": 0.24,
+    "a_fixed_minutes_vs_top_absorber": -0.05,
+    "top_absorber": {
+     "pid": 1627742,
+     "name": "Brandon Ingram",
+     "net": -1.16,
+     "extra_minutes": 3.2
+    },
+    "b_roster_change_redistributed": -0.23,
+    "depth_effect_b_minus_a": -0.46
+   },
+   "per_82_games_wins": {
+    "a": 0.54,
+    "b": -0.52
+   },
+   "redistribution": {
+    "Brook Lopez": 2.1,
+    "Kris Dunn": 2.8,
+    "Brandon Ingram": 3.2,
+    "Derrick Jones Jr.": 2.4,
+    "Max Strus": 3.1,
+    "Darius Garland": 2.5,
+    "Isaiah Jackson": 2.0,
+    "Gradey Dick": 2.9,
+    "Baba Miller": 1.0,
+    "Kobe Sanders": 3.0,
+    "Keaton Wagler": 2.2
+   }
+  },
+  {
+   "team": 1610612746,
+   "as_of_game": "0022600059",
+   "pid": 1642920,
+   "name": "Kobe Sanders",
+   "net": -0.91,
+   "minutes_with": 17.8,
+   "past_games_without_him": 6,
+   "per_game_points": {
+    "a_fixed_minutes_vs_replacement": 0.27,
+    "a_fixed_minutes_vs_top_absorber": 0.25,
+    "top_absorber": {
+     "pid": 1642949,
+     "name": "Yanic Konan Niederh\u00e4user",
+     "net": -1.6,
+     "extra_minutes": 2.2
+    },
+    "b_roster_change_redistributed": -0.03,
+    "depth_effect_b_minus_a": -0.29
+   },
+   "per_82_games_wins": {
+    "a": 0.61,
+    "b": -0.06
+   },
+   "redistribution": {
+    "Brook Lopez": 1.8,
+    "Kris Dunn": 1.4,
+    "Brandon Ingram": 1.6,
+    "Derrick Jones Jr.": 1.8,
+    "Rui Hachimura": 1.8,
+    "Max Strus": 1.5,
+    "Darius Garland": 2.1,
+    "Gradey Dick": 1.5,
+    "Yanic Konan Niederh\u00e4user": 2.2
+   }
+  },
+  {
+   "team": 1610612747,
+   "as_of_game": "0022600295",
+   "pid": 1629029,
+   "name": "Luka Don\u010di\u0107",
+   "net": 4.75,
+   "minutes_with": 35.3,
+   "past_games_without_him": 18,
+   "per_game_points": {
+    "a_fixed_minutes_vs_replacement": 4.62,
+    "a_fixed_minutes_vs_top_absorber": 3.21,
+    "top_absorber": {
+     "pid": 1626172,
+     "name": "Kevon Looney",
+     "net": 0.31,
+     "extra_minutes": 6.7
+    },
+    "b_roster_change_redistributed": 4.09,
+    "depth_effect_b_minus_a": -0.53
+   },
+   "per_82_games_wins": {
+    "a": 10.53,
+    "b": 9.32
+   },
+   "redistribution": {
+    "Kevon Looney": 6.7,
+    "Collin Sexton": 4.4,
+    "Jarred Vanderbilt": 2.0,
+    "Quentin Grimes": 1.4,
+    "Matisse Thybulle": 2.5,
+    "Ziaire Williams": 2.4,
+    "Sandro Mamukelashvili": 2.0,
+    "Jake LaRavia": 1.5,
+    "Bronny James": 1.1,
+    "Adou Thiero": 5.0,
+    "Cameron Carr": 2.4,
+    "Carson Cooper": 1.9
+   }
+  },
+  {
+   "team": 1610612747,
+   "as_of_game": "0022600295",
+   "pid": 1629656,
+   "name": "Quentin Grimes",
+   "net": -1.42,
+   "minutes_with": 30.7,
+   "past_games_without_him": 2,
+   "per_game_points": {
+    "a_fixed_minutes_vs_replacement": 0.14,
+    "a_fixed_minutes_vs_top_absorber": 0.46,
+    "top_absorber": {
+     "pid": 1642876,
+     "name": "Adou Thiero",
+     "net": -2.15,
+     "extra_minutes": 4.4
+    },
+    "b_roster_change_redistributed": -0.45,
+    "depth_effect_b_minus_a": -0.59
+   },
+   "per_82_games_wins": {
+    "a": 0.32,
+    "b": -1.03
+   },
+   "redistribution": {
+    "Kevon Looney": 2.6,
+    "Collin Sexton": 3.1,
+    "Jarred Vanderbilt": 1.2,
+    "Luka Don\u010di\u0107": 1.0,
+    "Matisse Thybulle": 2.1,
+    "Ziaire Williams": 2.7,
+    "Sandro Mamukelashvili": 3.4,
+    "Walker Kessler": 1.3,
+    "Jake LaRavia": 2.0,
+    "Adou Thiero": 4.4,
+    "Cameron Carr": 2.9,
+    "Carson Cooper": 1.9
+   }
+  },
+  {
+   "team": 1610612747,
+   "as_of_game": "0022600295",
+   "pid": 1630533,
+   "name": "Ziaire Williams",
+   "net": -1.63,
+   "minutes_with": 20.3,
+   "past_games_without_him": 0,
+   "per_game_points": {
+    "a_fixed_minutes_vs_replacement": 0.0,
+    "a_fixed_minutes_vs_top_absorber": -0.81,
+    "top_absorber": {
+     "pid": 1626172,
+     "name": "Kevon Looney",
+     "net": 0.31,
+     "extra_minutes": 5.0
+    },
+    "b_roster_change_redistributed": -0.48,
+    "depth_effect_b_minus_a": -0.49
+   },
+   "per_82_games_wins": {
+    "a": 0.01,
+    "b": -1.1
+   },
+   "redistribution": {
+    "Kevon Looney": 5.0,
+    "Collin Sexton": 2.0,
+    "Jarred Vanderbilt": 1.8,
+    "Quentin Grimes": 1.3,
+    "Sandro Mamukelashvili": 1.5,
+    "Jake LaRavia": 1.3,
+    "Adou Thiero": 2.2,
+    "Cameron Carr": 1.5
+   }
+  },
+  {
+   "team": 1610612748,
+   "as_of_game": "0022600055",
+   "pid": 1630558,
+   "name": "Davion Mitchell",
+   "net": 0.74,
+   "minutes_with": 35.5,
+   "past_games_without_him": 12,
+   "per_game_points": {
+    "a_fixed_minutes_vs_replacement": 1.73,
+    "a_fixed_minutes_vs_top_absorber": 1.0,
+    "top_absorber": {
+     "pid": 1631323,
+     "name": "Simone Fontecchio",
+     "net": -0.63,
+     "extra_minutes": 5.3
+    },
+    "b_roster_change_redistributed": 0.94,
+    "depth_effect_b_minus_a": -0.79
+   },
+   "per_82_games_wins": {
+    "a": 3.94,
+    "b": 2.15
+   },
+   "redistribution": {
+    "Klay Thompson": 1.6,
+    "Tim Hardaway Jr.": 2.4,
+    "Giannis Antetokounmpo": 1.7,
+    "Andrew Wiggins": 2.6,
+    "Bobby Portis Jr.": 3.1,
+    "Bam Adebayo": 1.4,
+    "Dru Smith": 1.5,
+    "Nikola Jovi\u0107": 5.0,
+    "Simone Fontecchio": 5.3,
+    "Pelle Larsson": 3.4,
+    "Myron Gardner": 5.0,
+    "Ryan Conwell": 1.7
+   }
+  },
+  {
+   "team": 1610612748,
+   "as_of_game": "0022600055",
+   "pid": 1628389,
+   "name": "Bam Adebayo",
+   "net": 2.75,
+   "minutes_with": 33.1,
+   "past_games_without_him": 45,
+   "per_game_points": {
+    "a_fixed_minutes_vs_replacement": 2.98,
+    "a_fixed_minutes_vs_top_absorber": 3.5,
+    "top_absorber": {
+     "pid": 1631107,
+     "name": "Nikola Jovi\u0107",
+     "net": -2.42,
+     "extra_minutes": 4.9
+    },
+    "b_roster_change_redistributed": 2.3,
+    "depth_effect_b_minus_a": -0.68
+   },
+   "per_82_games_wins": {
+    "a": 6.78,
+    "b": 5.23
+   },
+   "redistribution": {
+    "Klay Thompson": 2.4,
+    "Tim Hardaway Jr.": 2.4,
+    "Giannis Antetokounmpo": 2.6,
+    "Andrew Wiggins": 3.4,
+    "Bobby Portis Jr.": 3.6,
+    "Davion Mitchell": 2.0,
+    "Nikola Jovi\u0107": 4.9,
+    "Simone Fontecchio": 2.3,
+    "Pelle Larsson": 4.0,
+    "Myron Gardner": 1.5,
+    "Ryan Conwell": 2.4
+   }
+  },
+  {
+   "team": 1610612748,
+   "as_of_game": "0022600055",
+   "pid": 1643553,
+   "name": "Ryan Conwell",
+   "net": -1.43,
+   "minutes_with": 22.5,
+   "past_games_without_him": 0,
+   "per_game_points": {
+    "a_fixed_minutes_vs_replacement": 0.1,
+    "a_fixed_minutes_vs_top_absorber": -0.81,
+    "top_absorber": {
+     "pid": 1642066,
+     "name": "Myron Gardner",
+     "net": 0.32,
+     "extra_minutes": 2.6
+    },
+    "b_roster_change_redistributed": -0.71,
+    "depth_effect_b_minus_a": -0.81
+   },
+   "per_82_games_wins": {
+    "a": 0.22,
+    "b": -1.62
+   },
+   "redistribution": {
+    "Klay Thompson": 1.6,
+    "Tim Hardaway Jr.": 1.3,
+    "Giannis Antetokounmpo": 2.3,
+    "Andrew Wiggins": 2.4,
+    "Bobby Portis Jr.": 2.5,
+    "Bam Adebayo": 2.2,
+    "Davion Mitchell": 1.8,
+    "Nikola Jovi\u0107": 1.6,
+    "Simone Fontecchio": 1.5,
+    "Pelle Larsson": 2.2,
+    "Myron Gardner": 2.6
+   }
+  },
+  {
+   "team": 1610612749,
+   "as_of_game": "0022600060",
+   "pid": 1629639,
+   "name": "Tyler Herro",
+   "net": -0.73,
+   "minutes_with": 31.8,
+   "past_games_without_him": 1,
+   "per_game_points": {
+    "a_fixed_minutes_vs_replacement": 0.59,
+    "a_fixed_minutes_vs_top_absorber": 2.43,
+    "top_absorber": {
+     "pid": 1631172,
+     "name": "Ousmane Dieng",
+     "net": -4.46,
+     "extra_minutes": 6.9
+    },
+    "b_roster_change_redistributed": 1.02,
+    "depth_effect_b_minus_a": 0.43
+   },
+   "per_82_games_wins": {
+    "a": 1.35,
+    "b": 2.32
+   },
+   "redistribution": {
+    "Myles Turner": 1.4,
+    "Kyle Kuzma": 1.4,
+    "Jericho Sims": 2.1,
+    "Ryan Rollins": 2.6,
+    "Jaime Jaquez Jr.": 2.4,
+    "Ousmane Dieng": 6.9,
+    "Pete Nance": 1.7,
+    "Kel'el Ware": 2.9,
+    "Kasparas Jaku\u010dionis": 3.0,
+    "Brayden Burries": 2.1,
+    "Nate Ament": 4.8
+   }
+  },
+  {
+   "team": 1610612749,
+   "as_of_game": "0022600060",
+   "pid": 1628398,
+   "name": "Kyle Kuzma",
+   "net": -4.16,
+   "minutes_with": 30.1,
+   "past_games_without_him": 11,
+   "per_game_points": {
+    "a_fixed_minutes_vs_replacement": -1.56,
+    "a_fixed_minutes_vs_top_absorber": -0.9,
+    "top_absorber": {
+     "pid": 1643417,
+     "name": "Nate Ament",
+     "net": -2.71,
+     "extra_minutes": 5.7
+    },
+    "b_roster_change_redistributed": -1.2,
+    "depth_effect_b_minus_a": 0.36
+   },
+   "per_82_games_wins": {
+    "a": -3.54,
+    "b": -2.73
+   },
+   "redistribution": {
+    "Gary Trent Jr.": 2.3,
+    "Jericho Sims": 3.5,
+    "Ousmane Dieng": 4.3,
+    "Pete Nance": 3.4,
+    "AJ Green": 1.7,
+    "Kel'el Ware": 5.4,
+    "Kasparas Jaku\u010dionis": 2.0,
+    "Nate Ament": 5.7
+   }
+  },
+  {
+   "team": 1610612749,
+   "as_of_game": "0022600060",
+   "pid": 1643417,
+   "name": "Nate Ament",
+   "net": -2.71,
+   "minutes_with": 18.9,
+   "past_games_without_him": 0,
+   "per_game_points": {
+    "a_fixed_minutes_vs_replacement": -0.42,
+    "a_fixed_minutes_vs_top_absorber": -0.85,
+    "top_absorber": {
+     "pid": 1642276,
+     "name": "Kel'el Ware",
+     "net": -0.51,
+     "extra_minutes": 2.3
+    },
+    "b_roster_change_redistributed": -0.46,
+    "depth_effect_b_minus_a": -0.05
+   },
+   "per_82_games_wins": {
+    "a": -0.95,
+    "b": -1.06
+   },
+   "redistribution": {
+    "Myles Turner": 1.3,
+    "Kyle Kuzma": 1.9,
+    "Tyler Herro": 2.2,
+    "Jericho Sims": 1.2,
+    "Ryan Rollins": 2.1,
+    "Jaime Jaquez Jr.": 1.7,
+    "Ousmane Dieng": 1.4,
+    "Pete Nance": 1.3,
+    "Kel'el Ware": 2.3,
+    "Brayden Burries": 1.7
+   }
+  },
+  {
+   "team": 1610612750,
+   "as_of_game": "0022600058",
+   "pid": 1630183,
+   "name": "Jaden McDaniels",
+   "net": 0.9,
+   "minutes_with": 33.4,
+   "past_games_without_him": 30,
+   "per_game_points": {
+    "a_fixed_minutes_vs_replacement": 1.74,
+    "a_fixed_minutes_vs_top_absorber": -0.03,
+    "top_absorber": {
+     "pid": 1641740,
+     "name": "Jaylen Clark",
+     "net": 0.94,
+     "extra_minutes": 4.8
+    },
+    "b_roster_change_redistributed": 0.67,
+    "depth_effect_b_minus_a": -1.07
+   },
+   "per_82_games_wins": {
+    "a": 3.96,
+    "b": 1.52
+   },
+   "redistribution": {
+    "Rudy Gobert": 2.2,
+    "Trey Lyles": 2.9,
+    "LaMelo Ball": 2.6,
+    "Jonathan Kuminga": 2.8,
+    "Ayo Dosunmu": 2.6,
+    "Bones Hyland": 2.8,
+    "Terrence Shannon Jr": 3.3,
+    "Jaylen Clark": 4.8,
+    "Cody Williams": 2.7,
+    "Zyon Pullin": 1.1,
+    "Joan Beringer": 3.6,
+    "Isaiah Evans": 1.4
+   }
+  },
+  {
+   "team": 1610612750,
+   "as_of_game": "0022600058",
+   "pid": 1630245,
+   "name": "Ayo Dosunmu",
+   "net": -0.49,
+   "minutes_with": 31.6,
+   "past_games_without_him": 5,
+   "per_game_points": {
+    "a_fixed_minutes_vs_replacement": 0.75,
+    "a_fixed_minutes_vs_top_absorber": -0.93,
+    "top_absorber": {
+     "pid": 1641740,
+     "name": "Jaylen Clark",
+     "net": 0.94,
+     "extra_minutes": 4.9
+    },
+    "b_roster_change_redistributed": -0.27,
+    "depth_effect_b_minus_a": -1.02
+   },
+   "per_82_games_wins": {
+    "a": 1.7,
+    "b": -0.62
+   },
+   "redistribution": {
+    "Rudy Gobert": 1.4,
+    "Trey Lyles": 2.6,
+    "LaMelo Ball": 2.3,
+    "Jaden McDaniels": 1.6,
+    "Jonathan Kuminga": 2.4,
+    "Bones Hyland": 2.8,
+    "Terrence Shannon Jr": 3.3,
+    "Jaylen Clark": 4.9,
+    "Cody Williams": 2.6,
+    "Zyon Pullin": 1.1,
+    "Joan Beringer": 4.5,
+    "Isaiah Evans": 1.3
+   }
+  },
+  {
+   "team": 1610612750,
+   "as_of_game": "0022600058",
+   "pid": 1626168,
+   "name": "Trey Lyles",
+   "net": 0.77,
+   "minutes_with": 19.1,
+   "past_games_without_him": 0,
+   "per_game_points": {
+    "a_fixed_minutes_vs_replacement": 0.94,
+    "a_fixed_minutes_vs_top_absorber": 0.49,
+    "top_absorber": {
+     "pid": 1630245,
+     "name": "Ayo Dosunmu",
+     "net": -0.49,
+     "extra_minutes": 2.6
+    },
+    "b_roster_change_redistributed": 0.16,
+    "depth_effect_b_minus_a": -0.78
+   },
+   "per_82_games_wins": {
+    "a": 2.15,
+    "b": 0.37
+   },
+   "redistribution": {
+    "Rudy Gobert": 2.0,
+    "LaMelo Ball": 2.4,
+    "Jaden McDaniels": 2.4,
+    "Jonathan Kuminga": 2.5,
+    "Ayo Dosunmu": 2.6,
+    "Terrence Shannon Jr": 1.5,
+    "Jaylen Clark": 1.7,
+    "Cody Williams": 1.2,
+    "Joan Beringer": 1.1
+   }
+  },
+  {
+   "team": 1610612751,
+   "as_of_game": "0022600060",
+   "pid": 1629008,
+   "name": "Michael Porter Jr.",
+   "net": 0.51,
+   "minutes_with": 33.2,
+   "past_games_without_him": 19,
+   "per_game_points": {
+    "a_fixed_minutes_vs_replacement": 1.46,
+    "a_fixed_minutes_vs_top_absorber": 1.65,
+    "top_absorber": {
+     "pid": 1629611,
+     "name": "Terance Mann",
+     "net": -1.92,
+     "extra_minutes": 5.4
+    },
+    "b_roster_change_redistributed": 1.44,
+    "depth_effect_b_minus_a": -0.02
+   },
+   "per_82_games_wins": {
+    "a": 3.33,
+    "b": 3.29
+   },
+   "redistribution": {
+    "Julius Randle": 2.0,
+    "Moritz Wagner": 3.3,
+    "Terance Mann": 5.4,
+    "Day'Ron Sharpe": 2.4,
+    "Josh Minott": 2.1,
+    "Noah Clowney": 2.7,
+    "Grant Nelson": 1.6,
+    "Egor D\u00ebmin": 3.4,
+    "Danny Wolf": 3.6,
+    "Drake Powell": 1.3,
+    "Chaney Johnson": 4.2,
+    "Mikel Brown Jr.": 1.1
+   }
+  },
+  {
+   "team": 1610612751,
+   "as_of_game": "0022600060",
+   "pid": 203944,
+   "name": "Julius Randle",
+   "net": -0.23,
+   "minutes_with": 32.3,
+   "past_games_without_him": 0,
+   "per_game_points": {
+    "a_fixed_minutes_vs_replacement": 0.93,
+    "a_fixed_minutes_vs_top_absorber": 1.12,
+    "top_absorber": {
+     "pid": 1629611,
+     "name": "Terance Mann",
+     "net": -1.92,
+     "extra_minutes": 5.2
+    },
+    "b_roster_change_redistributed": 0.93,
+    "depth_effect_b_minus_a": -0.0
+   },
+   "per_82_games_wins": {
+    "a": 2.13,
+    "b": 2.13
+   },
+   "redistribution": {
+    "Michael Porter Jr.": 1.4,
+    "Moritz Wagner": 3.0,
+    "Terance Mann": 5.2,
+    "Day'Ron Sharpe": 1.6,
+    "Keon Ellis": 2.8,
+    "Josh Minott": 1.3,
+    "Noah Clowney": 2.0,
+    "Grant Nelson": 1.4,
+    "Egor D\u00ebmin": 3.0,
+    "Danny Wolf": 2.7,
+    "Drake Powell": 1.3,
+    "Chaney Johnson": 4.0,
+    "Mikel Brown Jr.": 2.6
+   }
+  },
+  {
+   "team": 1610612751,
+   "as_of_game": "0022600060",
+   "pid": 1641730,
+   "name": "Noah Clowney",
+   "net": -3.24,
+   "minutes_with": 19.6,
+   "past_games_without_him": 30,
+   "per_game_points": {
+    "a_fixed_minutes_vs_replacement": -0.64,
+    "a_fixed_minutes_vs_top_absorber": -0.53,
+    "top_absorber": {
+     "pid": 1629611,
+     "name": "Terance Mann",
+     "net": -1.92,
+     "extra_minutes": 3.3
+    },
+    "b_roster_change_redistributed": -0.76,
+    "depth_effect_b_minus_a": -0.12
+   },
+   "per_82_games_wins": {
+    "a": -1.46,
+    "b": -1.73
+   },
+   "redistribution": {
+    "Julius Randle": 1.1,
+    "Michael Porter Jr.": 1.1,
+    "Moritz Wagner": 2.0,
+    "Terance Mann": 3.3,
+    "Keon Ellis": 1.5,
+    "Josh Minott": 1.3,
+    "Egor D\u00ebmin": 1.9,
+    "Danny Wolf": 1.7,
+    "Chaney Johnson": 2.2,
+    "Mikel Brown Jr.": 1.2
+   }
+  },
+  {
+   "team": 1610612752,
+   "as_of_game": "0022600057",
+   "pid": 1628973,
+   "name": "Jalen Brunson",
+   "net": 1.11,
+   "minutes_with": 34.4,
+   "past_games_without_him": 37,
+   "per_game_points": {
+    "a_fixed_minutes_vs_replacement": 1.94,
+    "a_fixed_minutes_vs_top_absorber": 1.08,
+    "top_absorber": {
+     "pid": 203903,
+     "name": "Jordan Clarkson",
+     "net": -0.42,
+     "extra_minutes": 6.1
+    },
+    "b_roster_change_redistributed": 1.38,
+    "depth_effect_b_minus_a": -0.56
+   },
+   "per_82_games_wins": {
+    "a": 4.42,
+    "b": 3.15
+   },
+   "redistribution": {
+    "Andre Drummond": 4.1,
+    "Jordan Clarkson": 6.1,
+    "Josh Hart": 1.2,
+    "Mikal Bridges": 2.1,
+    "Landry Shamet": 2.2,
+    "James Wiseman": 4.0,
+    "Jose Alvarado": 3.1,
+    "Dalton Knecht": 1.5,
+    "Tyler Kolek": 4.0,
+    "Pac\u00f4me Dadiet": 2.5,
+    "Mohamed Diawara": 2.2
+   }
+  },
+  {
+   "team": 1610612752,
+   "as_of_game": "0022600057",
+   "pid": 1626157,
+   "name": "Karl-Anthony Towns",
+   "net": 3.5,
+   "minutes_with": 32.8,
+   "past_games_without_him": 18,
+   "per_game_points": {
+    "a_fixed_minutes_vs_replacement": 3.46,
+    "a_fixed_minutes_vs_top_absorber": 3.06,
+    "top_absorber": {
+     "pid": 203083,
+     "name": "Andre Drummond",
+     "net": -1.05,
+     "extra_minutes": 4.5
+    },
+    "b_roster_change_redistributed": 3.04,
+    "depth_effect_b_minus_a": -0.41
+   },
+   "per_82_games_wins": {
+    "a": 7.87,
+    "b": 6.93
+   },
+   "redistribution": {
+    "Andre Drummond": 4.5,
+    "Jordan Clarkson": 3.8,
+    "Josh Hart": 1.3,
+    "Mikal Bridges": 2.1,
+    "Jalen Brunson": 1.3,
+    "Landry Shamet": 2.2,
+    "James Wiseman": 4.1,
+    "Jose Alvarado": 2.3,
+    "Dalton Knecht": 1.6,
+    "Tyler Kolek": 3.1,
+    "Pac\u00f4me Dadiet": 2.5,
+    "Mohamed Diawara": 3.7
+   }
+  },
+  {
+   "team": 1610612752,
+   "as_of_game": "0022600057",
+   "pid": 1642278,
+   "name": "Tyler Kolek",
+   "net": -0.55,
+   "minutes_with": 16.5,
+   "past_games_without_him": 12,
+   "per_game_points": {
+    "a_fixed_minutes_vs_replacement": 0.37,
+    "a_fixed_minutes_vs_top_absorber": 1.06,
+    "top_absorber": {
+     "pid": 1630164,
+     "name": "James Wiseman",
+     "net": -3.68,
+     "extra_minutes": 2.3
+    },
+    "b_roster_change_redistributed": -0.09,
+    "depth_effect_b_minus_a": -0.46
+   },
+   "per_82_games_wins": {
+    "a": 0.84,
+    "b": -0.21
+   },
+   "redistribution": {
+    "Andre Drummond": 2.0,
+    "Jordan Clarkson": 1.3,
+    "Karl-Anthony Towns": 1.8,
+    "Josh Hart": 1.9,
+    "Mikal Bridges": 2.2,
+    "Jalen Brunson": 2.0,
+    "Landry Shamet": 1.7,
+    "James Wiseman": 2.3,
+    "Pac\u00f4me Dadiet": 1.2
+   }
+  },
+  {
+   "team": 1610612753,
+   "as_of_game": "0022600052",
+   "pid": 1630532,
+   "name": "Franz Wagner",
+   "net": 2.96,
+   "minutes_with": 33.3,
+   "past_games_without_him": 32,
+   "per_game_points": {
+    "a_fixed_minutes_vs_replacement": 3.14,
+    "a_fixed_minutes_vs_top_absorber": 3.37,
+    "top_absorber": {
+     "pid": 1631457,
+     "name": "Alex Morales",
+     "net": -1.97,
+     "extra_minutes": 6.0
+    },
+    "b_roster_change_redistributed": 2.83,
+    "depth_effect_b_minus_a": -0.31
+   },
+   "per_82_games_wins": {
+    "a": 7.16,
+    "b": 6.45
+   },
+   "redistribution": {
+    "Jevon Carter": 2.4,
+    "Wendell Carter Jr.": 1.5,
+    "Goga Bitadze": 3.8,
+    "Desmond Bane": 1.6,
+    "Jalen Suggs": 1.6,
+    "Colin Castleton": 1.2,
+    "Jamal Cain": 4.9,
+    "Alex Morales": 6.0,
+    "Anthony Black": 1.6,
+    "Tristan da Silva": 3.7,
+    "Jase Richardson": 4.9
+   }
+  },
+  {
+   "team": 1610612753,
+   "as_of_game": "0022600052",
+   "pid": 1641710,
+   "name": "Anthony Black",
+   "net": -1.17,
+   "minutes_with": 32.7,
+   "past_games_without_him": 18,
+   "per_game_points": {
+    "a_fixed_minutes_vs_replacement": 0.32,
+    "a_fixed_minutes_vs_top_absorber": 1.03,
+    "top_absorber": {
+     "pid": 1631288,
+     "name": "Jamal Cain",
+     "net": -2.71,
+     "extra_minutes": 5.4
+    },
+    "b_roster_change_redistributed": -0.29,
+    "depth_effect_b_minus_a": -0.6
+   },
+   "per_82_games_wins": {
+    "a": 0.72,
+    "b": -0.66
+   },
+   "redistribution": {
+    "Jevon Carter": 2.7,
+    "Wendell Carter Jr.": 2.1,
+    "Goga Bitadze": 3.2,
+    "Desmond Bane": 2.2,
+    "Franz Wagner": 2.3,
+    "Jalen Suggs": 2.5,
+    "Colin Castleton": 1.1,
+    "Jamal Cain": 5.4,
+    "Alex Morales": 4.0,
+    "Tristan da Silva": 3.8,
+    "Jase Richardson": 3.5
+   }
+  },
+  {
+   "team": 1610612753,
+   "as_of_game": "0022600052",
+   "pid": 1642859,
+   "name": "Jase Richardson",
+   "net": -2.71,
+   "minutes_with": 17.5,
+   "past_games_without_him": 7,
+   "per_game_points": {
+    "a_fixed_minutes_vs_replacement": -0.38,
+    "a_fixed_minutes_vs_top_absorber": -0.27,
+    "top_absorber": {
+     "pid": 1631457,
+     "name": "Alex Morales",
+     "net": -1.97,
+     "extra_minutes": 2.9
+    },
+    "b_roster_change_redistributed": -0.87,
+    "depth_effect_b_minus_a": -0.49
+   },
+   "per_82_games_wins": {
+    "a": -0.87,
+    "b": -1.99
+   },
+   "redistribution": {
+    "Jevon Carter": 1.5,
+    "Wendell Carter Jr.": 1.5,
+    "Goga Bitadze": 1.6,
+    "Desmond Bane": 1.5,
+    "Franz Wagner": 1.5,
+    "Jalen Suggs": 1.7,
+    "Jamal Cain": 1.0,
+    "Alex Morales": 2.9,
+    "Anthony Black": 1.6,
+    "Tristan da Silva": 2.2
+   }
+  },
+  {
+   "team": 1610612754,
+   "as_of_game": "0022600289",
+   "pid": 1629614,
+   "name": "Andrew Nembhard",
+   "net": -0.96,
+   "minutes_with": 32.8,
+   "past_games_without_him": 46,
+   "per_game_points": {
+    "a_fixed_minutes_vs_replacement": 0.46,
+    "a_fixed_minutes_vs_top_absorber": 0.28,
+    "top_absorber": {
+     "pid": 204456,
+     "name": "T.J. McConnell",
+     "net": -1.38,
+     "extra_minutes": 4.7
+    },
+    "b_roster_change_redistributed": 0.21,
+    "depth_effect_b_minus_a": -0.24
+   },
+   "per_82_games_wins": {
+    "a": 1.04,
+    "b": 0.49
+   },
+   "redistribution": {
+    "T.J. McConnell": 4.7,
+    "Kelly Oubre Jr.": 2.0,
+    "Larry Nance Jr.": 1.3,
+    "Ivica Zubac": 2.0,
+    "Obi Toppin": 2.6,
+    "Quenton Jackson": 3.0,
+    "Jarace Walker": 4.6,
+    "Kobe Brown": 3.9,
+    "Jalen Slawson": 3.9,
+    "Braden Smith": 3.5
+   }
+  },
+  {
+   "team": 1610612754,
+   "as_of_game": "0022600289",
+   "pid": 1627783,
+   "name": "Pascal Siakam",
+   "net": 1.88,
+   "minutes_with": 32.0,
+   "past_games_without_him": 21,
+   "per_game_points": {
+    "a_fixed_minutes_vs_replacement": 2.31,
+    "a_fixed_minutes_vs_top_absorber": 0.98,
+    "top_absorber": {
+     "pid": 1641771,
+     "name": "Jalen Slawson",
+     "net": 0.39,
+     "extra_minutes": 4.5
+    },
+    "b_roster_change_redistributed": 2.1,
+    "depth_effect_b_minus_a": -0.21
+   },
+   "per_82_games_wins": {
+    "a": 5.26,
+    "b": 4.79
+   },
+   "redistribution": {
+    "T.J. McConnell": 4.4,
+    "Kelly Oubre Jr.": 1.5,
+    "Larry Nance Jr.": 2.4,
+    "Ivica Zubac": 2.2,
+    "Obi Toppin": 3.2,
+    "Quenton Jackson": 3.1,
+    "Jarace Walker": 4.5,
+    "Kobe Brown": 3.7,
+    "Jalen Slawson": 4.5,
+    "Braden Smith": 1.7
+   }
+  },
+  {
+   "team": 1610612754,
+   "as_of_game": "0022600289",
+   "pid": 1643552,
+   "name": "Braden Smith",
+   "net": 0.46,
+   "minutes_with": 17.4,
+   "past_games_without_him": 3,
+   "per_game_points": {
+    "a_fixed_minutes_vs_replacement": 0.75,
+    "a_fixed_minutes_vs_top_absorber": 0.66,
+    "top_absorber": {
+     "pid": 204456,
+     "name": "T.J. McConnell",
+     "net": -1.38,
+     "extra_minutes": 4.4
+    },
+    "b_roster_change_redistributed": 0.33,
+    "depth_effect_b_minus_a": -0.42
+   },
+   "per_82_games_wins": {
+    "a": 1.7,
+    "b": 0.74
+   },
+   "redistribution": {
+    "T.J. McConnell": 4.4,
+    "Kelly Oubre Jr.": 3.2,
+    "Pascal Siakam": 1.3,
+    "Ivica Zubac": 3.0,
+    "Andrew Nembhard": 1.2,
+    "Obi Toppin": 1.1,
+    "Quenton Jackson": 1.5,
+    "Jalen Slawson": 1.4
+   }
+  },
+  {
+   "team": 1610612755,
+   "as_of_game": "0022600055",
+   "pid": 1642845,
+   "name": "VJ Edgecombe",
+   "net": 1.84,
+   "minutes_with": 34.6,
+   "past_games_without_him": 7,
+   "per_game_points": {
+    "a_fixed_minutes_vs_replacement": 2.47,
+    "a_fixed_minutes_vs_top_absorber": 2.88,
+    "top_absorber": {
+     "pid": 1642889,
+     "name": "Labaron Philon Jr.",
+     "net": -2.23,
+     "extra_minutes": 4.2
+    },
+    "b_roster_change_redistributed": 2.08,
+    "depth_effect_b_minus_a": -0.38
+   },
+   "per_82_games_wins": {
+    "a": 5.62,
+    "b": 4.74
+   },
+   "redistribution": {
+    "LeBron James": 1.7,
+    "Kentavious Caldwell-Pope": 3.0,
+    "Jaylen Brown": 1.8,
+    "Anfernee Simons": 2.9,
+    "Tacko Fall": 1.1,
+    "Dean Wade": 3.1,
+    "Tyrese Maxey": 2.0,
+    "Jabari Walker": 3.3,
+    "Dominick Barlow": 3.2,
+    "Rayan Rupert": 2.1,
+    "Adem Bona": 3.4,
+    "Justin Edwards": 2.5,
+    "Labaron Philon Jr.": 4.2
+   }
+  },
+  {
+   "team": 1610612755,
+   "as_of_game": "0022600055",
+   "pid": 1630178,
+   "name": "Tyrese Maxey",
+   "net": 0.52,
+   "minutes_with": 34.0,
+   "past_games_without_him": 57,
+   "per_game_points": {
+    "a_fixed_minutes_vs_replacement": 1.5,
+    "a_fixed_minutes_vs_top_absorber": 1.67,
+    "top_absorber": {
+     "pid": 1629014,
+     "name": "Anfernee Simons",
+     "net": -1.88,
+     "extra_minutes": 7.7
+    },
+    "b_roster_change_redistributed": 1.38,
+    "depth_effect_b_minus_a": -0.12
+   },
+   "per_82_games_wins": {
+    "a": 3.43,
+    "b": 3.15
+   },
+   "redistribution": {
+    "Kentavious Caldwell-Pope": 4.3,
+    "Anfernee Simons": 7.7,
+    "Tacko Fall": 1.2,
+    "Dean Wade": 1.9,
+    "Jabari Walker": 1.1,
+    "Dominick Barlow": 3.0,
+    "Rayan Rupert": 1.9,
+    "Adem Bona": 2.5,
+    "Justin Edwards": 2.3,
+    "Labaron Philon Jr.": 6.1
+   }
+  },
+  {
+   "team": 1610612755,
+   "as_of_game": "0022600055",
+   "pid": 1629014,
+   "name": "Anfernee Simons",
+   "net": -1.88,
+   "minutes_with": 18.2,
+   "past_games_without_him": 0,
+   "per_game_points": {
+    "a_fixed_minutes_vs_replacement": -0.09,
+    "a_fixed_minutes_vs_top_absorber": 0.13,
+    "top_absorber": {
+     "pid": 1642889,
+     "name": "Labaron Philon Jr.",
+     "net": -2.23,
+     "extra_minutes": 2.6
+    },
+    "b_roster_change_redistributed": -0.36,
+    "depth_effect_b_minus_a": -0.27
+   },
+   "per_82_games_wins": {
+    "a": -0.2,
+    "b": -0.82
+   },
+   "redistribution": {
+    "Kentavious Caldwell-Pope": 1.1,
+    "Jaylen Brown": 1.1,
+    "Dean Wade": 1.5,
+    "Tyrese Maxey": 1.0,
+    "Jabari Walker": 2.1,
+    "Dominick Barlow": 2.5,
+    "Rayan Rupert": 1.1,
+    "Adem Bona": 1.3,
+    "Justin Edwards": 1.2,
+    "VJ Edgecombe": 1.0,
+    "Labaron Philon Jr.": 2.6
+   }
+  },
+  {
+   "team": 1610612756,
+   "as_of_game": "0022600061",
+   "pid": 1626164,
+   "name": "Devin Booker",
+   "net": 1.81,
+   "minutes_with": 33.5,
+   "past_games_without_him": 57,
+   "per_game_points": {
+    "a_fixed_minutes_vs_replacement": 2.37,
+    "a_fixed_minutes_vs_top_absorber": 2.39,
+    "top_absorber": {
+     "pid": 1642863,
+     "name": "Khaman Maluach",
+     "net": -1.67,
+     "extra_minutes": 3.4
+    },
+    "b_roster_change_redistributed": 1.5,
+    "depth_effect_b_minus_a": -0.87
+   },
+   "per_82_games_wins": {
+    "a": 5.39,
+    "b": 3.42
+   },
+   "redistribution": {
+    "Luke Kennard": 3.4,
+    "Dillon Brooks": 2.3,
+    "Miles Bridges": 2.6,
+    "Jalen Green": 2.8,
+    "Jordan Goodwin": 3.2,
+    "Jamaree Bouyea": 3.1,
+    "Collin Gillespie": 2.5,
+    "Oso Ighodaro": 2.2,
+    "Ryan Dunn": 3.1,
+    "Rasheer Fleming": 3.1,
+    "Khaman Maluach": 3.4,
+    "Koa Peat": 1.0
+   }
+  },
+  {
+   "team": 1610612756,
+   "as_of_game": "0022600061",
+   "pid": 1628415,
+   "name": "Dillon Brooks",
+   "net": 0.4,
+   "minutes_with": 28.8,
+   "past_games_without_him": 7,
+   "per_game_points": {
+    "a_fixed_minutes_vs_replacement": 1.2,
+    "a_fixed_minutes_vs_top_absorber": 0.08,
+    "top_absorber": {
+     "pid": 1642346,
+     "name": "Ryan Dunn",
+     "net": 0.27,
+     "extra_minutes": 3.6
+    },
+    "b_roster_change_redistributed": 0.4,
+    "depth_effect_b_minus_a": -0.81
+   },
+   "per_82_games_wins": {
+    "a": 2.74,
+    "b": 0.9
+   },
+   "redistribution": {
+    "Devin Booker": 1.5,
+    "Luke Kennard": 2.4,
+    "Miles Bridges": 1.9,
+    "Jalen Green": 2.1,
+    "Jordan Goodwin": 2.8,
+    "Jamaree Bouyea": 2.7,
+    "Collin Gillespie": 1.9,
+    "Oso Ighodaro": 2.4,
+    "Ryan Dunn": 3.6,
+    "Rasheer Fleming": 3.2,
+    "Khaman Maluach": 3.3
+   }
+  },
+  {
+   "team": 1610612756,
+   "as_of_game": "0022600061",
+   "pid": 1630692,
+   "name": "Jordan Goodwin",
+   "net": 1.67,
+   "minutes_with": 19.8,
+   "past_games_without_him": 12,
+   "per_game_points": {
+    "a_fixed_minutes_vs_replacement": 1.34,
+    "a_fixed_minutes_vs_top_absorber": 0.95,
+    "top_absorber": {
+     "pid": 1642853,
+     "name": "Rasheer Fleming",
+     "net": -0.66,
+     "extra_minutes": 2.5
+    },
+    "b_roster_change_redistributed": 0.82,
+    "depth_effect_b_minus_a": -0.52
+   },
+   "per_82_games_wins": {
+    "a": 3.06,
+    "b": 1.88
+   },
+   "redistribution": {
+    "Devin Booker": 1.9,
+    "Luke Kennard": 1.6,
+    "Miles Bridges": 1.5,
+    "Jalen Green": 1.7,
+    "Jamaree Bouyea": 2.2,
+    "Collin Gillespie": 1.3,
+    "Oso Ighodaro": 2.1,
+    "Ryan Dunn": 1.7,
+    "Rasheer Fleming": 2.5,
+    "Khaman Maluach": 2.3
+   }
+  },
+  {
+   "team": 1610612757,
+   "as_of_game": "0022600063",
+   "pid": 1630166,
+   "name": "Deni Avdija",
+   "net": 0.47,
+   "minutes_with": 32.6,
+   "past_games_without_him": 23,
+   "per_game_points": {
+    "a_fixed_minutes_vs_replacement": 1.41,
+    "a_fixed_minutes_vs_top_absorber": 1.28,
+    "top_absorber": {
+     "pid": 1643257,
+     "name": "Jayson Kent",
+     "net": -1.45,
+     "extra_minutes": 7.8
+    },
+    "b_roster_change_redistributed": 0.82,
+    "depth_effect_b_minus_a": -0.59
+   },
+   "per_82_games_wins": {
+    "a": 3.21,
+    "b": 1.86
+   },
+   "redistribution": {
+    "Jrue Holiday": 3.2,
+    "Damian Lillard": 1.9,
+    "Robert Williams III": 3.1,
+    "Scoot Henderson": 3.5,
+    "Sidy Cissoko": 2.1,
+    "Toumani Camara": 1.5,
+    "Donovan Clingan": 1.3,
+    "Branden Carlson": 4.3,
+    "Yang Hansen": 1.9,
+    "Jayson Kent": 7.8
+   }
+  },
+  {
+   "team": 1610612757,
+   "as_of_game": "0022600063",
+   "pid": 1641739,
+   "name": "Toumani Camara",
+   "net": 1.21,
+   "minutes_with": 31.4,
+   "past_games_without_him": 15,
+   "per_game_points": {
+    "a_fixed_minutes_vs_replacement": 1.84,
+    "a_fixed_minutes_vs_top_absorber": 2.91,
+    "top_absorber": {
+     "pid": 1630703,
+     "name": "Scoot Henderson",
+     "net": -3.3,
+     "extra_minutes": 4.6
+    },
+    "b_roster_change_redistributed": 1.1,
+    "depth_effect_b_minus_a": -0.74
+   },
+   "per_82_games_wins": {
+    "a": 4.18,
+    "b": 2.51
+   },
+   "redistribution": {
+    "Jrue Holiday": 3.4,
+    "Damian Lillard": 2.8,
+    "Robert Williams III": 1.6,
+    "Deni Avdija": 3.0,
+    "Scoot Henderson": 4.6,
+    "Sidy Cissoko": 2.7,
+    "Donovan Clingan": 2.5,
+    "Branden Carlson": 2.4,
+    "Yang Hansen": 1.8,
+    "Chris Youngblood": 1.2,
+    "Jayson Kent": 3.4
+   }
+  },
+  {
+   "team": 1610612757,
+   "as_of_game": "0022600063",
+   "pid": 1630703,
+   "name": "Scoot Henderson",
+   "net": -3.3,
+   "minutes_with": 21.6,
+   "past_games_without_him": 24,
+   "per_game_points": {
+    "a_fixed_minutes_vs_replacement": -0.74,
+    "a_fixed_minutes_vs_top_absorber": -1.67,
+    "top_absorber": {
+     "pid": 1630166,
+     "name": "Deni Avdija",
+     "net": 0.47,
+     "extra_minutes": 2.9
+    },
+    "b_roster_change_redistributed": -1.6,
+    "depth_effect_b_minus_a": -0.87
+   },
+   "per_82_games_wins": {
+    "a": -1.68,
+    "b": -3.65
+   },
+   "redistribution": {
+    "Jrue Holiday": 2.2,
+    "Damian Lillard": 2.4,
+    "Deni Avdija": 2.9,
+    "Sidy Cissoko": 2.1,
+    "Toumani Camara": 2.7,
+    "Donovan Clingan": 2.3,
+    "Branden Carlson": 1.6,
+    "Chris Youngblood": 1.0,
+    "Jayson Kent": 2.4
+   }
+  },
+  {
+   "team": 1610612758,
+   "as_of_game": "0022600062",
+   "pid": 1629631,
+   "name": "De'Andre Hunter",
+   "net": -1.29,
+   "minutes_with": 34.6,
+   "past_games_without_him": 1,
+   "per_game_points": {
+    "a_fixed_minutes_vs_replacement": 0.25,
+    "a_fixed_minutes_vs_top_absorber": 0.02,
+    "top_absorber": {
+     "pid": 1628370,
+     "name": "Malik Monk",
+     "net": -1.32,
+     "extra_minutes": 6.6
+    },
+    "b_roster_change_redistributed": 0.18,
+    "depth_effect_b_minus_a": -0.07
+   },
+   "per_82_games_wins": {
+    "a": 0.57,
+    "b": 0.41
+   },
+   "redistribution": {
+    "Mason Plumlee": 1.9,
+    "Malik Monk": 6.6,
+    "Precious Achiuwa": 2.4,
+    "Daeqwon Plowden": 5.7,
+    "Leaky Black": 3.5,
+    "Alex Karaban": 4.2,
+    "Nique Clifford": 1.9,
+    "Dylan Cardwell": 2.7,
+    "Emanuel Sharp": 3.2
+   }
+  },
+  {
+   "team": 1610612758,
+   "as_of_game": "0022600062",
+   "pid": 1643411,
+   "name": "Darius Acuff Jr.",
+   "net": -4.0,
+   "minutes_with": 34.3,
+   "past_games_without_him": 0,
+   "per_game_points": {
+    "a_fixed_minutes_vs_replacement": -1.66,
+    "a_fixed_minutes_vs_top_absorber": -1.24,
+    "top_absorber": {
+     "pid": 1631342,
+     "name": "Daeqwon Plowden",
+     "net": -2.24,
+     "extra_minutes": 5.2
+    },
+    "b_roster_change_redistributed": -1.86,
+    "depth_effect_b_minus_a": -0.2
+   },
+   "per_82_games_wins": {
+    "a": -3.78,
+    "b": -4.24
+   },
+   "redistribution": {
+    "Mason Plumlee": 2.0,
+    "Domantas Sabonis": 1.3,
+    "Malik Monk": 2.5,
+    "De'Andre Hunter": 1.1,
+    "Precious Achiuwa": 2.7,
+    "Keegan Murray": 1.2,
+    "Daeqwon Plowden": 5.2,
+    "Leaky Black": 3.8,
+    "Alex Karaban": 4.4,
+    "Nique Clifford": 2.0,
+    "Dylan Cardwell": 3.6,
+    "Emanuel Sharp": 3.5
+   }
+  },
+  {
+   "team": 1610612758,
+   "as_of_game": "0022600062",
+   "pid": 1628370,
+   "name": "Malik Monk",
+   "net": -1.32,
+   "minutes_with": 17.8,
+   "past_games_without_him": 45,
+   "per_game_points": {
+    "a_fixed_minutes_vs_replacement": 0.12,
+    "a_fixed_minutes_vs_top_absorber": 0.34,
+    "top_absorber": {
+     "pid": 1631342,
+     "name": "Daeqwon Plowden",
+     "net": -2.24,
+     "extra_minutes": 3.3
+    },
+    "b_roster_change_redistributed": 0.08,
+    "depth_effect_b_minus_a": -0.03
+   },
+   "per_82_games_wins": {
+    "a": 0.27,
+    "b": 0.19
+   },
+   "redistribution": {
+    "Precious Achiuwa": 1.5,
+    "Keegan Murray": 1.1,
+    "Daeqwon Plowden": 3.3,
+    "Leaky Black": 2.1,
+    "Alex Karaban": 2.2,
+    "Dylan Cardwell": 1.1,
+    "Emanuel Sharp": 1.8
+   }
+  },
+  {
+   "team": 1610612759,
+   "as_of_game": "0022600063",
+   "pid": 1642264,
+   "name": "Stephon Castle",
+   "net": 0.45,
+   "minutes_with": 31.4,
+   "past_games_without_him": 13,
+   "per_game_points": {
+    "a_fixed_minutes_vs_replacement": 1.34,
+    "a_fixed_minutes_vs_top_absorber": 1.24,
+    "top_absorber": {
+     "pid": 203084,
+     "name": "Harrison Barnes",
+     "net": -1.48,
+     "extra_minutes": 4.3
+    },
+    "b_roster_change_redistributed": 0.86,
+    "depth_effect_b_minus_a": -0.48
+   },
+   "per_82_games_wins": {
+    "a": 3.06,
+    "b": 1.96
+   },
+   "redistribution": {
+    "Harrison Barnes": 4.3,
+    "Luke Kornet": 3.9,
+    "Jordan McLaughlin": 2.4,
+    "Keldon Johnson": 2.6,
+    "Devin Vassell": 1.3,
+    "Julian Champagnie": 2.3,
+    "Victor Wembanyama": 1.1,
+    "David Jones Garcia": 3.2,
+    "Carter Bryant": 3.4,
+    "Tarris Reed Jr.": 3.8,
+    "Ja'Kobi Gillespie": 2.5
+   }
+  },
+  {
+   "team": 1610612759,
+   "as_of_game": "0022600063",
+   "pid": 1641705,
+   "name": "Victor Wembanyama",
+   "net": 9.87,
+   "minutes_with": 30.5,
+   "past_games_without_him": 40,
+   "per_game_points": {
+    "a_fixed_minutes_vs_replacement": 7.2,
+    "a_fixed_minutes_vs_top_absorber": 7.79,
+    "top_absorber": {
+     "pid": 1643542,
+     "name": "Tarris Reed Jr.",
+     "net": -2.57,
+     "extra_minutes": 5.1
+    },
+    "b_roster_change_redistributed": 6.97,
+    "depth_effect_b_minus_a": -0.23
+   },
+   "per_82_games_wins": {
+    "a": 16.41,
+    "b": 15.89
+   },
+   "redistribution": {
+    "Harrison Barnes": 3.3,
+    "Luke Kornet": 5.1,
+    "Jordan McLaughlin": 1.8,
+    "Keldon Johnson": 2.3,
+    "Devin Vassell": 1.3,
+    "Julian Champagnie": 1.2,
+    "Stephon Castle": 1.0,
+    "David Jones Garcia": 3.3,
+    "Carter Bryant": 3.2,
+    "Tarris Reed Jr.": 5.1,
+    "Ja'Kobi Gillespie": 2.5
+   }
+  },
+  {
+   "team": 1610612759,
+   "as_of_game": "0022600063",
+   "pid": 1628436,
+   "name": "Luke Kornet",
+   "net": 0.69,
+   "minutes_with": 19.2,
+   "past_games_without_him": 7,
+   "per_game_points": {
+    "a_fixed_minutes_vs_replacement": 0.92,
+    "a_fixed_minutes_vs_top_absorber": 0.85,
+    "top_absorber": {
+     "pid": 203084,
+     "name": "Harrison Barnes",
+     "net": -1.48,
+     "extra_minutes": 2.5
+    },
+    "b_roster_change_redistributed": 0.33,
+    "depth_effect_b_minus_a": -0.59
+   },
+   "per_82_games_wins": {
+    "a": 2.08,
+    "b": 0.75
+   },
+   "redistribution": {
+    "Harrison Barnes": 2.5,
+    "Jordan McLaughlin": 1.1,
+    "Keldon Johnson": 1.5,
+    "Devin Vassell": 1.8,
+    "Julian Champagnie": 1.3,
+    "Victor Wembanyama": 1.9,
+    "Stephon Castle": 1.7,
+    "David Jones Garcia": 1.4,
+    "Carter Bryant": 1.8,
+    "Tarris Reed Jr.": 1.2,
+    "Ja'Kobi Gillespie": 2.4
+   }
+  },
+  {
+   "team": 1610612760,
+   "as_of_game": "0022600058",
+   "pid": 1628983,
+   "name": "Shai Gilgeous-Alexander",
+   "net": 6.55,
+   "minutes_with": 34.5,
+   "past_games_without_him": 72,
+   "per_game_points": {
+    "a_fixed_minutes_vs_replacement": 5.79,
+    "a_fixed_minutes_vs_top_absorber": 5.21,
+    "top_absorber": {
+     "pid": 1642877,
+     "name": "Micah Peavy",
+     "net": -0.83,
+     "extra_minutes": 5.4
+    },
+    "b_roster_change_redistributed": 5.22,
+    "depth_effect_b_minus_a": -0.56
+   },
+   "per_82_games_wins": {
+    "a": 13.18,
+    "b": 11.89
+   },
+   "redistribution": {
+    "Alex Caruso": 3.3,
+    "Isaiah Hartenstein": 1.5,
+    "Kenrich Williams": 3.1,
+    "Jaylin Williams": 2.9,
+    "Nikola Topi\u0107": 3.9,
+    "Nique Clifford": 3.6,
+    "Micah Peavy": 5.4,
+    "Bennett Stirtz": 4.9,
+    "Brooks Barnhizer": 4.0
+   }
+  },
+  {
+   "team": 1610612760,
+   "as_of_game": "0022600058",
+   "pid": 1642272,
+   "name": "Jared McCain",
+   "net": -2.62,
+   "minutes_with": 31.9,
+   "past_games_without_him": 0,
+   "per_game_points": {
+    "a_fixed_minutes_vs_replacement": -0.64,
+    "a_fixed_minutes_vs_top_absorber": -5.09,
+    "top_absorber": {
+     "pid": 1627936,
+     "name": "Alex Caruso",
+     "net": 5.18,
+     "extra_minutes": 4.2
+    },
+    "b_roster_change_redistributed": -1.79,
+    "depth_effect_b_minus_a": -1.15
+   },
+   "per_82_games_wins": {
+    "a": -1.46,
+    "b": -4.08
+   },
+   "redistribution": {
+    "Alex Caruso": 4.2,
+    "Isaiah Hartenstein": 2.6,
+    "Shai Gilgeous-Alexander": 1.6,
+    "Kenrich Williams": 3.1,
+    "Jaylin Williams": 2.6,
+    "Nikola Topi\u0107": 2.7,
+    "Ajay Mitchell": 1.8,
+    "Nique Clifford": 1.8,
+    "Micah Peavy": 3.5,
+    "Bennett Stirtz": 3.7,
+    "Brooks Barnhizer": 3.7
+   }
+  },
+  {
+   "team": 1610612760,
+   "as_of_game": "0022600058",
+   "pid": 1627936,
+   "name": "Alex Caruso",
+   "net": 5.18,
+   "minutes_with": 19.9,
+   "past_games_without_him": 45,
+   "per_game_points": {
+    "a_fixed_minutes_vs_replacement": 2.78,
+    "a_fixed_minutes_vs_top_absorber": 3.94,
+    "top_absorber": {
+     "pid": 1642260,
+     "name": "Nikola Topi\u0107",
+     "net": -4.47,
+     "extra_minutes": 3.8
+    },
+    "b_roster_change_redistributed": 2.51,
+    "depth_effect_b_minus_a": -0.27
+   },
+   "per_82_games_wins": {
+    "a": 6.34,
+    "b": 5.72
+   },
+   "redistribution": {
+    "Isaiah Hartenstein": 1.6,
+    "Kenrich Williams": 3.1,
+    "Jaylin Williams": 2.5,
+    "Nikola Topi\u0107": 3.8,
+    "Ajay Mitchell": 1.2,
+    "Micah Peavy": 1.7,
+    "Bennett Stirtz": 2.2,
+    "Brooks Barnhizer": 1.5
+   }
+  },
+  {
+   "team": 1610612761,
+   "as_of_game": "0022600290",
+   "pid": 1630567,
+   "name": "Scottie Barnes",
+   "net": 1.9,
+   "minutes_with": 33.2,
+   "past_games_without_him": 30,
+   "per_game_points": {
+    "a_fixed_minutes_vs_replacement": 2.41,
+    "a_fixed_minutes_vs_top_absorber": 0.77,
+    "top_absorber": {
+     "pid": 1643512,
+     "name": "Allen Graves",
+     "net": 0.77,
+     "extra_minutes": 4.3
+    },
+    "b_roster_change_redistributed": 1.73,
+    "depth_effect_b_minus_a": -0.68
+   },
+   "per_82_games_wins": {
+    "a": 5.49,
+    "b": 3.94
+   },
+   "redistribution": {
+    "Kyle Anderson": 3.3,
+    "Jakob Poeltl": 2.1,
+    "Immanuel Quickley": 1.3,
+    "Trayce Jackson-Davis": 3.2,
+    "Malachi Smith": 2.3,
+    "Ja'Kobe Walter": 1.5,
+    "Jamal Shead": 2.4,
+    "Jamison Battle": 3.8,
+    "Collin Murray-Boyles": 1.7,
+    "Alijah Martin": 3.8,
+    "Allen Graves": 4.3,
+    "Jaden Bradley": 3.4
+   }
+  },
+  {
+   "team": 1610612761,
+   "as_of_game": "0022600290",
+   "pid": 1642266,
+   "name": "Ja'Kobe Walter",
+   "net": -1.7,
+   "minutes_with": 31.4,
+   "past_games_without_him": 18,
+   "per_game_points": {
+    "a_fixed_minutes_vs_replacement": -0.04,
+    "a_fixed_minutes_vs_top_absorber": -1.59,
+    "top_absorber": {
+     "pid": 1643512,
+     "name": "Allen Graves",
+     "net": 0.77,
+     "extra_minutes": 5.4
+    },
+    "b_roster_change_redistributed": -0.8,
+    "depth_effect_b_minus_a": -0.76
+   },
+   "per_82_games_wins": {
+    "a": -0.09,
+    "b": -1.83
+   },
+   "redistribution": {
+    "Kyle Anderson": 3.3,
+    "Jakob Poeltl": 1.8,
+    "Trayce Jackson-Davis": 5.2,
+    "Malachi Smith": 1.9,
+    "Jamal Shead": 2.9,
+    "Jamison Battle": 3.5,
+    "Collin Murray-Boyles": 1.8,
+    "Alijah Martin": 1.7,
+    "Allen Graves": 5.4,
+    "Jaden Bradley": 2.9
+   }
+  },
+  {
+   "team": 1610612761,
+   "as_of_game": "0022600290",
+   "pid": 1642419,
+   "name": "Jamison Battle",
+   "net": -1.73,
+   "minutes_with": 20.2,
+   "past_games_without_him": 6,
+   "per_game_points": {
+    "a_fixed_minutes_vs_replacement": -0.04,
+    "a_fixed_minutes_vs_top_absorber": -0.34,
+    "top_absorber": {
+     "pid": 1631218,
+     "name": "Trayce Jackson-Davis",
+     "net": -0.92,
+     "extra_minutes": 4.4
+    },
+    "b_roster_change_redistributed": -0.46,
+    "depth_effect_b_minus_a": -0.43
+   },
+   "per_82_games_wins": {
+    "a": -0.08,
+    "b": -1.06
+   },
+   "redistribution": {
+    "Kyle Anderson": 2.6,
+    "Trayce Jackson-Davis": 4.4,
+    "Malachi Smith": 1.0,
+    "Alijah Martin": 3.9,
+    "Allen Graves": 3.2,
+    "Jaden Bradley": 1.7
+   }
+  },
+  {
+   "team": 1610612762,
+   "as_of_game": "0022600295",
+   "pid": 1641718,
+   "name": "Keyonte George",
+   "net": -2.52,
+   "minutes_with": 35.3,
+   "past_games_without_him": 34,
+   "per_game_points": {
+    "a_fixed_minutes_vs_replacement": -0.64,
+    "a_fixed_minutes_vs_top_absorber": 1.45,
+    "top_absorber": {
+     "pid": 1642268,
+     "name": "Isaiah Collier",
+     "net": -4.53,
+     "extra_minutes": 6.9
+    },
+    "b_roster_change_redistributed": -0.97,
+    "depth_effect_b_minus_a": -0.33
+   },
+   "per_82_games_wins": {
+    "a": -1.45,
+    "b": -2.2
+   },
+   "redistribution": {
+    "Lauri Markkanen": 4.7,
+    "Tony Bradley": 5.9,
+    "Mo Bamba": 1.8,
+    "Jaren Jackson Jr.": 1.0,
+    "Svi Mykhailiuk": 2.8,
+    "Josh Okogie": 2.3,
+    "Josh Green": 2.7,
+    "Brice Sensabaugh": 3.2,
+    "Isaiah Collier": 6.9,
+    "Kyle Filipowski": 3.5
+   }
+  },
+  {
+   "team": 1610612762,
+   "as_of_game": "0022600295",
+   "pid": 1643408,
+   "name": "Darryn Peterson",
+   "net": -0.89,
+   "minutes_with": 32.2,
+   "past_games_without_him": 0,
+   "per_game_points": {
+    "a_fixed_minutes_vs_replacement": 0.49,
+    "a_fixed_minutes_vs_top_absorber": -2.0,
+    "top_absorber": {
+     "pid": 1628374,
+     "name": "Lauri Markkanen",
+     "net": 2.14,
+     "extra_minutes": 6.9
+    },
+    "b_roster_change_redistributed": -0.18,
+    "depth_effect_b_minus_a": -0.68
+   },
+   "per_82_games_wins": {
+    "a": 1.13,
+    "b": -0.41
+   },
+   "redistribution": {
+    "Lauri Markkanen": 6.9,
+    "Tony Bradley": 5.9,
+    "Mo Bamba": 2.4,
+    "Svi Mykhailiuk": 3.5,
+    "Josh Okogie": 2.2,
+    "Brice Sensabaugh": 3.0,
+    "Isaiah Collier": 3.6,
+    "Kyle Filipowski": 2.8
+   }
+  },
+  {
+   "team": 1610612762,
+   "as_of_game": "0022600295",
+   "pid": 1641729,
+   "name": "Brice Sensabaugh",
+   "net": -3.1,
+   "minutes_with": 21.5,
+   "past_games_without_him": 13,
+   "per_game_points": {
+    "a_fixed_minutes_vs_replacement": -0.64,
+    "a_fixed_minutes_vs_top_absorber": -2.31,
+    "top_absorber": {
+     "pid": 1628374,
+     "name": "Lauri Markkanen",
+     "net": 2.14,
+     "extra_minutes": 4.8
+    },
+    "b_roster_change_redistributed": -1.02,
+    "depth_effect_b_minus_a": -0.38
+   },
+   "per_82_games_wins": {
+    "a": -1.46,
+    "b": -2.32
+   },
+   "redistribution": {
+    "Lauri Markkanen": 4.8,
+    "Tony Bradley": 2.4,
+    "Mo Bamba": 1.7,
+    "Josh Okogie": 1.7,
+    "Isaiah Collier": 3.7,
+    "Kyle Filipowski": 3.0,
+    "Ace Bailey": 1.1,
+    "Darryn Peterson": 1.1
+   }
+  },
+  {
+   "team": 1610612763,
+   "as_of_game": "0022600059",
+   "pid": 1642907,
+   "name": "Cedric Coward",
+   "net": 1.43,
+   "minutes_with": 28.8,
+   "past_games_without_him": 15,
+   "per_game_points": {
+    "a_fixed_minutes_vs_replacement": 1.81,
+    "a_fixed_minutes_vs_top_absorber": 1.16,
+    "top_absorber": {
+     "pid": 1642914,
+     "name": "Javon Small",
+     "net": -0.54,
+     "extra_minutes": 3.3
+    },
+    "b_roster_change_redistributed": 1.36,
+    "depth_effect_b_minus_a": -0.46
+   },
+   "per_82_games_wins": {
+    "a": 4.13,
+    "b": 3.09
+   },
+   "redistribution": {
+    "Ty Jerome": 1.0,
+    "Isaiah Stewart": 1.6,
+    "Kris Murray": 2.7,
+    "Taylor Hendricks": 2.3,
+    "GG Jackson": 2.3,
+    "Zach Edey": 3.0,
+    "Olivier-Maxence Prosper": 2.6,
+    "Cam Spencer": 1.5,
+    "Quinten Post": 2.7,
+    "Jaylen Wells": 1.8,
+    "Javon Small": 3.3,
+    "Jahmai Mashack": 2.8
+   }
+  },
+  {
+   "team": 1610612763,
+   "as_of_game": "0022600059",
+   "pid": 1629660,
+   "name": "Ty Jerome",
+   "net": 1.93,
+   "minutes_with": 28.7,
+   "past_games_without_him": 16,
+   "per_game_points": {
+    "a_fixed_minutes_vs_replacement": 2.1,
+    "a_fixed_minutes_vs_top_absorber": 1.45,
+    "top_absorber": {
+     "pid": 1642914,
+     "name": "Javon Small",
+     "net": -0.54,
+     "extra_minutes": 3.7
+    },
+    "b_roster_change_redistributed": 1.67,
+    "depth_effect_b_minus_a": -0.43
+   },
+   "per_82_games_wins": {
+    "a": 4.78,
+    "b": 3.81
+   },
+   "redistribution": {
+    "Taylor Hendricks": 3.4,
+    "GG Jackson": 2.2,
+    "Zach Edey": 2.5,
+    "Olivier-Maxence Prosper": 2.9,
+    "Cam Spencer": 2.7,
+    "Quinten Post": 3.2,
+    "Jaylen Wells": 2.2,
+    "Cedric Coward": 1.3,
+    "Javon Small": 3.7,
+    "Jahmai Mashack": 2.8
+   }
+  },
+  {
+   "team": 1610612763,
+   "as_of_game": "0022600059",
+   "pid": 1641744,
+   "name": "Zach Edey",
+   "net": 2.59,
+   "minutes_with": 21.8,
+   "past_games_without_him": 20,
+   "per_game_points": {
+    "a_fixed_minutes_vs_replacement": 1.89,
+    "a_fixed_minutes_vs_top_absorber": 1.62,
+    "top_absorber": {
+     "pid": 1641707,
+     "name": "Taylor Hendricks",
+     "net": -1.03,
+     "extra_minutes": 3.7
+    },
+    "b_roster_change_redistributed": 1.67,
+    "depth_effect_b_minus_a": -0.22
+   },
+   "per_82_games_wins": {
+    "a": 4.31,
+    "b": 3.81
+   },
+   "redistribution": {
+    "Ty Jerome": 1.1,
+    "Kris Murray": -2.1,
+    "Taylor Hendricks": 3.7,
+    "GG Jackson": 3.6,
+    "Olivier-Maxence Prosper": 2.1,
+    "Cam Spencer": 3.4,
+    "Quinten Post": 1.6,
+    "Jaylen Wells": 2.0,
+    "Cedric Coward": 1.2,
+    "Javon Small": 2.3,
+    "Jahmai Mashack": 1.4
+   }
+  },
+  {
+   "team": 1610612764,
+   "as_of_game": "0022600053",
+   "pid": 1643407,
+   "name": "AJ Dybantsa",
+   "net": -1.21,
+   "minutes_with": 33.4,
+   "past_games_without_him": 0,
+   "per_game_points": {
+    "a_fixed_minutes_vs_replacement": 0.29,
+    "a_fixed_minutes_vs_top_absorber": 0.91,
+    "top_absorber": {
+     "pid": 1641731,
+     "name": "Bilal Coulibaly",
+     "net": -2.54,
+     "extra_minutes": 3.7
+    },
+    "b_roster_change_redistributed": 0.56,
+    "depth_effect_b_minus_a": 0.27
+   },
+   "per_82_games_wins": {
+    "a": 0.67,
+    "b": 1.28
+   },
+   "redistribution": {
+    "Anthony Davis": 3.0,
+    "Khris Middleton": 2.3,
+    "Trae Young": 3.0,
+    "Deandre Ayton": 3.1,
+    "Tre Mann": 1.8,
+    "Bilal Coulibaly": 3.7,
+    "Alex Sarr": 2.7,
+    "Bub Carrington": 3.1,
+    "Kyshawn George": 3.0,
+    "Tre Johnson": 3.1,
+    "Will Riley": 3.2
+   }
+  },
+  {
+   "team": 1610612764,
+   "as_of_game": "0022600053",
+   "pid": 203076,
+   "name": "Anthony Davis",
+   "net": 2.79,
+   "minutes_with": 32.8,
+   "past_games_without_him": 0,
+   "per_game_points": {
+    "a_fixed_minutes_vs_replacement": 2.98,
+    "a_fixed_minutes_vs_top_absorber": 3.59,
+    "top_absorber": {
+     "pid": 1641731,
+     "name": "Bilal Coulibaly",
+     "net": -2.54,
+     "extra_minutes": 3.6
+    },
+    "b_roster_change_redistributed": 3.49,
+    "depth_effect_b_minus_a": 0.51
+   },
+   "per_82_games_wins": {
+    "a": 6.79,
+    "b": 7.95
+   },
+   "redistribution": {
+    "Khris Middleton": 2.3,
+    "Trae Young": 2.9,
+    "Deandre Ayton": 3.0,
+    "Tre Mann": 1.7,
+    "Bilal Coulibaly": 3.6,
+    "Alex Sarr": 2.6,
+    "Bub Carrington": 3.0,
+    "Kyshawn George": 3.0,
+    "Tre Johnson": 3.1,
+    "Will Riley": 3.2,
+    "AJ Dybantsa": 2.9
+   }
+  },
+  {
+   "team": 1610612764,
+   "as_of_game": "0022600053",
+   "pid": 1642848,
+   "name": "Tre Johnson",
+   "net": -3.13,
+   "minutes_with": 19.0,
+   "past_games_without_him": 19,
+   "per_game_points": {
+    "a_fixed_minutes_vs_replacement": -0.58,
+    "a_fixed_minutes_vs_top_absorber": 0.43,
+    "top_absorber": {
+     "pid": 1642860,
+     "name": "Will Riley",
+     "net": -4.24,
+     "extra_minutes": 2.5
+    },
+    "b_roster_change_redistributed": -0.38,
+    "depth_effect_b_minus_a": 0.2
+   },
+   "per_82_games_wins": {
+    "a": -1.32,
+    "b": -0.87
+   },
+   "redistribution": {
+    "Anthony Davis": 1.7,
+    "Khris Middleton": 1.8,
+    "Trae Young": 1.1,
+    "Deandre Ayton": 1.1,
+    "Anthony Gill": 1.3,
+    "Tre Mann": 2.2,
+    "Bilal Coulibaly": 2.1,
+    "Bub Carrington": 1.4,
+    "Kyshawn George": 1.2,
+    "Will Riley": 2.5,
+    "AJ Dybantsa": 1.4
+   }
+  },
+  {
+   "team": 1610612765,
+   "as_of_game": "0022600052",
+   "pid": 1642450,
+   "name": "Daniss Jenkins",
+   "net": -0.9,
+   "minutes_with": 35.1,
+   "past_games_without_him": 4,
+   "per_game_points": {
+    "a_fixed_minutes_vs_replacement": 0.53,
+    "a_fixed_minutes_vs_top_absorber": 0.88,
+    "top_absorber": {
+     "pid": 1642404,
+     "name": "Chaz Lanier",
+     "net": -2.13,
+     "extra_minutes": 4.1
+    },
+    "b_roster_change_redistributed": -0.52,
+    "depth_effect_b_minus_a": -1.05
+   },
+   "per_82_games_wins": {
+    "a": 1.21,
+    "b": -1.19
+   },
+   "redistribution": {
+    "Taurean Prince": 2.6,
+    "John Collins": 2.6,
+    "Kevin Huerter": 1.4,
+    "Javonte Green": 3.3,
+    "Paul Reed": 3.3,
+    "Isaiah Joe": 1.4,
+    "Ausar Thompson": 3.2,
+    "Ronald Holland II": 3.4,
+    "Elijah Harkless": 3.2,
+    "Chaz Lanier": 4.1,
+    "Tolu Smith": 3.3,
+    "Ebuka Okorie": 2.6
+   }
+  },
+  {
+   "team": 1610612765,
+   "as_of_game": "0022600052",
+   "pid": 1628989,
+   "name": "Kevin Huerter",
+   "net": 0.17,
+   "minutes_with": 32.5,
+   "past_games_without_him": 2,
+   "per_game_points": {
+    "a_fixed_minutes_vs_replacement": 1.21,
+    "a_fixed_minutes_vs_top_absorber": 0.89,
+    "top_absorber": {
+     "pid": 1641842,
+     "name": "Ronald Holland II",
+     "net": -1.17,
+     "extra_minutes": 5.5
+    },
+    "b_roster_change_redistributed": 0.41,
+    "depth_effect_b_minus_a": -0.8
+   },
+   "per_82_games_wins": {
+    "a": 2.75,
+    "b": 0.93
+   },
+   "redistribution": {
+    "Taurean Prince": 2.5,
+    "John Collins": 2.0,
+    "Javonte Green": 3.6,
+    "Paul Reed": 2.5,
+    "Isaiah Joe": 1.1,
+    "Ausar Thompson": 1.6,
+    "Ronald Holland II": 5.5,
+    "Elijah Harkless": 3.0,
+    "Chaz Lanier": 3.8,
+    "Tolu Smith": 2.3,
+    "Daniss Jenkins": 1.8,
+    "Ebuka Okorie": 2.3
+   }
+  },
+  {
+   "team": 1610612765,
+   "as_of_game": "0022600052",
+   "pid": 1641842,
+   "name": "Ronald Holland II",
+   "net": -1.17,
+   "minutes_with": 16.5,
+   "past_games_without_him": 8,
+   "per_game_points": {
+    "a_fixed_minutes_vs_replacement": 0.16,
+    "a_fixed_minutes_vs_top_absorber": -1.09,
+    "top_absorber": {
+     "pid": 1629750,
+     "name": "Javonte Green",
+     "net": 2.06,
+     "extra_minutes": 3.3
+    },
+    "b_roster_change_redistributed": -0.52,
+    "depth_effect_b_minus_a": -0.68
+   },
+   "per_82_games_wins": {
+    "a": 0.36,
+    "b": -1.19
+   },
+   "redistribution": {
+    "John Collins": 1.5,
+    "Kevin Huerter": 1.8,
+    "Javonte Green": 3.3,
+    "Paul Reed": 1.9,
+    "Ausar Thompson": 1.5,
+    "Chaz Lanier": 1.9,
+    "Daniss Jenkins": 1.4
+   }
+  },
+  {
+   "team": 1610612766,
+   "as_of_game": "0022600056",
+   "pid": 1629675,
+   "name": "Naz Reid",
+   "net": -0.61,
+   "minutes_with": 34.4,
+   "past_games_without_him": 0,
+   "per_game_points": {
+    "a_fixed_minutes_vs_replacement": 0.73,
+    "a_fixed_minutes_vs_top_absorber": 0.66,
+    "top_absorber": {
+     "pid": 1626220,
+     "name": "Royce O'Neale",
+     "net": -1.54,
+     "extra_minutes": 4.5
+    },
+    "b_roster_change_redistributed": 0.34,
+    "depth_effect_b_minus_a": -0.38
+   },
+   "per_82_games_wins": {
+    "a": 1.66,
+    "b": 0.78
+   },
+   "redistribution": {
+    "Royce O'Neale": 4.5,
+    "Coby White": 4.4,
+    "Grant Williams": 1.2,
+    "Moussa Diabat\u00e9": 2.7,
+    "Brandon Miller": 2.8,
+    "Tidjane Sala\u00fcn": 3.4,
+    "Kon Knueppel": 1.2,
+    "Liam McNeeley": 3.0,
+    "Sion James": 3.1,
+    "Hannes Steinbach": 4.3,
+    "Christian Anderson": 3.1
+   }
+  },
+  {
+   "team": 1610612766,
+   "as_of_game": "0022600056",
+   "pid": 1631217,
+   "name": "Moussa Diabat\u00e9",
+   "net": 1.92,
+   "minutes_with": 32.3,
+   "past_games_without_him": 17,
+   "per_game_points": {
+    "a_fixed_minutes_vs_replacement": 2.36,
+    "a_fixed_minutes_vs_top_absorber": 2.29,
+    "top_absorber": {
+     "pid": 1626220,
+     "name": "Royce O'Neale",
+     "net": -1.54,
+     "extra_minutes": 5.2
+    },
+    "b_roster_change_redistributed": 2.16,
+    "depth_effect_b_minus_a": -0.2
+   },
+   "per_82_games_wins": {
+    "a": 5.37,
+    "b": 4.93
+   },
+   "redistribution": {
+    "Royce O'Neale": 5.2,
+    "Coby White": 3.4,
+    "Naz Reid": 2.4,
+    "Brandon Miller": 2.3,
+    "Tidjane Sala\u00fcn": 3.0,
+    "Kon Knueppel": 1.2,
+    "Liam McNeeley": 3.7,
+    "Sion James": 3.0,
+    "Hannes Steinbach": 3.6,
+    "Christian Anderson": 2.8
+   }
+  },
+  {
+   "team": 1610612766,
+   "as_of_game": "0022600056",
+   "pid": 1643515,
+   "name": "Christian Anderson",
+   "net": -2.71,
+   "minutes_with": 18.9,
+   "past_games_without_him": 0,
+   "per_game_points": {
+    "a_fixed_minutes_vs_replacement": -0.41,
+    "a_fixed_minutes_vs_top_absorber": -1.02,
+    "top_absorber": {
+     "pid": 1629632,
+     "name": "Coby White",
+     "net": -0.08,
+     "extra_minutes": 2.9
+    },
+    "b_roster_change_redistributed": -0.73,
+    "depth_effect_b_minus_a": -0.31
+   },
+   "per_82_games_wins": {
+    "a": -0.94,
+    "b": -1.66
+   },
+   "redistribution": {
+    "Royce O'Neale": 2.4,
+    "Coby White": 2.9,
+    "Naz Reid": 1.9,
+    "Moussa Diabat\u00e9": 1.9,
+    "Brandon Miller": 2.0,
+    "Tidjane Sala\u00fcn": 1.6,
+    "Sion James": 2.2,
+    "Hannes Steinbach": 2.6
+   }
+  }
+ ]
+}

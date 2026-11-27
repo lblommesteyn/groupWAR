@@ -1,0 +1,61 @@
+{
+ "date": "2026-11-25",
+ "replacement": -1.64,
+ "points_per_win": 36.0,
+ "points_per_win_ci": [
+  34.6,
+  37.5
+ ],
+ "units": "ratings per 100 possessions; possessions = mean of offensive and defensive possessions on court; wins = points / points_per_win (+1 point per game over 82 games = 82 / ppw wins)",
+ "league_total_war_82": {
+  "old_no_availability": 618,
+  "new_with_availability": 518,
+  "implied_by_replacement": 554.7,
+  "note": "replacement team: five replacement players, ~99 possessions per game"
+ },
+ "bootstrap_refits": 20,
+ "checks": {
+  "per_player_recompute": "passed (season-to-date and projection recomputed from definitions)",
+  "team_minutes_per_game": {
+   "min": 240.0,
+   "max": 240.0
+  },
+  "season_to_date_total": 111.1,
+  "note": "league total over a full season should be close to implied_by_replacement; residual gaps come from players without a current rating, rookies yet to play, and the ROS centring (ratings are centred on season-to-date possessions)"
+ },
+ "unmodelled": [
+  "injury risk beyond the availability rate",
+  "trades and role changes",
+  "rating drift during the season",
+  "coach changes",
+  "minutes-model error (see results/iggy/minutes.json MAE)",
+  "playoff value",
+  "rating covariance between teammates (bootstrap sd is per player)"
+ ],
+ "provenance": {
+  "revision": "7ed37e3459e35690f06f9a409d8592e3b428325e",
+  "script": "value_outputs.py",
+  "script_sha256": "07044e4a86c59203",
+  "run_utc": "2026-11-27T08:31:01+00:00",
+  "data": [
+   {
+    "path": "results/duncan/score_2026-11-25.json",
+    "bytes": 96633,
+    "mtime": "2026-11-27T07:29:42+00:00",
+    "sha256_first_mib": "159a81646a6bd666"
+   },
+   {
+    "path": "results/latent/live_ratings_2026-11-25.npz",
+    "bytes": 30464,
+    "mtime": "2026-11-27T07:29:33+00:00",
+    "sha256_first_mib": "94109325cbb2c79f"
+   },
+   {
+    "path": "results/latent/gamelogs.parquet",
+    "bytes": 4225056,
+    "mtime": "2026-11-27T06:15:15+00:00",
+    "sha256_first_mib": "d5c5085ab8a797da"
+   }
+  ]
+ }
+}
