@@ -13,7 +13,7 @@ Writes results/world/pred_{season}.npz: for every (possession, frame, defender) 
   actual, scheme-conditioned mean, baseline mean, log-variances, plus z per (possession, defender).
   python world_model.py   (PC GPU; ~1 h)
 """
-import json, math, time
+import json, os, math, time
 from pathlib import Path
 import numpy as np
 import torch
@@ -28,12 +28,23 @@ STEPS, BATCH, FRAMES = 12000, 192, 6
 RIM = 41.75
 
 
+OUTDIR = None
+
+
 def load():
-    desc = json.load(open(W / 'desc.json'))
+    # chronological mode (AUDIT.md I3): WM_CUT = only possessions before this date (cross-fit within them),
+    # WM_DIR = results/world/<dir> holding chrono_reps.py's desc.json; outputs go there too
+    cut, sub = os.environ.get('WM_CUT'), os.environ.get('WM_DIR')
+    desc = json.load(open((W / sub if sub else W) / 'desc.json'))
     parts = []
     for s in (2026, 2027):
         z = dict(np.load(W / f'traj_{s}.npz'))
-        ds = desc[str(s)]
+        if cut:
+            keep = z['date'] < cut
+            if not keep.any():
+                continue
+            z = {k: v[keep] for k, v in z.items()}
+        ds = desc['all'] if 'all' in desc else desc[str(s)]
         z['desc'] = np.array([[ds.get(str(p), [0.0] * 11) for p in row] for row in z['off']], np.float32)
         z['season'] = np.full(len(z['gid']), s)
         parts.append(z)
@@ -166,6 +177,8 @@ def predict(net, Dd, idx):
 
 def main():
     torch.manual_seed(0); np.random.seed(0)
+    global OUTDIR
+    OUTDIR = W / os.environ['WM_DIR'] if os.environ.get('WM_DIR') else W
     Dd, n_ts = load()
     N = len(Dd['gid']); print(N, 'possessions', n_ts, 'team-seasons', DEV, flush=True)
     games = np.unique(Dd['gid']); rng = np.random.default_rng(0)
@@ -187,13 +200,13 @@ def main():
                 with torch.no_grad():
                     v = [step(net, tens(Dd, va[i:i + BATCH]), train=False)[1] for i in range(0, 1500, BATCH)]
                 print(f'fold {f} step {it} train nll {nll:.3f} kl {kl:.2f} val nll {np.mean(v):.3f} ({time.time() - t0:.0f}s)', flush=True)
-        torch.save(net.state_dict(), W / f'world_fold{f}.pt')
+        torch.save(net.state_dict(), OUTDIR / f'world_fold{f}.pt')
         p, Zf = predict(net, Dd, te); preds.append(p); Zall = Zf if f == 0 else Zall + Zf
         e_s = np.hypot(*(p['y'].astype(float) - p['ms'].astype(float)).T); e_b = np.hypot(*(p['y'].astype(float) - p['mb'].astype(float)).T)
         print(f'fold {f}: held-out mean error scheme {e_s.mean():.2f} ft, baseline {e_b.mean():.2f} ft', flush=True)
     P = {k: np.concatenate([p[k] for p in preds]) for k in preds[0]}
     meta = {k: Dd[k] for k in ('gid', 'date', 'season', 'off', 'deff', 'off_team', 'def_team', 'ts')}
-    np.savez_compressed(W / 'pred.npz', **P, z=Zall, fold=fold, **{'meta_' + k: v for k, v in meta.items()})
+    np.savez_compressed(OUTDIR / 'pred.npz', **P, z=Zall, fold=fold, **{'meta_' + k: v for k, v in meta.items()})
     print('saved', len(P['y']), 'defender-frames', flush=True)
 
 
