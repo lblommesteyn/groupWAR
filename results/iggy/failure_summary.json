@@ -1,0 +1,38 @@
+{
+ "did not play, not in the absent set (DNP or unlisted injury)": {
+  "rows": 2630,
+  "share_of_abs_error": 0.144,
+  "mae": 9.16
+ },
+ "played with no recent minutes (new arrival / returning from injury)": {
+  "rows": 98,
+  "share_of_abs_error": 0.008,
+  "mae": 13.13
+ },
+ "big minutes swing: actual >= predicted + 12": {
+  "rows": 1502,
+  "share_of_abs_error": 0.149,
+  "mae": 16.57
+ },
+ "big minutes cut: actual <= predicted - 12 (blowout, foul trouble, in-game injury)": {
+  "rows": 623,
+  "share_of_abs_error": 0.059,
+  "mae": 15.81
+ },
+ "all non-absent test rows": {
+  "rows": 34266,
+  "mae": 4.88
+ },
+ "final margin 0-10": {
+  "rows": 20045,
+  "mae": 4.83
+ },
+ "final margin 10-20": {
+  "rows": 9966,
+  "mae": 4.93
+ },
+ "final margin 20-99": {
+  "rows": 4255,
+  "mae": 5.02
+ }
+}

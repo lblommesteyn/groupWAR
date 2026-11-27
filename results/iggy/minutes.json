@@ -1,0 +1,266 @@
+{
+ "provenance": {
+  "revision": "a8a1ec8dc173f99551b3bed66040b89134b2ac4d",
+  "script": "iggy_minutes.py",
+  "script_sha256": "7a66336cdd4f5e60",
+  "run_utc": "2026-11-27T08:17:34+00:00",
+  "data": [
+   {
+    "path": "results/latent/gamelogs.parquet",
+    "bytes": 4225056,
+    "mtime": "2026-11-27T06:15:15+00:00",
+    "sha256_first_mib": "d5c5085ab8a797da"
+   },
+   {
+    "path": "results/latent/ms2_stints.pkl",
+    "bytes": 67892083,
+    "mtime": "2026-11-24T20:58:51+00:00",
+    "sha256_first_mib": "097d0de914714e7f"
+   },
+   {
+    "path": "results/latent/ms2_stints_2325.pkl",
+    "bytes": 39701083,
+    "mtime": "2026-11-24T20:59:20+00:00",
+    "sha256_first_mib": "9afbb96b74358e03"
+   },
+   {
+    "path": "results/latent/ms2_stints_2526.pkl",
+    "bytes": 20836266,
+    "mtime": "2026-11-24T20:59:35+00:00",
+    "sha256_first_mib": "cdbbb5704c620e1e"
+   },
+   {
+    "path": "results/latent/ms2_stints_2627.pkl",
+    "bytes": 4305228,
+    "mtime": "2026-11-26T21:23:22+00:00",
+    "sha256_first_mib": "5cdde2bf900ad0c7"
+   }
+  ]
+ },
+ "config": {
+  "cap": 44.0,
+  "rotation": ">= 10 min over last 10 team games",
+  "candidates": "played for team in prior 30 days",
+  "split": "train <=2024, validate 2025, test 2026-2027 (season end years)"
+ },
+ "rows": {
+  "train": 158970,
+  "validate": 34674,
+  "test": 38188
+ },
+ "validate": {
+  "none": {
+   "rows": 6491,
+   "B0": {
+    "mae": 5.157,
+    "rmse": 6.593
+   },
+   "B1": {
+    "mae": 3.814,
+    "rmse": 5.215
+   },
+   "B2": {
+    "mae": 3.806,
+    "rmse": 5.219
+   },
+   "B3": {
+    "mae": 3.812,
+    "rmse": 5.221
+   }
+  },
+  "single": {
+   "rows": 10626,
+   "B0": {
+    "mae": 5.565,
+    "rmse": 7.177
+   },
+   "B1": {
+    "mae": 4.356,
+    "rmse": 5.938
+   },
+   "B2": {
+    "mae": 4.338,
+    "rmse": 5.904
+   },
+   "B3": {
+    "mae": 4.333,
+    "rmse": 5.888
+   }
+  },
+  "multi": {
+   "rows": 13954,
+   "B0": {
+    "mae": 6.489,
+    "rmse": 8.582
+   },
+   "B1": {
+    "mae": 5.573,
+    "rmse": 7.421
+   },
+   "B2": {
+    "mae": 5.533,
+    "rmse": 7.378
+   },
+   "B3": {
+    "mae": 5.509,
+    "rmse": 7.351
+   }
+  }
+ },
+ "test": {
+  "none": {
+   "rows": 7496,
+   "B0": {
+    "mae": 5.415,
+    "rmse": 6.845
+   },
+   "B1": {
+    "mae": 4.043,
+    "rmse": 5.549
+   },
+   "B2": {
+    "mae": 4.035,
+    "rmse": 5.552
+   },
+   "B3": {
+    "mae": 4.033,
+    "rmse": 5.55
+   }
+  },
+  "single": {
+   "rows": 11442,
+   "B0": {
+    "mae": 5.642,
+    "rmse": 7.249
+   },
+   "B1": {
+    "mae": 4.523,
+    "rmse": 6.149
+   },
+   "B2": {
+    "mae": 4.502,
+    "rmse": 6.124
+   },
+   "B3": {
+    "mae": 4.509,
+    "rmse": 6.134
+   }
+  },
+  "multi": {
+   "rows": 15328,
+   "B0": {
+    "mae": 6.465,
+    "rmse": 8.506
+   },
+   "B1": {
+    "mae": 5.655,
+    "rmse": 7.472
+   },
+   "B2": {
+    "mae": 5.583,
+    "rmse": 7.405
+   },
+   "B3": {
+    "mae": 5.581,
+    "rmse": 7.391
+   }
+  }
+ },
+ "selected": "B3",
+ "test_team_game_abs_error_sum": {
+  "B0": {
+   "single": 82.86,
+   "multi": 86.63
+  },
+  "B1": {
+   "single": 66.43,
+   "multi": 75.78
+  },
+  "B2": {
+   "single": 66.13,
+   "multi": 74.8
+  },
+  "B3": {
+   "single": 66.22,
+   "multi": 74.77
+  }
+ },
+ "mae_B3_minus_B2_test_absence": {
+  "mean": 0.0015,
+  "ci": [
+   -0.007,
+   0.0101
+  ]
+ },
+ "mae_B2_minus_B1_test_absence": {
+  "mean": -0.0504,
+  "ci": [
+   -0.065,
+   -0.0357
+  ]
+ },
+ "mae_B3_minus_B0_test_absence": {
+  "mean": -0.9907,
+  "ci": [
+   -1.0518,
+   -0.9309
+  ]
+ },
+ "team_forecast": {
+  "calibration": "rolling within 2025-26 (fit on earlier blocks only)",
+  "games_total": 1004,
+  "games_tested": 822,
+  "naive": 0.58849,
+  "B0": 0.57718,
+  "iggy": 0.57084,
+  "realised_DIAGNOSTIC": 0.5741,
+  "iggy_minus_B0": {
+   "mean": -0.00634,
+   "ci": [
+    -0.01084,
+    -0.00187
+   ]
+  },
+  "iggy_minus_naive": {
+   "mean": -0.01766,
+   "ci": [
+    -0.02768,
+    -0.00786
+   ]
+  },
+  "B0_minus_naive": {
+   "mean": -0.01131,
+   "ci": [
+    -0.01972,
+    -0.00288
+   ]
+  },
+  "realised_DIAGNOSTIC_minus_iggy": {
+   "mean": 0.00327,
+   "ci": [
+    -0.00236,
+    0.00957
+   ]
+  }
+ },
+ "team_forecast_provenance": {
+  "revision": "88d9f530bd2026dd9c2fcb1ee2b6db3d2a3cefde",
+  "script": "iggy_minutes.py",
+  "script_sha256": "7a66336cdd4f5e60",
+  "run_utc": "2026-11-27T08:17:54+00:00",
+  "data": [
+   {
+    "path": "results/iggy/minutes_predictions.parquet",
+    "bytes": 13628620,
+    "mtime": "2026-11-27T08:17:36+00:00",
+    "sha256_first_mib": "408bd9a5eb973870"
+   },
+   {
+    "path": "results/latent/spm_ratings.pkl",
+    "bytes": 1934815,
+    "mtime": "2026-11-24T21:25:34+00:00",
+    "sha256_first_mib": "0be83bf85d49508e"
+   }
+  ]
+ }
+}
