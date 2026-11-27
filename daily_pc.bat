@@ -40,5 +40,8 @@ git -c user.name=lblommesteyn -c user.email=lblommesteyn@icloud.com commit -q -m
 git pull --rebase -X theirs -q >> C:\Users\LukeB\dev\court-model\logs\daily.log 2>&1
 git push -q >> C:\Users\LukeB\dev\court-model\logs\daily.log 2>&1
 if errorlevel 1 set FAIL=1
+rem alerts: trigger the cloud health check now (GitHub's own schedule is unreliable); a failed run emails the owner
+"C:\Program Files\GitHub CLI\gh.exe" workflow run health.yml -R lblommesteyn/court-live -f mode=am >> C:\Users\LukeB\dev\court-model\logs\daily.log 2>&1
+"C:\Program Files\GitHub CLI\gh.exe" workflow run health.yml -R lblommesteyn/court-live -f mode=morning >> C:\Users\LukeB\dev\court-model\logs\daily.log 2>&1
 echo ---- exit %FAIL% %time% >> C:\Users\LukeB\dev\court-model\logs\daily.log
 exit /b %FAIL%
