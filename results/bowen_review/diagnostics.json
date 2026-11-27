@@ -1,0 +1,119 @@
+{
+ "scheme_follows_new_team": {
+  "movers": 72,
+  "incl_self": {
+   "r": 0.905,
+   "ci": [
+    0.852,
+    0.94
+   ],
+   "n": 72
+  },
+  "leave_self_out": {
+   "r": 0.887,
+   "ci": [
+    0.825,
+    0.928
+   ],
+   "n": 72
+  },
+  "old_team_leave_self_out": {
+   "r": -0.363,
+   "ci": [
+    -0.549,
+    -0.144
+   ],
+   "n": 72
+  },
+  "note": "scheme spot is conditioned on a team-season embedding, so a team-level correlation is expected by construction even leave-self-out"
+ },
+ "variance_explained_heldout_games": {
+  "possession_defenders": 823115,
+  "situation_features": 0.1712,
+  "situation_plus_player_identity": 0.177
+ },
+ "cross_situation_consistency": {
+  "onball_vs_help": {
+   "r": 0.382,
+   "ci": [
+    0.32,
+    0.44
+   ],
+   "n": 784
+  },
+  "onball_vs_perimeter": {
+   "r": 0.009,
+   "ci": [
+    -0.062,
+    0.08
+   ],
+   "n": 771
+  },
+  "help_vs_interior": {
+   "r": -0.016,
+   "ci": [
+    -0.085,
+    0.052
+   ],
+   "n": 817
+  },
+  "perimeter_vs_help": {
+   "r": 0.199,
+   "ci": [
+    0.132,
+    0.264
+   ],
+   "n": 807
+  }
+ },
+ "outcome_link": {
+  "shot_possessions": 43541,
+  "coef_by_fold": [
+   {
+    "on_gap": -0.0004,
+    "on_too_far": -0.0016,
+    "on_too_close": -0.0031,
+    "help_gap": 0.0008,
+    "help_too_far": -0.0008,
+    "help_too_close": -0.0004
+   },
+   {
+    "on_gap": 0.0046,
+    "on_too_far": -0.0038,
+    "on_too_close": -0.0077,
+    "help_gap": -0.0002,
+    "help_too_far": 0.0012,
+    "help_too_close": -0.0025
+   }
+  ],
+  "split_half_r_2026": 0.6253704736552023,
+  "split_half_r_2027": 0.42796191664995253,
+  "cross_season_r": 0.7291655002098432
+ },
+ "provenance": {
+  "revision": "36ce6556e509cd4a96073884f09f9ba12c3dcff7",
+  "script": "bowen_diagnostics.py",
+  "script_sha256": "b0eef76441d0a18e",
+  "run_utc": "2026-11-27T08:08:31+00:00",
+  "data": [
+   {
+    "path": "results/world/pred.npz",
+    "bytes": 251414571,
+    "mtime": "2026-11-27T02:42:38+00:00",
+    "sha256_first_mib": "73b418f31116d6ca"
+   },
+   {
+    "path": "results/world/bowen_players.json",
+    "bytes": 203045,
+    "mtime": "2026-11-27T02:27:17+00:00",
+    "sha256_first_mib": "be90b74126a3a858"
+   },
+   {
+    "path": "results/world/bowen_value.json",
+    "bytes": 522,
+    "mtime": "2026-11-27T02:44:25+00:00",
+    "sha256_first_mib": "9b8b0695dc4fc51d"
+   }
+  ]
+ }
+}
