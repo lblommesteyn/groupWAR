@@ -29,11 +29,14 @@ def main():
     sc = np.concatenate([x['sc'] for x in T]).astype(np.float32)
     P = [np.load(ROOT / f'results/archetypes/poss_{s}.npz', allow_pickle=True) for s in (2026, 2027)]
     fd = np.concatenate([p['fd'] for p in P]); dfn = list(P[0]['def_f'])
-    models = {'v1': W / 'pred.npz', 'A_live': W / 'bowen_live/pred.npz', 'B_live_mix3': W / 'bowen_live_mix3/pred.npz'}
+    models = {'v1': W / 'pred.npz', 'A_live': W / 'bowen_live/pred.npz', 'B_live_mix3': W / 'bowen_live_mix3/pred.npz',
+              'V3_scheme': W / 'bowen_v3_hier/pred.npz', 'V3_scheme_plus_player': W / 'bowen_v3_hier/pred.npz'}
+    models = {m: f for m, f in models.items() if f.exists()}
+    READ = {'V3_scheme_plus_player': ('mp', 'nll_p')}     # which expected spot / likelihood each row reads (default ms / nll_s)
     Z = {m: np.load(f) for m, f in models.items()}
     keys = {m: key(z) for m, z in Z.items()}
     common = keys['v1']
-    for m in ('A_live', 'B_live_mix3'):
+    for m in [m for m in models if m != 'v1']:
         common = np.intersect1d(common, keys[m])
     z1 = Z['v1']; i1 = np.searchsorted(keys['v1'], common) if np.all(np.diff(keys['v1']) > 0) else None
     out = dict(models={m: str(f.relative_to(ROOT)) for m, f in models.items()}, results={})
@@ -49,16 +52,24 @@ def main():
     f = fd[poss, k]
     oh, pa, dr = f[:, dfn.index('on_handler')], f[:, dfn.index('paint')], f[:, dfn.index('d_rim')]
     sit = np.where(oh >= 0.4, 'On ball', np.where(pa >= 0.5, 'Interior', np.where(dr >= 22, 'Perimeter stay-home', 'Help / rotation')))
-    out['frames'] = dict(common=int(len(common)), live=int(live.sum()), dead=int(dead.sum()))
+    gid_p, date_p, team_p, seas_p = z['meta_gid'], z['meta_date'], z['meta_def_team'], z['meta_season']
+    order = {}
+    for (tm, se) in set(zip(team_p.tolist(), seas_p.tolist())):
+        g = sorted({(d_, g_) for d_, g_, t_, s_ in zip(date_p, gid_p, team_p, seas_p) if t_ == tm and s_ == se})
+        for i_, (_, g_) in enumerate(g):
+            order[(g_, tm)] = i_
+    early = np.array([order.get((gid_p[p_], team_p[p_]), 99) < 10 for p_ in poss])
+    out['frames'] = dict(common=int(len(common)), live=int(live.sum()), dead=int(dead.sum()), live_early_season=int((live & early).sum()))
     for m, (z, ix) in aligned.items():
-        y = z['y'][ix].astype(np.float32); ms = z['ms'][ix].astype(np.float32)
+        mk_, nk_ = READ.get(m, ('ms', 'nll_s'))
+        y = z['y'][ix].astype(np.float32); ms = z[mk_][ix].astype(np.float32)
         d = y - ms; e = np.hypot(*d.T)
-        if 'nll_s' in z.files:
-            nll = z['nll_s'][ix].astype(np.float32)
+        if nk_ in z.files:
+            nll = z[nk_][ix].astype(np.float32)
         else:
             ls = z['ls'][ix].astype(np.float32); nll = (d ** 2).sum(-1) / (2 * np.exp(ls)) + ls
         r = {}
-        for lab, mk in (('live', live), ('dead', dead)):
+        for lab, mk in (('live', live), ('dead', dead), ('live_early_season', live & early)):
             ee = e[mk]
             r[lab] = dict(median=round(float(np.median(ee)), 2), p75=round(float(np.percentile(ee, 75)), 2), p90=round(float(np.percentile(ee, 90)), 2),
                           p99=round(float(np.percentile(ee, 99)), 2), share_over_15ft=round(float((ee > 15).mean()), 4),
