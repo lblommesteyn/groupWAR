@@ -1,0 +1,61 @@
+{
+ "provenance": {
+  "revision": "f48b3e78650a6b30dc2f37f3cf36b63acb05b734",
+  "script": "block_bootstrap.py",
+  "script_sha256": "2f3501f96a03615e",
+  "run_utc": "2026-11-27T08:00:59+00:00",
+  "data": [
+   {
+    "path": "results/latent/duncan2_3000_1.0.npz",
+    "bytes": 146630,
+    "mtime": "2026-11-27T02:45:20+00:00",
+    "sha256_first_mib": "65146e6bf1d35bf1"
+   },
+   {
+    "path": "results/latent/ms_bench.json",
+    "bytes": 50777,
+    "mtime": "2026-11-24T22:57:28+00:00",
+    "sha256_first_mib": "dd666403acd8fc29"
+   }
+  ]
+ },
+ "games": 6057,
+ "blocks": 44,
+ "evaluation": "given realised lineups (not pregame)",
+ "ll_duncan2_minus_darko": {
+  "mean": 0.00351,
+  "game_ci": [
+   -0.00123,
+   0.00826
+  ],
+  "block_ci": [
+   -0.00135,
+   0.00813
+  ]
+ },
+ "margin_r_duncan2_minus_darko": {
+  "mean": 0.0204,
+  "block_ci": [
+   0.0091,
+   0.0311
+  ]
+ },
+ "synergy_syn_1e+06_test_blocks": {
+  "blocks": 26,
+  "total_gain_x1e6": 0.5,
+  "block_ci_total": [
+   0.3,
+   0.69
+  ],
+  "blocks_positive": 19
+ },
+ "synergy_syn_300000_test_blocks": {
+  "blocks": 26,
+  "total_gain_x1e6": 0.61,
+  "block_ci_total": [
+   0.26,
+   0.97
+  ],
+  "blocks_positive": 18
+ }
+}

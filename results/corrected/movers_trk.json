@@ -1,0 +1,256 @@
+{
+ "provenance": {
+  "revision": "7ed37e3459e35690f06f9a409d8592e3b428325e",
+  "script": "corrected_movers_trk.py",
+  "script_sha256": "474f91300288b312",
+  "run_utc": "2026-11-27T17:49:25+00:00",
+  "data": [
+   {
+    "path": "results/world/chrono_dl2026/pred.npz",
+    "bytes": 28127796,
+    "mtime": "2026-11-27T08:57:05+00:00",
+    "sha256_first_mib": "a016762ccf9797ff"
+   },
+   {
+    "path": "results/world/chrono_os2026/pred.npz",
+    "bytes": 180223654,
+    "mtime": "2026-11-27T09:59:33+00:00",
+    "sha256_first_mib": "eef77063811c7db3"
+   },
+   {
+    "path": "results/world/chrono_dl2026/boris_mix.json",
+    "bytes": 20752,
+    "mtime": "2026-11-27T08:02:25+00:00",
+    "sha256_first_mib": "a22ae2168c3f20ba"
+   },
+   {
+    "path": "results/world/chrono_os2026/boris_mix.json",
+    "bytes": 30265,
+    "mtime": "2026-11-27T08:02:26+00:00",
+    "sha256_first_mib": "0d949dfa178e1a2f"
+   },
+   {
+    "path": "results/latent/transactions.json",
+    "bytes": 3304646,
+    "mtime": "2026-11-27T07:58:19+00:00",
+    "sha256_first_mib": "5e2633d1abb4cbb3"
+   },
+   {
+    "path": "results/latent/ms2_stints_2526.pkl",
+    "bytes": 20836266,
+    "mtime": "2026-11-24T20:59:35+00:00",
+    "sha256_first_mib": "cdbbb5704c620e1e"
+   },
+   {
+    "path": "results/latent/ms2_stints_2627.pkl",
+    "bytes": 4305228,
+    "mtime": "2026-11-27T16:00:22+00:00",
+    "sha256_first_mib": "5cdde2bf900ad0c7"
+   }
+  ]
+ },
+ "config": {
+  "rule": "pre-registered b 0.15/0.15",
+  "evaluation": "conditional on realised lineups (stints)"
+ },
+ "events": {
+  "2026 deadline": {
+   "cut": "2026-02-05",
+   "tx_movers": 61,
+   "eligible": 50,
+   "with_scheme": 49,
+   "with_role": 35,
+   "chrono_pred_possessions": 19752,
+   "teams_with_scheme": 29,
+   "lam_pit": 10000.0
+  },
+  "2026 offseason": {
+   "cut": "2026-10-20",
+   "tx_movers": 107,
+   "eligible": 88,
+   "with_scheme": 107,
+   "with_role": 104,
+   "chrono_pred_possessions": 117040,
+   "teams_with_scheme": 30,
+   "lam_pit": 1000.0
+  }
+ },
+ "strata": {
+  "tx": {
+   "flat_3000": {
+    "r2": 0.003306,
+    "gain_vs_darko_ci": [
+     -0.002248,
+     0.000219
+    ]
+   },
+   "trk_3000": {
+    "r2": 0.003432,
+    "gain_vs_flat_3000_ci": [
+     6.2e-05,
+     0.000188
+    ],
+    "gain_vs_darko_ci": [
+     -0.002123,
+     0.000356
+    ]
+   },
+   "placebo_3000": {
+    "r2": 0.003166,
+    "gain_vs_flat_3000_ci": [
+     -0.000205,
+     -7.6e-05
+    ],
+    "gain_vs_darko_ci": [
+     -0.002403,
+     8.2e-05
+    ]
+   },
+   "flat_pit": {
+    "r2": 0.003115,
+    "gain_vs_darko_ci": [
+     -0.002501,
+     0.00011
+    ]
+   },
+   "trk_pit": {
+    "r2": 0.003287,
+    "gain_vs_flat_pit_ci": [
+     9.8e-05,
+     0.000251
+    ],
+    "gain_vs_darko_ci": [
+     -0.002315,
+     0.000256
+    ]
+   },
+   "placebo_pit": {
+    "r2": 0.002916,
+    "gain_vs_flat_pit_ci": [
+     -0.000282,
+     -0.000122
+    ],
+    "gain_vs_darko_ci": [
+     -0.002718,
+     -8.1e-05
+    ]
+   },
+   "darko": {
+    "r2": 0.004311,
+    "gain_vs_flat_3000_ci": [
+     -0.000219,
+     0.002248
+    ]
+   }
+  },
+  "eligible": {
+   "flat_3000": {
+    "r2": 0.003247,
+    "gain_vs_darko_ci": [
+     -0.002231,
+     0.000285
+    ]
+   },
+   "trk_3000": {
+    "r2": 0.003372,
+    "gain_vs_flat_3000_ci": [
+     6.1e-05,
+     0.000187
+    ],
+    "gain_vs_darko_ci": [
+     -0.002103,
+     0.000398
+    ]
+   },
+   "placebo_3000": {
+    "r2": 0.003107,
+    "gain_vs_flat_3000_ci": [
+     -0.000205,
+     -7.5e-05
+    ],
+    "gain_vs_darko_ci": [
+     -0.002378,
+     0.000151
+    ]
+   },
+   "flat_pit": {
+    "r2": 0.003041,
+    "gain_vs_darko_ci": [
+     -0.002486,
+     0.000137
+    ]
+   },
+   "trk_pit": {
+    "r2": 0.003213,
+    "gain_vs_flat_pit_ci": [
+     9.7e-05,
+     0.000252
+    ],
+    "gain_vs_darko_ci": [
+     -0.002297,
+     0.00029
+    ]
+   },
+   "placebo_pit": {
+    "r2": 0.002842,
+    "gain_vs_flat_pit_ci": [
+     -0.000282,
+     -0.000121
+    ],
+    "gain_vs_darko_ci": [
+     -0.002703,
+     -4.9e-05
+    ]
+   },
+   "darko": {
+    "r2": 0.004216,
+    "gain_vs_flat_3000_ci": [
+     -0.000285,
+     0.002231
+    ]
+   }
+  }
+ },
+ "per_event": {
+  "2026 deadline": {
+   "tx": {
+    "flat_3000": 0.004243,
+    "trk_3000": 0.004301,
+    "placebo_3000": 0.004179,
+    "flat_pit": 0.005112,
+    "trk_pit": 0.00514,
+    "placebo_pit": 0.00508,
+    "darko": 0.005189
+   },
+   "eligible": {
+    "flat_3000": 0.004105,
+    "trk_3000": 0.004161,
+    "placebo_3000": 0.004043,
+    "flat_pit": 0.004976,
+    "trk_pit": 0.005003,
+    "placebo_pit": 0.004946,
+    "darko": 0.005003
+   }
+  },
+  "2026 offseason": {
+   "tx": {
+    "flat_3000": 0.001968,
+    "trk_3000": 0.002191,
+    "placebo_3000": 0.001718,
+    "flat_pit": 0.000263,
+    "trk_pit": 0.00064,
+    "placebo_pit": -0.000174,
+    "darko": 0.003058
+   },
+   "eligible": {
+    "flat_3000": 0.002023,
+    "trk_3000": 0.002247,
+    "placebo_3000": 0.001772,
+    "flat_pit": 0.000283,
+    "trk_pit": 0.000662,
+    "placebo_pit": -0.000156,
+    "darko": 0.003095
+   }
+  }
+ }
+}

@@ -1,0 +1,598 @@
+{
+ "provenance": {
+  "revision": "b573793c3a45a57c57dcfd0ebd869a628e2eeca4",
+  "script": "corrected_movers.py",
+  "script_sha256": "b0d94d2c7a4acf26",
+  "run_utc": "2026-11-27T08:00:36+00:00",
+  "data": [
+   {
+    "path": "results/latent/ms2_stints.pkl",
+    "bytes": 67892083,
+    "mtime": "2026-11-24T20:58:51+00:00",
+    "sha256_first_mib": "097d0de914714e7f"
+   },
+   {
+    "path": "results/latent/ms2_stints_2325.pkl",
+    "bytes": 39701083,
+    "mtime": "2026-11-24T20:59:20+00:00",
+    "sha256_first_mib": "9afbb96b74358e03"
+   },
+   {
+    "path": "results/latent/ms2_stints_2526.pkl",
+    "bytes": 20836266,
+    "mtime": "2026-11-24T20:59:35+00:00",
+    "sha256_first_mib": "cdbbb5704c620e1e"
+   },
+   {
+    "path": "results/latent/ms2_stints_2627.pkl",
+    "bytes": 4305228,
+    "mtime": "2026-11-26T21:23:22+00:00",
+    "sha256_first_mib": "5cdde2bf900ad0c7"
+   },
+   {
+    "path": "results/latent/gamelogs.parquet",
+    "bytes": 4225056,
+    "mtime": "2026-11-27T06:15:15+00:00",
+    "sha256_first_mib": "d5c5085ab8a797da"
+   },
+   {
+    "path": "results/latent/transactions.json",
+    "bytes": 3304646,
+    "mtime": "2026-11-27T07:58:19+00:00",
+    "sha256_first_mib": "5e2633d1abb4cbb3"
+   },
+   {
+    "path": "results/benchmarks/darko_history.json",
+    "bytes": 35255217,
+    "mtime": "2026-11-24T02:46:44+00:00",
+    "sha256_first_mib": "09ad8aefbf263128"
+   }
+  ]
+ },
+ "config": {
+  "min_pre": 300.0,
+  "min_post": 150.0,
+  "lams_pit": [
+   1000.0,
+   3000.0,
+   10000.0
+  ],
+  "k_mv": 0.5,
+  "tune_events": [
+   "2021 deadline",
+   "2022 deadline",
+   "2023 deadline"
+  ],
+  "evaluation": "conditional on realised post-cutoff lineups (stint level); not pregame"
+ },
+ "events": {
+  "2021 deadline": {
+   "cut": "2021-03-25",
+   "tx_movers": 51,
+   "eligible": 45,
+   "orig": 57,
+   "orig_not_tx": 9,
+   "tx_not_orig": 3,
+   "lam_pit": 1000.0
+  },
+  "2022 deadline": {
+   "cut": "2022-02-10",
+   "tx_movers": 61,
+   "eligible": 48,
+   "orig": 60,
+   "orig_not_tx": 9,
+   "tx_not_orig": 10,
+   "lam_pit": 10000.0
+  },
+  "2023 deadline": {
+   "cut": "2023-02-09",
+   "tx_movers": 52,
+   "eligible": 43,
+   "orig": 57,
+   "orig_not_tx": 10,
+   "tx_not_orig": 5,
+   "lam_pit": 10000.0
+  },
+  "2024 deadline": {
+   "cut": "2024-02-08",
+   "tx_movers": 53,
+   "eligible": 43,
+   "orig": 57,
+   "orig_not_tx": 9,
+   "tx_not_orig": 5,
+   "lam_pit": 10000.0
+  },
+  "2025 deadline": {
+   "cut": "2025-02-06",
+   "tx_movers": 59,
+   "eligible": 44,
+   "orig": 54,
+   "orig_not_tx": 7,
+   "tx_not_orig": 12,
+   "lam_pit": 3000.0
+  },
+  "2026 deadline": {
+   "cut": "2026-02-05",
+   "tx_movers": 61,
+   "eligible": 50,
+   "orig": 58,
+   "orig_not_tx": 7,
+   "tx_not_orig": 10,
+   "lam_pit": 10000.0
+  },
+  "2025 offseason": {
+   "cut": "2025-10-21",
+   "tx_movers": 91,
+   "eligible": 77,
+   "orig": 87,
+   "orig_not_tx": 10,
+   "tx_not_orig": 14,
+   "lam_pit": 1000.0
+  },
+  "2026 offseason": {
+   "cut": "2026-10-20",
+   "tx_movers": 107,
+   "eligible": 88,
+   "orig": 93,
+   "orig_not_tx": 5,
+   "tx_not_orig": 19,
+   "lam_pit": 1000.0
+  }
+ },
+ "held": {
+  "all": {
+   "nopull_3000": {
+    "r2": 0.003913,
+    "gain_vs_d2_3000_ci": [
+     -0.000202,
+     2e-06
+    ],
+    "gain_vs_darko_ci": [
+     -0.000199,
+     0.001219
+    ]
+   },
+   "d2_3000": {
+    "r2": 0.004015,
+    "gain_vs_nopull_3000_ci": [
+     -2e-06,
+     0.000202
+    ],
+    "gain_vs_darko_ci": [
+     -7.9e-05,
+     0.001321
+    ]
+   },
+   "d2orig_3000": {
+    "r2": 0.004028,
+    "gain_vs_nopull_3000_ci": [
+     1e-05,
+     0.000218
+    ],
+    "gain_vs_d2_3000_ci": [
+     -1.4e-05,
+     3.8e-05
+    ],
+    "gain_vs_darko_ci": [
+     -5.8e-05,
+     0.001333
+    ]
+   },
+   "nopull_pit": {
+    "r2": 0.004287,
+    "gain_vs_nopull_3000_ci": [
+     0.000153,
+     0.000605
+    ],
+    "gain_vs_d2_3000_ci": [
+     4.1e-05,
+     0.000509
+    ],
+    "gain_vs_darko_ci": [
+     0.000153,
+     0.001573
+    ]
+   },
+   "d2_pit": {
+    "r2": 0.004367,
+    "gain_vs_nopull_3000_ci": [
+     0.000223,
+     0.000692
+    ],
+    "gain_vs_d2_3000_ci": [
+     0.00014,
+     0.000565
+    ],
+    "gain_vs_darko_ci": [
+     0.000259,
+     0.001642
+    ]
+   },
+   "d2orig_pit": {
+    "r2": 0.004398,
+    "gain_vs_nopull_3000_ci": [
+     0.000253,
+     0.00072
+    ],
+    "gain_vs_d2_3000_ci": [
+     0.000173,
+     0.000601
+    ],
+    "gain_vs_darko_ci": [
+     0.000285,
+     0.001674
+    ]
+   },
+   "darko": {
+    "r2": 0.003426,
+    "gain_vs_nopull_3000_ci": [
+     -0.001219,
+     0.000199
+    ],
+    "gain_vs_d2_3000_ci": [
+     -0.001321,
+     7.9e-05
+    ]
+   }
+  },
+  "tx": {
+   "nopull_3000": {
+    "r2": 0.003085,
+    "gain_vs_d2_3000_ci": [
+     -0.000316,
+     -2.6e-05
+    ],
+    "gain_vs_darko_ci": [
+     -0.000249,
+     0.001587
+    ]
+   },
+   "d2_3000": {
+    "r2": 0.003258,
+    "gain_vs_nopull_3000_ci": [
+     2.6e-05,
+     0.000316
+    ],
+    "gain_vs_darko_ci": [
+     -6e-05,
+     0.001736
+    ]
+   },
+   "d2orig_3000": {
+    "r2": 0.003268,
+    "gain_vs_nopull_3000_ci": [
+     2.9e-05,
+     0.000332
+    ],
+    "gain_vs_d2_3000_ci": [
+     -2.7e-05,
+     4.7e-05
+    ],
+    "gain_vs_darko_ci": [
+     -4.6e-05,
+     0.00174
+    ]
+   },
+   "nopull_pit": {
+    "r2": 0.00342,
+    "gain_vs_nopull_3000_ci": [
+     7e-05,
+     0.000624
+    ],
+    "gain_vs_d2_3000_ci": [
+     -0.00013,
+     0.000476
+    ],
+    "gain_vs_darko_ci": [
+     0.000108,
+     0.001934
+    ]
+   },
+   "d2_pit": {
+    "r2": 0.003557,
+    "gain_vs_nopull_3000_ci": [
+     0.000172,
+     0.000776
+    ],
+    "gain_vs_d2_3000_ci": [
+     4.9e-05,
+     0.000558
+    ],
+    "gain_vs_darko_ci": [
+     0.000273,
+     0.002042
+    ]
+   },
+   "d2orig_pit": {
+    "r2": 0.003593,
+    "gain_vs_nopull_3000_ci": [
+     0.000214,
+     0.000809
+    ],
+    "gain_vs_d2_3000_ci": [
+     8.6e-05,
+     0.000594
+    ],
+    "gain_vs_darko_ci": [
+     0.000315,
+     0.002082
+    ]
+   },
+   "darko": {
+    "r2": 0.002428,
+    "gain_vs_nopull_3000_ci": [
+     -0.001587,
+     0.000249
+    ],
+    "gain_vs_d2_3000_ci": [
+     -0.001736,
+     6e-05
+    ]
+   }
+  },
+  "eligible": {
+   "nopull_3000": {
+    "r2": 0.002921,
+    "gain_vs_d2_3000_ci": [
+     -0.00033,
+     -4.3e-05
+    ],
+    "gain_vs_darko_ci": [
+     -0.00025,
+     0.001609
+    ]
+   },
+   "d2_3000": {
+    "r2": 0.003105,
+    "gain_vs_nopull_3000_ci": [
+     4.3e-05,
+     0.00033
+    ],
+    "gain_vs_darko_ci": [
+     -2.4e-05,
+     0.001776
+    ]
+   },
+   "d2orig_3000": {
+    "r2": 0.00311,
+    "gain_vs_nopull_3000_ci": [
+     4e-05,
+     0.000339
+    ],
+    "gain_vs_d2_3000_ci": [
+     -2.7e-05,
+     3.9e-05
+    ],
+    "gain_vs_darko_ci": [
+     -1.1e-05,
+     0.00178
+    ]
+   },
+   "nopull_pit": {
+    "r2": 0.003209,
+    "gain_vs_nopull_3000_ci": [
+     1.3e-05,
+     0.000575
+    ],
+    "gain_vs_d2_3000_ci": [
+     -0.000185,
+     0.000415
+    ],
+    "gain_vs_darko_ci": [
+     5.9e-05,
+     0.001917
+    ]
+   },
+   "d2_pit": {
+    "r2": 0.003354,
+    "gain_vs_nopull_3000_ci": [
+     0.000144,
+     0.000734
+    ],
+    "gain_vs_d2_3000_ci": [
+     -3e-06,
+     0.000517
+    ],
+    "gain_vs_darko_ci": [
+     0.000233,
+     0.002021
+    ]
+   },
+   "d2orig_pit": {
+    "r2": 0.003382,
+    "gain_vs_nopull_3000_ci": [
+     0.000168,
+     0.000772
+    ],
+    "gain_vs_d2_3000_ci": [
+     2.2e-05,
+     0.000544
+    ],
+    "gain_vs_darko_ci": [
+     0.000255,
+     0.002048
+    ]
+   },
+   "darko": {
+    "r2": 0.002259,
+    "gain_vs_nopull_3000_ci": [
+     -0.001609,
+     0.00025
+    ],
+    "gain_vs_d2_3000_ci": [
+     -0.001776,
+     2.4e-05
+    ]
+   }
+  },
+  "orig": {
+   "nopull_3000": {
+    "r2": 0.003212,
+    "gain_vs_d2_3000_ci": [
+     -0.000311,
+     -3.5e-05
+    ],
+    "gain_vs_darko_ci": [
+     -0.00036,
+     0.001445
+    ]
+   },
+   "d2_3000": {
+    "r2": 0.003378,
+    "gain_vs_nopull_3000_ci": [
+     3.5e-05,
+     0.000311
+    ],
+    "gain_vs_darko_ci": [
+     -0.000185,
+     0.001599
+    ]
+   },
+   "d2orig_3000": {
+    "r2": 0.003395,
+    "gain_vs_nopull_3000_ci": [
+     4.8e-05,
+     0.00033
+    ],
+    "gain_vs_d2_3000_ci": [
+     -2e-05,
+     5.3e-05
+    ],
+    "gain_vs_darko_ci": [
+     -0.000156,
+     0.001609
+    ]
+   },
+   "nopull_pit": {
+    "r2": 0.003553,
+    "gain_vs_nopull_3000_ci": [
+     8.4e-05,
+     0.000617
+    ],
+    "gain_vs_d2_3000_ci": [
+     -0.000115,
+     0.00047
+    ],
+    "gain_vs_darko_ci": [
+     -2.6e-05,
+     0.001786
+    ]
+   },
+   "d2_pit": {
+    "r2": 0.003688,
+    "gain_vs_nopull_3000_ci": [
+     0.000202,
+     0.000772
+    ],
+    "gain_vs_d2_3000_ci": [
+     6.8e-05,
+     0.000561
+    ],
+    "gain_vs_darko_ci": [
+     0.000133,
+     0.001885
+    ]
+   },
+   "d2orig_pit": {
+    "r2": 0.003727,
+    "gain_vs_nopull_3000_ci": [
+     0.000246,
+     0.000811
+    ],
+    "gain_vs_d2_3000_ci": [
+     0.000106,
+     0.000595
+    ],
+    "gain_vs_darko_ci": [
+     0.000163,
+     0.001933
+    ]
+   },
+   "darko": {
+    "r2": 0.002668,
+    "gain_vs_nopull_3000_ci": [
+     -0.001445,
+     0.00036
+    ],
+    "gain_vs_d2_3000_ci": [
+     -0.001599,
+     0.000185
+    ]
+   }
+  }
+ },
+ "per_event": {
+  "2021 deadline": {
+   "nopull_3000": 0.004734,
+   "d2_3000": 0.004917,
+   "d2orig_3000": 0.005003,
+   "nopull_pit": 0.001998,
+   "d2_pit": 0.00263,
+   "d2orig_pit": 0.00281,
+   "darko": 0.006117
+  },
+  "2022 deadline": {
+   "nopull_3000": 0.003228,
+   "d2_3000": 0.003214,
+   "d2orig_3000": 0.003203,
+   "nopull_pit": 0.003672,
+   "d2_pit": 0.003545,
+   "d2orig_pit": 0.003534,
+   "darko": 0.003236
+  },
+  "2023 deadline": {
+   "nopull_3000": 0.006295,
+   "d2_3000": 0.006939,
+   "d2orig_3000": 0.006829,
+   "nopull_pit": 0.007438,
+   "d2_pit": 0.007712,
+   "d2orig_pit": 0.007654,
+   "darko": 0.007347
+  },
+  "2024 deadline": {
+   "nopull_3000": 0.007339,
+   "d2_3000": 0.007957,
+   "d2orig_3000": 0.007919,
+   "nopull_pit": 0.008787,
+   "d2_pit": 0.009065,
+   "d2orig_pit": 0.009051,
+   "darko": 0.007427
+  },
+  "2025 deadline": {
+   "nopull_3000": 0.00547,
+   "d2_3000": 0.005631,
+   "d2orig_3000": 0.005704,
+   "nopull_pit": 0.00547,
+   "d2_pit": 0.005631,
+   "d2orig_pit": 0.005704,
+   "darko": 0.004557
+  },
+  "2026 deadline": {
+   "nopull_3000": 0.004151,
+   "d2_3000": 0.004243,
+   "d2orig_3000": 0.004217,
+   "nopull_pit": 0.005101,
+   "d2_pit": 0.005112,
+   "d2orig_pit": 0.005099,
+   "darko": 0.005189
+  },
+  "2025 offseason": {
+   "nopull_3000": -0.003514,
+   "d2_3000": -0.003644,
+   "d2orig_3000": -0.003674,
+   "nopull_pit": -0.002576,
+   "d2_pit": -0.002815,
+   "d2orig_pit": -0.002852,
+   "darko": -0.008169
+  },
+  "2026 offseason": {
+   "nopull_3000": 0.001807,
+   "d2_3000": 0.001968,
+   "d2orig_3000": 0.00206,
+   "nopull_pit": -0.000324,
+   "d2_pit": 0.000263,
+   "d2orig_pit": 0.000465,
+   "darko": 0.003058
+  }
+ }
+}

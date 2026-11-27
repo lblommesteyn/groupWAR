@@ -1,0 +1,156 @@
+{
+ "provenance": {
+  "revision": "020c46eb3804129fc2fc4a0213da54fff7cd063a",
+  "script": "corrected_calibration.py",
+  "script_sha256": "c74a7d45d1c70591",
+  "run_utc": "2026-11-27T08:02:55+00:00",
+  "data": [
+   {
+    "path": "results/latent/gamelogs.parquet",
+    "bytes": 4225056,
+    "mtime": "2026-11-27T06:15:15+00:00",
+    "sha256_first_mib": "d5c5085ab8a797da"
+   },
+   {
+    "path": "results/latent/ms2_stints.pkl",
+    "bytes": 67892083,
+    "mtime": "2026-11-24T20:58:51+00:00",
+    "sha256_first_mib": "097d0de914714e7f"
+   },
+   {
+    "path": "results/latent/ms2_stints_2325.pkl",
+    "bytes": 39701083,
+    "mtime": "2026-11-24T20:59:20+00:00",
+    "sha256_first_mib": "9afbb96b74358e03"
+   },
+   {
+    "path": "results/latent/ms2_stints_2526.pkl",
+    "bytes": 20836266,
+    "mtime": "2026-11-24T20:59:35+00:00",
+    "sha256_first_mib": "cdbbb5704c620e1e"
+   },
+   {
+    "path": "results/benchmarks/darko_history.json",
+    "bytes": 35255217,
+    "mtime": "2026-11-24T02:46:44+00:00",
+    "sha256_first_mib": "09ad8aefbf263128"
+   },
+   {
+    "path": "results/latent/live_calib_v2.json",
+    "bytes": 333,
+    "mtime": "2026-11-27T02:44:08+00:00",
+    "sha256_first_mib": "e6609eda1f476533"
+   }
+  ]
+ },
+ "games": {
+  "fit_2025": 1074,
+  "test_2026": 1079
+ },
+ "arms": {
+  "realised_ours": {
+   "slope_fit_2025": 0.1391,
+   "test_ll_2026": 0.59076,
+   "test_mean_p_vs_rate": [
+    0.5358,
+    0.5505
+   ]
+  },
+  "realised_darko": {
+   "slope_fit_2025": 0.1414,
+   "test_ll_2026": 0.59807,
+   "test_mean_p_vs_rate": [
+    0.5418,
+    0.5505
+   ]
+  },
+  "pregame_ours": {
+   "slope_fit_2025": 0.142,
+   "test_ll_2026": 0.60728,
+   "test_mean_p_vs_rate": [
+    0.5327,
+    0.5505
+   ],
+   "frozen_live_calib_ll_2026": 0.60621,
+   "frozen_slope": 0.1464843737990635,
+   "frozen_reliability_bins": [
+    [
+     0.282,
+     0.25,
+     216
+    ],
+    [
+     0.441,
+     0.435,
+     216
+    ],
+    [
+     0.554,
+     0.577,
+     215
+    ],
+    [
+     0.673,
+     0.662,
+     216
+    ],
+    [
+     0.799,
+     0.829,
+     216
+    ]
+   ]
+  },
+  "pregame_darko": {
+   "slope_fit_2025": 0.1428,
+   "test_ll_2026": 0.61153,
+   "test_mean_p_vs_rate": [
+    0.538,
+    0.5505
+   ],
+   "frozen_live_calib_ll_2026": 0.61077,
+   "frozen_slope": 0.1494456265149607,
+   "frozen_reliability_bins": [
+    [
+     0.285,
+     0.245,
+     216
+    ],
+    [
+     0.441,
+     0.44,
+     216
+    ],
+    [
+     0.558,
+     0.567,
+     215
+    ],
+    [
+     0.667,
+     0.69,
+     216
+    ],
+    [
+     0.796,
+     0.81,
+     216
+    ]
+   ]
+  }
+ },
+ "realised_ours_minus_darko_ll": {
+  "mean": -0.00731,
+  "ci": [
+   -0.01585,
+   0.00105
+  ]
+ },
+ "pregame_ours_minus_darko_ll": {
+  "mean": -0.00426,
+  "ci": [
+   -0.01103,
+   0.00238
+  ]
+ }
+}
