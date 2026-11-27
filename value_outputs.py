@@ -76,7 +76,11 @@ def main():
     v = np.array([(w / n, d_ / n) for n, w, d_ in acc.values() if n >= 50]); rng = np.random.default_rng(1)
     ppw_bs = [1 / np.polyfit(v[i, 1], v[i, 0], 1)[0] for i in (rng.integers(0, len(v), len(v)) for _ in range(2000))]
     ppw_ci = np.percentile(ppw_bs, [2.5, 97.5]).round(1).tolist()
-    SD = boot_sd(a.date, a.boot)
+    cache = OUT / f'boot_sd_{a.date}_{a.boot}.json'
+    if cache.exists():
+        SD = {int(k): tuple(v) for k, v in json.load(open(cache)).items()}
+    else:
+        SD = boot_sd(a.date, a.boot); OUT.mkdir(parents=True, exist_ok=True); json.dump({str(k): v for k, v in SD.items()}, open(cache, 'w'))
     gl = pd.read_parquet(LAT / 'gamelogs.parquet'); gl = gl[~gl.playoff].copy(); gl['d'] = pd.to_datetime(gl.game_date)
     gl = gl[gl.d < pd.Timestamp(a.date)].sort_values('d')
     # availability: games played / team games over his last 82 team games (team = his current team)
@@ -94,7 +98,7 @@ def main():
         team_left = max(82 - int(gl[(gl.team_id == team) & (gl.season == SEASON)].game_id.nunique()), 0)
         so, sd_ = SD.get(p, (np.nan, np.nan)); sd_net = float(np.hypot(so, sd_))
         ppm = r['poss'] / max(h[h.season == SEASON]['min'].sum(), 1) if r['poss'] else 2.05
-        e_poss = avail * mpg * team_left * ppm
+        e_poss = avail * mpg * team_left * ppm      # rescaled to 240 team minutes per game below
         war = lambda net, rp, poss, pw=ppw: (net - rp) * poss / 100 / pw
         net = r['duncan']
         row = dict(pid=p, name=r['name'], team=r['team'],
@@ -110,8 +114,36 @@ def main():
                                            'points_per_win_ci': [round(war(net, repl, e_poss, ppw_ci[1]), 2), round(war(net, repl, e_poss, ppw_ci[0]), 2)]},
                                    old_war_ros_no_availability=r['war_ros']))
         players.append(row)
+    # team minutes must add to 240 per game: missed games' minutes are played by teammates (IGGY B0 rule: rescale
+    # expected minutes within the team, capped as in iggy_minutes.project). Recompute projections with the rescaled minutes.
+    from iggy_minutes import project
+    byteam = defaultdict(list)
+    for x in players:
+        byteam[x['team']].append(x)
+    for tm, xs in byteam.items():
+        em = np.array([x['projection']['availability'] * x['projection']['minutes_when_available'] for x in xs])
+        if em.sum() <= 0:
+            continue
+        cap = np.minimum(44.0, np.maximum(np.array([x['projection']['minutes_when_available'] for x in xs]), 10.0) + 14.0)
+        m240 = project(em * 240.0 / em.sum(), cap) if em.sum() < 240 else project(em, cap)
+        for x, mm, e0 in zip(xs, m240, em):
+            pj = x['projection']; f = mm / max(e0, 1e-9)
+            pj['expected_minutes_per_team_game'] = round(float(mm), 2)
+            pj['team_minutes_rescale'] = round(float(f), 3)
+            for k in ('expected_possessions',):
+                pj[k] = round(pj[k] * f)
+            pj['war_ros'] = round(pj['war_ros'] * f, 2)
+            pj['ranges'] = {k: [round(v[0] * f, 2), round(v[1] * f, 2)] for k, v in pj['ranges'].items()}
     players.sort(key=lambda x: -(x['season_to_date']['war'] + x['projection']['war_ros']))
+    # verified calculations: recompute by hand for every player; accounting identities
+    for x in players:
+        net = x['ability']['net']; std = (net - repl) * x['season_to_date']['possessions'] / 100 / ppw
+        assert abs(std - x['season_to_date']['war']) < 0.006, (x['name'], std, x['season_to_date']['war'])
+        pj = x['projection']; ros = (net - repl) * pj['expected_possessions'] / 100 / ppw
+        assert abs(ros - pj['war_ros']) < 0.05 + 0.01 * abs(ros), (x['name'], ros, pj['war_ros'])
+    team_min = {tm: sum(x['projection']['expected_minutes_per_team_game'] for x in xs) for tm, xs in byteam.items()}
     tot_old = sum(r['war_82'] for r in sc['players']); tot_new = sum(x['season_to_date']['war'] + x['projection']['war_ros'] for x in players)
+    std_tot = sum(x['season_to_date']['war'] for x in players)
     audit = dict(date=a.date, replacement=repl, points_per_win=ppw, points_per_win_ci=ppw_ci,
                  units='ratings per 100 possessions; possessions = mean of offensive and defensive possessions on court; '
                        'wins = points / points_per_win (+1 point per game over 82 games = 82 / ppw wins)',
@@ -119,6 +151,12 @@ def main():
                                           implied_by_replacement=round(30 * (41 - 82 * (0.5 + 5 * repl * 0.99 / ppw)), 1),
                                           note='replacement team: five replacement players, ~99 possessions per game'),
                  bootstrap_refits=a.boot,
+                 checks=dict(per_player_recompute='passed (season-to-date and projection recomputed from definitions)',
+                             team_minutes_per_game=dict(min=round(min(team_min.values()), 1), max=round(max(team_min.values()), 1)),
+                             season_to_date_total=round(std_tot, 1),
+                             note='league total over a full season should be close to implied_by_replacement; residual gaps come from '
+                                  'players without a current rating, rookies yet to play, and the ROS centring (ratings are centred on '
+                                  'season-to-date possessions)'),
                  unmodelled=['injury risk beyond the availability rate', 'trades and role changes', 'rating drift during the season',
                              'coach changes', 'minutes-model error (see results/iggy/minutes.json MAE)', 'playoff value',
                              'rating covariance between teammates (bootstrap sd is per player)'])
