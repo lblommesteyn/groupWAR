@@ -3,6 +3,7 @@ rem PRIMARY live position capture (every 10 min, 11:00-03:00 ET). GitHub's sched
 rem (2026-11-27: two runs in eight hours), so the PC captures into data/positions_pc in the court-live clone and
 rem pushes whenever something new arrived. GitHub's copy (data/positions) is a second source; the converter merges both.
 set PYTHONIOENCODING=utf-8
+set PYTHONUTF8=1
 set LOG=C:\Users\LukeB\dev\court-model\logs\positions_pc.log
 echo ---- run %date% %time% >> %LOG%
 cd /d C:\Users\LukeB\dev\court-live
