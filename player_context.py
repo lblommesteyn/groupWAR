@@ -1,6 +1,6 @@
 """Contextual player evaluation: role-adjusted ratings, situational splits, lineup / teammate fit.
 
-Ratings: the live model (spm_lpit_h, every game through yesterday, lambda 1000), offense and defense per 100
+Ratings: DUNCAN-2, the live model (every game through yesterday, lambda 3000; the live mover pull is not applied here), offense and defense per 100
 possessions (defense sign flipped so + is good). Teammates and opponents are already adjusted for by the ridge.
 Roles: Gaussian mixture on the cross-season-stable tracking style features (both seasons pooled, minutes-weighted),
 separately for offense and defense. Role-adjusted = the rating against players in the same role (percentile and
@@ -34,7 +34,7 @@ OFF_F = ['onball_share', 'hold_per_touch', 'pot_ast36', 'drives36', 'cs_share', 
          'paint_share', 'crash_rate', 'spacing', 'own_touch', 'pass_rate']
 DEF_F = ['rim_presence', 'dmatch', 'onball_def', 'help', 'matchup_usage', 'nd_rate']
 K_OFF, K_DEF = 7, 5
-LAM = 1000.0
+LAM = 3000.0        # DUNCAN-2 (court-live/HOLDOUT.md)
 PAIR_LAM = 1500.0
 SIG = 115.0
 
@@ -75,7 +75,7 @@ def main():
     OUT.mkdir(parents=True, exist_ok=True)
     Dt = sp.Data(live=True); n = Dt.n; cut = sp.dnum(str(date.today()))
     y = Dt.luck_target(cut, 0.5)
-    th, b = sp.fit_arm(Dt, 'spm_lpit_h', cut, LAM)
+    m_ = Dt.spm_prior(cut, y); th, b = Dt.ridge(np.flatnonzero(Dt.DAY < cut), y, m_, LAM, cut)
     rows = np.flatnonzero(Dt.DAY < cut)
     pred = b[0] + b[1] * Dt.H + th[Dt.O].sum(1) + th[n + Dt.D].sum(1)
     resid = y - pred
