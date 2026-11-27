@@ -124,7 +124,7 @@ def main():
         em = np.array([x['projection']['availability'] * x['projection']['minutes_when_available'] for x in xs])
         if em.sum() <= 0:
             continue
-        cap = np.minimum(44.0, np.maximum(np.array([x['projection']['minutes_when_available'] for x in xs]), 10.0) + 14.0)
+        cap = np.minimum(44.0, np.array([x['projection']['minutes_when_available'] for x in xs]) + 3.0)   # missed minutes go mostly to players with headroom (bench), as IGGY's data shows
         m240 = project(em * 240.0 / em.sum(), cap) if em.sum() < 240 else project(em, cap)
         for x, mm, e0 in zip(xs, m240, em):
             pj = x['projection']; f = mm / max(e0, 1e-9)
