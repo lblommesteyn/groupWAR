@@ -255,30 +255,48 @@ def team_forecasts(D, sel):
                    'realised_DIAGNOSTIC': g.y.values}
         for k, mins in schemes.items():
             out[(gid, d)][k].append((team == home[gid][0], val(mins)))
-    X = defaultdict(lambda: defaultdict(list)); Y = defaultdict(list)
+    # point-in-time ratings exist for the 2025-26 blocks only, so calibration is ROLLING within 2025-26: block j is
+    # scored with a logistic fit on the games of blocks < j (chronological); the first block is only used for fitting
+    bidx = {b0: i for i, (b0, _) in enumerate(blocks)}
+    rowsg = []
     for (gid, d), sch in out.items():
         if any(len(v) != 2 for v in sch.values()):
             continue
-        season = int(d[:4]) + (int(d[5:7]) >= 8)
+        blk = [b for b in blocks if b[0] <= d][-1][0]
+        m = {}
         for k, v in sch.items():
             (hh, (ho, hd)), (aa, (ao, ad)) = sorted(v, key=lambda t: not t[0])
-            X[season][k].append((ho + ad) - (ao + hd))
-        Y[season].append(int(home[gid][1]))
-    res = dict(games_fit_2025=len(Y[2025]), games_test_2026=len(Y[2026]))
-    if not Y[2025] or not Y[2026]:
-        return res
-    y25, y26 = np.array(Y[2025]), np.array(Y[2026]); lls = {}
-    for k in X[2026]:
-        lr = LogisticRegression(C=1e4).fit(np.array(X[2025][k])[:, None], y25)
-        p = lr.predict_proba(np.array(X[2026][k])[:, None])[:, 1]
-        lls[k] = -np.log(np.clip(np.where(y26 == 1, p, 1 - p), 1e-9, 1))
-        res[k] = round(float(lls[k].mean()), 5)
+            m[k] = (ho + ad) - (ao + hd)
+        rowsg.append((bidx[blk], int(home[gid][1]), m))
+    res = dict(calibration='rolling within 2025-26 (fit on earlier blocks only)', games_total=len(rowsg))
+    keys = list(rowsg[0][2]) if rowsg else []
+    lls = {k: [] for k in keys}; tested = 0
+    for j in range(1, len(blocks)):
+        fit = [r for r in rowsg if r[0] < j]; te = [r for r in rowsg if r[0] == j]
+        if len(fit) < 50 or not te:
+            continue
+        yf = np.array([r[1] for r in fit]); yt = np.array([r[1] for r in te]); tested += len(te)
+        for k in keys:
+            lr = LogisticRegression(C=1e4).fit(np.array([r[2][k] for r in fit])[:, None], yf)
+            p = lr.predict_proba(np.array([r[2][k] for r in te])[:, None])[:, 1]
+            lls[k].append(-np.log(np.clip(np.where(yt == 1, p, 1 - p), 1e-9, 1)))
+    res['games_tested'] = tested
+    lls = {k: np.concatenate(v) for k, v in lls.items() if v}
+    for k, v in lls.items():
+        res[k] = round(float(v.mean()), 5)
     rng = np.random.default_rng(1)
-    for a_, b_ in (('iggy', 'B0'), ('iggy', 'naive'), ('B0', 'naive')):
-        d_ = lls[a_] - lls[b_]
-        res[f'{a_}_minus_{b_}'] = dict(mean=round(float(d_.mean()), 5), ci=np.percentile([d_[rng.integers(0, len(d_), len(d_))].mean() for _ in range(2000)], [2.5, 97.5]).round(5).tolist())
+    for a_, b_ in (('iggy', 'B0'), ('iggy', 'naive'), ('B0', 'naive'), ('realised_DIAGNOSTIC', 'iggy')):
+        if a_ in lls and b_ in lls:
+            d_ = lls[a_] - lls[b_]
+            res[f'{a_}_minus_{b_}'] = dict(mean=round(float(d_.mean()), 5), ci=np.percentile([d_[rng.integers(0, len(d_), len(d_))].mean() for _ in range(2000)], [2.5, 97.5]).round(5).tolist())
     return res
 
 
 if __name__ == '__main__':
-    main()
+    import sys
+    if '--team-only' in sys.argv:      # rerun the team-forecast step from the saved minute predictions
+        D = pd.read_parquet(OUT / 'minutes_predictions.parquet'); res = json.load(open(OUT / 'minutes.json'))
+        res['team_forecast'] = team_forecasts(D, res['selected']); res['team_forecast_provenance'] = provenance(__file__, ['results/iggy/minutes_predictions.parquet', 'results/latent/spm_ratings.pkl'])
+        json.dump(res, open(OUT / 'minutes.json', 'w'), indent=1); print(json.dumps(res['team_forecast'], indent=1))
+    else:
+        main()
