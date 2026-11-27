@@ -25,6 +25,10 @@ W = ROOT / 'results/world'
 DEV = 'cuda' if torch.cuda.is_available() else 'cpu'
 D, ZD, TD, BETA, P_DROP = 128, 8, 8, 0.01, 0.3
 STEPS, BATCH, FRAMES = 12000, 192, 6
+# WM_MIX=K: K-component Gaussian mixture head (the expected spot is the most likely component); WM_LIVE=1: train on
+# live-play frames only (dead ball = shot clock frozen over the last two frames). Neither set = the original model.
+MIX = int(os.environ.get('WM_MIX', '1')); LIVE = os.environ.get('WM_LIVE') == '1'
+STEPS = int(os.environ.get('WM_STEPS', STEPS))
 RIM = 41.75
 
 
@@ -66,7 +70,7 @@ class Net(nn.Module):
         self.zhead = nn.Linear(2 * D, 2 * ZD)
         self.tse = nn.Embedding(n_ts, TD); nn.init.zeros_(self.tse.weight)
         self.cond = nn.Linear(ZD + TD, D); self.nocond = nn.Parameter(torch.zeros(D))
-        self.out = nn.Sequential(nn.Linear(D, D), nn.GELU(), nn.Linear(D, 3))
+        self.out = nn.Sequential(nn.Linear(D, D), nn.GELU(), nn.Linear(D, 3 if MIX == 1 else 4 * MIX))
 
     def tokens(self, pos, vel, ball, hold, desc, others, glob):
         # pos/vel [B, 10, 2]; others: bool mask of defenders to include [B, 5]
@@ -101,7 +105,11 @@ class Net(nn.Module):
         q = (cond + self.typ.weight[4]).unsqueeze(1)
         h = self.frame(torch.cat([toks, q], 1), src_key_padding_mask=torch.cat([pad, torch.zeros_like(pad[:, :1])], 1))
         o = self.out(h[:, -1])
-        return o[:, :2] + torch.tensor([RIM - 12.0, 0.0], device=pos.device), o[:, 2].clamp(-4, 6)
+        off = torch.tensor([RIM - 12.0, 0.0], device=pos.device)
+        if MIX == 1:
+            return (o[:, :2] + off).unsqueeze(1), o[:, 2:3].clamp(-4, 6), torch.zeros_like(o[:, 2:3])
+        o = o.reshape(-1, MIX, 4)
+        return o[..., :2] + off, o[..., 2].clamp(-4, 6), o[..., 3]
 
 
 def tens(Dd, idx):
@@ -110,17 +118,28 @@ def tens(Dd, idx):
     H = torch.tensor(Dd['holder'][idx].astype(np.int64))
     Ho = F.one_hot(H.clamp(min=0), 5).float() * (H >= 0).unsqueeze(-1).float()
     T = P.shape[1]; L = torch.tensor(Dd['length'][idx].astype(np.int64))
-    sc = torch.tensor(np.nan_to_num(Dd['sc'][idx].astype(np.float32), nan=12.0)) / 24.0
+    scr = Dd['sc'][idx].astype(np.float32)
+    d1 = np.abs(scr - np.roll(scr, 1, 1)); d2 = np.roll(d1, 1, 1)
+    dead = np.isfinite(d1) & np.isfinite(d2) & (d1 < 0.05) & (d2 < 0.05); dead[:, :2] = False
+    LV = torch.tensor(~dead)
+    sc = torch.tensor(np.nan_to_num(scr, nan=12.0)) / 24.0
     tt = torch.arange(T).float().unsqueeze(0).expand(len(idx), T) * 0.4 / 24.0
     G = torch.stack([sc, tt], -1)
     ok = torch.isfinite(P).all(-1).all(-1) & (torch.arange(T).unsqueeze(0) < L.unsqueeze(1))
     P = torch.nan_to_num(P); V = torch.nan_to_num(V).clamp(-30, 30); Bl = torch.nan_to_num(Bl)
     De = torch.tensor(Dd['desc'][idx]); TS = torch.tensor(Dd['ts'][idx])
-    return [x.to(DEV) for x in (P, V, Bl, Ho, De, G, L, ok, TS)]
+    return [x.to(DEV) for x in (P, V, Bl, Ho, De, G, L, ok, TS, LV)]
+
+
+def mix_nll(y, m, lv, logit):
+    lp = torch.log_softmax(logit, -1) - (((y.unsqueeze(1) - m) ** 2).sum(-1) / (2 * lv.exp()) + lv)
+    return -torch.logsumexp(lp, -1)
 
 
 def step(net, batch, train=True):
-    P, V, Bl, Ho, De, G, L, ok, TS = batch
+    P, V, Bl, Ho, De, G, L, ok, TS, LV = batch
+    if LIVE:
+        ok = ok & LV
     B_ = P.shape[0]
     k = torch.randint(0, 5, (B_,), device=DEV)
     mu, lv = net.scheme(P, V, Bl, Ho, De, G, L, k)
@@ -136,11 +155,11 @@ def step(net, batch, train=True):
     bi = torch.arange(B_, device=DEV).unsqueeze(1).expand_as(ti)
     sel = lambda X: X[bi, ti].reshape(-1, *X.shape[2:])
     kk = k.unsqueeze(1).expand_as(ti).reshape(-1)
-    m, lvar = net.decode(sel(P), sel(V), sel(Bl), sel(Ho), De.unsqueeze(1).expand(B_, FRAMES, 5, 11).reshape(-1, 5, 11), sel(G), kk,
-                         cond.unsqueeze(1).expand(B_, FRAMES, D).reshape(-1, D))
+    m, lvar, logit = net.decode(sel(P), sel(V), sel(Bl), sel(Ho), De.unsqueeze(1).expand(B_, FRAMES, 5, 11).reshape(-1, 5, 11), sel(G), kk,
+                                cond.unsqueeze(1).expand(B_, FRAMES, D).reshape(-1, D))
     y = sel(P)[torch.arange(len(kk), device=DEV), 5 + kk]
     valid = sel(ok.float())
-    nll = ((((y - m) ** 2).sum(-1) / (2 * lvar.exp()) + lvar) * valid).sum() / valid.sum().clamp(min=1)
+    nll = (mix_nll(y, m, lvar, logit) * valid).sum() / valid.sum().clamp(min=1)
     return nll + BETA * kl, nll.item(), kl.item()
 
 
@@ -150,7 +169,7 @@ def predict(net, Dd, idx):
     net.eval(); out = []; zs = []
     for s in range(0, len(idx), 64):
         b = idx[s:s + 64]
-        P, V, Bl, Ho, De, G, L, ok, TS = tens(Dd, b)
+        P, V, Bl, Ho, De, G, L, ok, TS, LV = tens(Dd, b)
         B_, T = P.shape[:2]
         for k in range(5):
             kk = torch.full((B_,), k, device=DEV)
@@ -159,15 +178,19 @@ def predict(net, Dd, idx):
             fl = lambda X: X.reshape(B_ * T, *X.shape[2:])
             kf = kk.unsqueeze(1).expand(B_, T).reshape(-1)
             Dx = De.unsqueeze(1).expand(B_, T, 5, 11).reshape(-1, 5, 11)
-            ms, ls = net.decode(fl(P), fl(V), fl(Bl), fl(Ho), Dx, fl(G), kf, c_s.unsqueeze(1).expand(B_, T, D).reshape(-1, D))
-            mb, lb = net.decode(fl(P), fl(V), fl(Bl), fl(Ho), Dx, fl(G), kf, c_b.unsqueeze(1).expand(B_, T, D).reshape(-1, D))
+            Ms, Ls, Gs = net.decode(fl(P), fl(V), fl(Bl), fl(Ho), Dx, fl(G), kf, c_s.unsqueeze(1).expand(B_, T, D).reshape(-1, D))
+            Mb, Lb, Gb = net.decode(fl(P), fl(V), fl(Bl), fl(Ho), Dx, fl(G), kf, c_b.unsqueeze(1).expand(B_, T, D).reshape(-1, D))
+            ar = torch.arange(len(Ms), device=DEV); i_s, i_b = Gs.argmax(-1), Gb.argmax(-1)
+            ms, ls, mb, lb = Ms[ar, i_s], Ls[ar, i_s], Mb[ar, i_b], Lb[ar, i_b]
             okf = fl(ok)
             y = fl(P)[:, 5 + k]
             sel = okf.nonzero().squeeze(-1)
             zs.append((b, k, mu.cpu().numpy().astype(np.float16)))
             out.append(dict(poss=np.repeat(b, T)[sel.cpu().numpy()].astype(np.int32), t=np.tile(np.arange(T), B_)[sel.cpu().numpy()].astype(np.int8), k=np.full(len(sel), k, np.int8),
                             y=y[sel].cpu().numpy().astype(np.float16), ms=ms[sel].cpu().numpy().astype(np.float16), ls=ls[sel].cpu().numpy().astype(np.float16),
-                            mb=mb[sel].cpu().numpy().astype(np.float16), lb=lb[sel].cpu().numpy().astype(np.float16)))
+                            mb=mb[sel].cpu().numpy().astype(np.float16), lb=lb[sel].cpu().numpy().astype(np.float16),
+                            nll_s=mix_nll(y, Ms, Ls, Gs)[sel].cpu().numpy().astype(np.float16), nll_b=mix_nll(y, Mb, Lb, Gb)[sel].cpu().numpy().astype(np.float16),
+                            live=fl(LV)[sel].cpu().numpy().astype(np.int8)))
     res = {key: np.concatenate([o[key] for o in out]) for key in out[0]}
     Z = np.zeros((len(Dd['gid']), 5, ZD), np.float16)
     for b, k, z in zs:
