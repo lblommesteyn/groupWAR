@@ -14,6 +14,12 @@ echo ==== %date% %time% >> logs\daily.log
 cd /d %LIVE%
 git pull -q >> C:\Users\LukeB\dev\court-model\logs\daily.log 2>&1
 cd /d C:\Users\LukeB\dev\court-model
+rem fallback for GitHub's unreliable schedule: final stats, companion history, scoreboard (all idempotent)
+cd /d %LIVE%
+python collect_stats.py >> C:\Users\LukeB\dev\court-model\logs\daily.log 2>&1
+python collect_companion.py >> C:\Users\LukeB\dev\court-model\logs\daily.log 2>&1
+python score.py >> C:\Users\LukeB\dev\court-model\logs\daily.log 2>&1
+cd /d C:\Users\LukeB\dev\court-model
 rem last night's live positions + companion history -> normalized tracking (outside the repo; summary committed)
 python %LIVE%\convert_live.py --date %Y% --root %LIVE% --out C:\Users\LukeB\dev\tracking-live --summary %LIVE%\data\tracking_summary\%Y%.json >> logs\daily.log 2>&1
 python fetch_pbp.py >> logs\daily.log 2>&1
@@ -29,7 +35,7 @@ copy /y results\latent\live_calib_v2.json %LIVE%\data\ratings\live_calib_v2.json
 if not exist %LIVE%\data\heartbeat mkdir %LIVE%\data\heartbeat
 if "%FAIL%"=="0" echo am %date% %time% > %LIVE%\data\heartbeat\%D%-am.txt
 cd /d %LIVE%
-git add forecasts data/darko data/injury data/duncan data/ratings data/schedule data/heartbeat data/tracking_summary
+git add forecasts data/darko data/injury data/duncan data/ratings data/schedule data/heartbeat data/tracking_summary data/stats data/companion SCOREBOARD.md
 git -c user.name=lblommesteyn -c user.email=lblommesteyn@icloud.com commit -q -m "forecast %D%" >> C:\Users\LukeB\dev\court-model\logs\daily.log 2>&1
 git pull --rebase -X theirs -q >> C:\Users\LukeB\dev\court-model\logs\daily.log 2>&1
 git push -q >> C:\Users\LukeB\dev\court-model\logs\daily.log 2>&1
