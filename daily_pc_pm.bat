@@ -16,7 +16,7 @@ if "%FAIL%"=="0" echo pm %date% %time% > %LIVE%\data\heartbeat\%D%-pm.txt
 cd /d %LIVE%
 git add forecasts data/darko data/injury data/heartbeat
 git -c user.name=lblommesteyn -c user.email=lblommesteyn@icloud.com commit -q -m "forecast pm %D%" >> C:\Users\LukeB\dev\court-model\logs\daily.log 2>&1
-git pull --rebase -q >> C:\Users\LukeB\dev\court-model\logs\daily.log 2>&1
+git pull --rebase -X theirs -q >> C:\Users\LukeB\dev\court-model\logs\daily.log 2>&1
 git push -q >> C:\Users\LukeB\dev\court-model\logs\daily.log 2>&1
 if errorlevel 1 set FAIL=1
 echo ---- pm exit %FAIL% %time% >> C:\Users\LukeB\dev\court-model\logs\daily.log
