@@ -1,4 +1,4 @@
-"""BOWEN (formerly DRAYMOND) value: what do execution gaps cost in points?
+"""BOWEN value: what do execution gaps cost in points?
 
 1. Shot timestamps: for every aligned shot (results/shots/alignment.jsonl, both seasons) the release timestamp from
    the game's tracking frames (shot_align.load_frames, the index the alignment used).
@@ -11,7 +11,7 @@
    shooter's defender and the four help defenders (ridge). Contribution of a defender on a possession =
    coefficients x his gaps - the same at zero gap; per player: points per 100 shot possessions, + = costs points.
 5. Reliability: odd / even games and season to season.
-Output: results/world/draymond_value.json, results/world/draymond_value_players.json     python draymond_value.py
+Output: results/world/bowen_value.json, results/world/bowen_value_players.json     python bowen_value.py
 """
 import json, zipfile
 from collections import defaultdict
@@ -144,8 +144,8 @@ def main():
     res['cross_season_r'] = corr([out[p + '_2026']['value100'] for p in both], [out[p + '_2027']['value100'] for p in both])
     res['players'] = len(out)
     print(res, flush=True)
-    json.dump(res, open(W / 'draymond_value.json', 'w'), indent=1)
-    json.dump(out, open(W / 'draymond_value_players.json', 'w'))
+    json.dump(res, open(W / 'bowen_value.json', 'w'), indent=1)
+    json.dump(out, open(W / 'bowen_value_players.json', 'w'))
 
 
 if __name__ == '__main__':

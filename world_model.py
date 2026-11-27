@@ -1,4 +1,4 @@
-"""BOWEN (formerly DRAYMOND) defensive world model: where should each defender be, under the league baseline and under his team's scheme?
+"""BOWEN defensive world model: where should each defender be, under the league baseline and under his team's scheme?
 
 Data: results/world/traj_{2026,2027}.npz (traj_export.py), desc.json (world_desc.py). Offense attacks (+41.75, 0).
 For defender k at frame t the decoder sees everything except k's own position:

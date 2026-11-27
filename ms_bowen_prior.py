@@ -1,6 +1,6 @@
-"""Does BOWEN (formerly DRAYMOND) (world_model.py) predict defense beyond DUNCAN? A defensive-prior test like ms_trk2.
+"""Does BOWEN (world_model.py) predict defense beyond DUNCAN? A defensive-prior test like ms_trk2.
 
-At each cutoff inside the tracked seasons, per defender, from BOWEN (formerly DRAYMOND) frames of games BEFORE the cutoff only:
+At each cutoff inside the tracked seasons, per defender, from BOWEN frames of games BEFORE the cutoff only:
   exec_depth (signed distance to rim vs scheme spot), exec_ft (distance to scheme spot), scheme_depth, and the
   same split by situation (defender within 12 ft of the rim at the scheme spot vs outside).
 Prior adjustment: RidgeCV of (plain RAPM defense - box prior defense) on those features, weights min(frames/2500, 1)
@@ -8,7 +8,7 @@ x possessions, added to the box prior for defense only; then the DUNCAN v2 fit (
 Scored on the following 30 days: stint R2 (linear map fit on the 30 days before the cutoff), game-clustered CIs.
 Caveat: the world model is cross-fitted by game over both seasons, so its notion of normal positioning saw later
 games (positions only, never outcomes).
-Output: results/latent/ms_draymond_prior.json     python ms_draymond_prior.py [LAM2 K_ALL]   (PC)
+Output: results/latent/ms_bowen_prior.json     python ms_bowen_prior.py [LAM2 K_ALL]   (PC)
 """
 import json, sys
 from datetime import date
@@ -53,7 +53,7 @@ def main():
         reg = RidgeCV(alphas=np.logspace(0, 4, 9)).fit(Z, res_d[have], sample_weight=wts)
         adj = np.zeros(2 * n); adj[n + np.flatnonzero(have)] = -reg.predict(Z) * wts   # defence theta: + = worse
         arms = {}
-        for name, mm in (('duncan2', m), ('duncan2_draymond', m + adj)):
+        for name, mm in (('duncan2', m), ('duncan2_bowen', m + adj)):
             th, bb = Dt.ridge(trn, y_t, mm, LAM2, cut); arms[name] = (mm + K_ALL * (th - mm), bb)
         vrow = np.flatnonzero((Dt.DAY >= cut - sp.VAL_DAYS) & (Dt.DAY < cut))
         trow = np.flatnonzero((Dt.DAY >= cut) & (Dt.DAY < cut + 30))
@@ -68,18 +68,18 @@ def main():
                                         np.round(reg.coef_, 3).tolist())), test_rows=int(len(trow)))
         print(cut_s, res[cut_s], flush=True)
     out = {}
-    for name in ('duncan2', 'duncan2_draymond'):
+    for name in ('duncan2', 'duncan2_bowen'):
         R = [r for r in rows_all if r[1] == name]
         out[name] = dict(g=np.concatenate([r[2] for r in R]), se=np.concatenate([r[3] for r in R]), st=np.concatenate([r[4] for r in R]))
     g = out['duncan2']['g']; ug, gi = np.unique(g, return_inverse=True)
     S = {k_: (np.bincount(gi, v['se'], len(ug)), np.bincount(gi, v['st'], len(ug))) for k_, v in out.items()}
     r2 = {k_: float(1 - a.sum() / b.sum()) for k_, (a, b) in S.items()}
     rng = np.random.default_rng(0)
-    bs = [(S['duncan2'][0][i].sum() - S['duncan2_draymond'][0][i].sum()) / S['duncan2'][1][i].sum()
+    bs = [(S['duncan2'][0][i].sum() - S['duncan2_bowen'][0][i].sum()) / S['duncan2'][1][i].sum()
           for i in (rng.integers(0, len(ug), len(ug)) for _ in range(2000))]
     res['stint_r2'] = r2; res['gain_ci'] = np.percentile(bs, [2.5, 97.5]).round(5).tolist()
     print('stint R2', r2, 'gain CI', res['gain_ci'], flush=True)
-    json.dump(res, open(OUT / 'ms_draymond_prior.json', 'w'), indent=1)
+    json.dump(res, open(OUT / 'ms_bowen_prior.json', 'w'), indent=1)
 
 
 if __name__ == '__main__':

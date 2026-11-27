@@ -1,4 +1,4 @@
-"""BOWEN (formerly DRAYMOND) decomposition checks, from results/world/pred.npz (world_model.py, cross-fitted).
+"""BOWEN decomposition checks, from results/world/pred.npz (world_model.py, cross-fitted).
 
 Per defender-frame: baseline spot mb (league), scheme spot ms (league + his team's scheme), actual y.
   scheme shift  = ms - mb       (what the scheme asks for beyond the league norm)
@@ -10,7 +10,7 @@ Checks
   2. scheme belongs to teams: team-season mean scheme depth shift, correlation across seasons for the same team;
   3. movers: for players who changed teams between seasons, does his execution gap follow him (corr across
      seasons) while his scheme shift follows the team (corr with the new team's mean, vs the old team's)?
-Output: results/world/draymond_eval.json, results/world/draymond_players.json   python draymond_eval.py  (PC)
+Output: results/world/bowen_eval.json, results/world/bowen_players.json   python bowen_eval.py  (PC)
 """
 import json
 from collections import defaultdict
@@ -92,8 +92,8 @@ def main():
                     scheme_r_old_team=corr([T[(P[(p, 2026)]['team'], 2026)] for p in group], [P[(p, 2027)]['scheme_depth'] for p in group]))
     res['movers'] = mv_stats(movers); res['stayers'] = mv_stats(stayers)
     print(json.dumps(res, indent=1))
-    json.dump(res, open(W / 'draymond_eval.json', 'w'), indent=1)
-    json.dump({f'{p}_{s}': v for (p, s), v in P.items()}, open(W / 'draymond_players.json', 'w'))
+    json.dump(res, open(W / 'bowen_eval.json', 'w'), indent=1)
+    json.dump({f'{p}_{s}': v for (p, s), v in P.items()}, open(W / 'bowen_players.json', 'w'))
 
 
 if __name__ == '__main__':
