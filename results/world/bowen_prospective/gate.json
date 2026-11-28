@@ -1,0 +1,102 @@
+{
+ "tolerances": {
+  "spot_ft": 0.05,
+  "nll": 0.02
+ },
+ "results": {
+  "A_live": {
+   "fold0": {
+    "possessions": 150,
+    "rows": 15470,
+    "matched": 15470,
+    "max_abs_diff": {
+     "ms": 0.03125,
+     "mb": 0.03125,
+     "nll_s": 0.0078125,
+     "nll_b": 0.00390625
+    },
+    "ok": true
+   },
+   "fold1": {
+    "possessions": 150,
+    "rows": 14865,
+    "matched": 14865,
+    "max_abs_diff": {
+     "ms": 0.03125,
+     "mb": 0.015625,
+     "nll_s": 0.00390625,
+     "nll_b": 0.0009765625
+    },
+    "ok": true
+   },
+   "ok": true
+  },
+  "B_live_mix3": {
+   "fold0": {
+    "possessions": 150,
+    "rows": 15470,
+    "matched": 15470,
+    "max_abs_diff": {
+     "ms": 0.03125,
+     "mb": 0.015625,
+     "nll_s": 0.0078125,
+     "nll_b": 0.00390625
+    },
+    "ok": true
+   },
+   "fold1": {
+    "possessions": 150,
+    "rows": 14865,
+    "matched": 14865,
+    "max_abs_diff": {
+     "ms": 0.03125,
+     "mb": 0.015625,
+     "nll_s": 0.00390625,
+     "nll_b": 0.001953125
+    },
+    "ok": true
+   },
+   "ok": true
+  },
+  "V3": {
+   "fold0": {
+    "possessions": 150,
+    "rows": 15470,
+    "matched": 15470,
+    "max_abs_diff": {
+     "ms": 0.03125,
+     "mb": 0.03125,
+     "nll_s": 0.0078125,
+     "nll_b": 0.00390625,
+     "mp": 0.015625,
+     "nll_p": 0.0078125
+    },
+    "ok": true
+   },
+   "fold1": {
+    "possessions": 150,
+    "rows": 14865,
+    "matched": 14865,
+    "max_abs_diff": {
+     "ms": 0.03125,
+     "mb": 0.0078125,
+     "nll_s": 0.00390625,
+     "nll_b": 0.00390625,
+     "mp": 0.015625,
+     "nll_p": 0.0078125
+    },
+    "ok": true
+   },
+   "ok": true
+  }
+ },
+ "ok": true,
+ "weights": {
+  "bowen_live/world_fold0.pt": "13da0fae5501fadf85bc0ea25c7377e30ae44385029ed5b7b9e9d5f36e920b9d",
+  "bowen_live/world_fold1.pt": "51c4462dcb8feab51f92fddba36bfd0be0f0d0b8235f5e4e0dc11d776aa60141",
+  "bowen_live_mix3/world_fold0.pt": "b2a757cec8b8183d4c795b7c64bf48ed6297976958fa65f0d5513dd42909b90c",
+  "bowen_live_mix3/world_fold1.pt": "2a547cfd7e061229a1aca57bdb46bedec159e8c0b028d0d70f0977e4c875bcf1",
+  "bowen_v3_hier/world_fold0.pt": "a2d4fdc895aac84c6e7917dd23bcea1c45642bc1c791c4b887b120d182a0cdcc",
+  "bowen_v3_hier/world_fold1.pt": "2f463ead6f898e2b3f86f9526a99a0e1e08bc52d8102871261221f4d96e7dfb9"
+ }
+}
