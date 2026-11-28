@@ -26,11 +26,17 @@ FIXED = dict(none=1.0, **inj.AVAIL)
 HGB = dict(max_iter=300, learning_rate=0.05, max_leaf_nodes=31, random_state=0)   # = iggy_minutes
 
 
-def match(rows, team, ck):
+def match(rows, team, ck, first=None, last=None):
+    """Exact: first + last name key. Fallback (fixed before results, counted): same surname key and one first name a
+    prefix of the other (Alexandre / Alex, Christopher / Chris); never across different first names (Jalen / Jaylin)."""
     ck = SUF.sub('', ck)
     for i, (t, kb, kf, st) in enumerate(rows):
         if t == team and kf and ck.startswith(kf) and len(ck) - len(kf) >= 2 and kb.endswith(ck[len(kf):]):
             return i, st
+    if first and last and len(last) >= 4:
+        for i, (t, kb, kf, st) in enumerate(rows):
+            if t == team and kf and kb.endswith(last) and (kf.startswith(first) or first.startswith(kf)) and min(len(kf), len(first)) >= 3:
+                return i, st
     return None, 'none'
 
 
@@ -160,13 +166,17 @@ def main():
     D = D0[D0.season >= 2023][['gid', 'd', 'team', 'pid', 'base', 'mins10', 'avail', 'startr', 'y', 'played', 'season', 'rot']]
     D = D.sort_values(['d', 'gid', 'team']).reset_index(drop=True)
     names = {int(p): inj.key(n) for p, n in zip(gl.player_id, gl.player_name)}
+    parts = {int(p): (inj.key(n.split(' ', 1)[0]), SUF.sub('', inj.key(n.split(' ', 1)[1])) if ' ' in n else '')
+             for p, n in zip(gl.player_id, gl.player_name)}
     ds = D.d.dt.strftime('%Y-%m-%d').values
     D['rstate'] = [('no_report' if d not in rows else state.get((d, int(t)), 'absent_from_report')) for d, t in zip(ds, D.team)]
-    stt, used = [], defaultdict(set)
+    stt, used, n_alias = [], defaultdict(set), 0
     for d, t, p, s_ in zip(ds, D.team, D.pid, D.rstate):
         if s_ != 'valid':
             stt.append('none'); continue
-        i, st = match(rows[d], int(t), names.get(int(p), ''))
+        i, st = match(rows[d], int(t), names.get(int(p), ''), *parts.get(int(p), (None, None)))
+        if i is not None and match(rows[d], int(t), names.get(int(p), ''))[0] is None:
+            n_alias += 1
         if i is not None:
             used[d].add(i)
         stt.append(st)
@@ -234,7 +244,7 @@ def main():
                                                 for s, g in tg[tg.season >= 2023].groupby('season')},
                            games=dict(validation=int((G.season == 2025).sum()), validation_eligible=int(va.sum()),
                                       test=int((G.season >= 2026).sum()), test_eligible=int(te.sum())),
-                           listed_rows_matched=int(sum(len(u) for u in used.values())),
+                           listed_rows_matched=int(sum(len(u) for u in used.values())), matched_by_first_name_fallback=n_alias,
                            listed_rows_unmatched_by_status=dict(unmatched))
     tab = {}
     for name, msk in (('train_2023_2024', (D.season <= 2024).values), ('test_2026_2027', (D.season >= 2026).values)):

@@ -19,6 +19,9 @@ observed absences (IGGY_MINUTES.md, AUDIT.md "data blockers").
 - **Team-game report state:** `valid` (team appears under the date and is not NOT YET SUBMITTED), `not_submitted`,
   `absent_from_report`, or `no_report` (no valid report for the date). Only `valid` team-games count. A player on a
   `valid` team who is not listed is **unlisted** (status none), which is different from missing.
+- **Name matching:** first + last name key against the team's candidates; fallback (added before results after a
+  coverage check found about 20 formal-name rows such as Alexandre / Alex Sarr): same surname and one first name a prefix of
+  the other. Reported as a count. Teammates sharing a surname are never matched to each other.
 - **Candidates and history:** frozen IGGY definitions (`iggy_minutes.build`): players with a game for the team in the
   prior 30 days, same-season previous-10 history, first 10 team games not covered.
 - **Ratings:** point-in-time DARKO DPM, the latest value dated before the game (`darko_history.json`; point-in-time
