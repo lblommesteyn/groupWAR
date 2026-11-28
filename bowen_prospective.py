@@ -20,6 +20,7 @@ from masked_paths import ROOT
 W = ROOT / 'results/world'
 FROZEN = W / 'frozen'
 LIVE_REPO = Path.home() / 'code/court-live'
+TRACK = ROOT / 'results/tracking_live'       # convert_live.py --out (PC: C:\Users\LukeB\dev\tracking-live)
 VARIANTS = {'A_live': ('bowen_live', {'WM_LIVE': '1', 'WM_MIX': '1'}),
             'B_live_mix3': ('bowen_live_mix3', {'WM_LIVE': '1', 'WM_MIX': '3'}),
             'V3': ('bowen_v3_hier', {'WM_LIVE': '1', 'WM_MIX': '3', 'WM_HIER': '1'})}
@@ -235,8 +236,8 @@ if __name__ == '__main__':
     if cmd == 'score':
         if not (W / 'bowen_prospective/gate.json').exists() or not json.load(open(W / 'bowen_prospective/gate.json'))['ok']:
             sys.exit('gate has not passed')
-        score(sys.argv[sys.argv.index('--live') + 1] if '--live' in sys.argv else LIVE_REPO / 'data/tracking')
+        score(sys.argv[sys.argv.index('--live') + 1] if '--live' in sys.argv else TRACK)
     if cmd == 'gate':
         sys.exit(0 if gate() else 1)
     if cmd == 'inputs':
-        inputs(sys.argv[2:], LIVE_REPO / 'data/tracking')
+        inputs(sys.argv[2:], TRACK)
