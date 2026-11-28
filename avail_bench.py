@@ -88,6 +88,43 @@ def project_team(D, v, absent):
     return out
 
 
+def reproduce(D0, b2, tol=0.005):
+    """Gate (AVAIL_BENCH.md): the reconstructed B2, scored as frozen (realised absences), must reproduce the saved
+    benchmark results/iggy/minutes.json: identical test row counts per stratum and B0/B2 MAE within `tol`; and, where
+    the saved per-row predictions exist (PC), the same predictions."""
+    saved = json.loads((ROOT / 'results/iggy/minutes.json').read_text())['test']
+    P = {'B0': D0.base.values.copy(), 'B2': b2.predict(D0[ig.FEATS['B2']].values)}
+    out = {k: np.zeros(len(D0)) for k in P}
+    for _, g in D0.groupby(['gid', 'team'], sort=False):
+        ix = g.index.values; av = ~g.absent.values
+        cap = np.minimum(ig.CAP, np.maximum(g.base.values[av], 10.0) + 14.0)
+        for k in P:
+            out[k][ix[av]] = ig.project(P[k][ix[av]], cap)
+    te = (D0.season >= 2026) & ~D0.absent; y = D0.y.values
+    strata = {'none': D0.n_abs == 0, 'single': D0.n_abs == 1, 'multi': D0.n_abs >= 2}
+    res, ok = {}, True
+    for s, m in strata.items():
+        mk = (te & m).values
+        r = dict(rows=int(mk.sum()), saved_rows=saved[s]['rows'])
+        ok &= r['rows'] == r['saved_rows']
+        for k in P:
+            r[k] = round(float(np.mean(np.abs(out[k][mk] - y[mk]))), 3); r[k + '_saved'] = saved[s][k]['mae']
+            ok &= abs(r[k] - r[k + '_saved']) <= tol
+        res[s] = r
+    f = ROOT / 'results/iggy/minutes_predictions.parquet'
+    if f.exists():
+        S = pd.read_parquet(f)[['gid', 'team', 'pid', 'pred_B2']]
+        M = D0[['gid', 'team', 'pid']].assign(rec=out['B2']).merge(S, on=['gid', 'team', 'pid'], how='outer', indicator=True)
+        both = M._merge == 'both'
+        res['per_row'] = dict(rows_both=int(both.sum()), rows_only_one=int((~both).sum()),
+                              max_abs_diff=round(float(np.abs(M.rec[both] - M.pred_B2[both]).max()), 6))
+        ok &= res['per_row']['rows_only_one'] == 0 and res['per_row']['max_abs_diff'] <= 0.01
+    else:
+        res['per_row'] = 'saved per-row predictions not on this machine'
+    res['tolerance_mae'] = tol; res['passed'] = bool(ok)
+    return res
+
+
 def main():
     smoke = '--smoke' in sys.argv
     out_dir = Path(sys.argv[sys.argv.index('--smoke') + 1]) if smoke else OUT
@@ -98,6 +135,13 @@ def main():
     D0 = ig.add_features(D0, pg)
     tr0 = (D0.season <= 2024) & ~D0.absent
     b2 = HistGradientBoostingRegressor(**HGB).fit(D0.loc[tr0, ig.FEATS['B2']].values, D0.loc[tr0, 'y'].values)
+    gate = reproduce(D0, b2)
+    print('B2 reproduction gate:', json.dumps(gate), flush=True)
+    if not gate['passed'] and not smoke:
+        OUT.mkdir(parents=True, exist_ok=True)
+        json.dump(dict(protocol='AVAIL_BENCH.md', reproduction_gate=gate, stopped='reconstructed B2 does not reproduce the saved benchmark'),
+                  open(OUT / 'avail_bench.json', 'w'), indent=1)
+        raise SystemExit('B2 reproduction gate failed: no pregame results computed')
     # 2. pregame report status for candidate rows from 2022-23 on
     V = json.loads((ROOT / 'results/injury_hist/verified.json').read_text())
     state, rows = report_state(V)
@@ -169,7 +213,8 @@ def main():
     G = pd.DataFrame(games)
     E = G[G.eligible & (G.season >= 2025)].reset_index(drop=True)
     yw = (E.margin > 0).values.astype(int); va = (E.season == 2025).values; te = (E.season >= 2026).values
-    res = dict(protocol='AVAIL_BENCH.md', smoke=smoke)
+    res = dict(protocol='AVAIL_BENCH.md', smoke=smoke, evidence='retrospective development evidence, not prospective validation',
+               reproduction_gate=gate)
     vv = [v for v in V.values() if v['valid']]
     res['coverage'] = dict(dates=len(V), dates_valid=len(vv), dates_refetched=sum(v.get('refetched', False) for v in V.values()),
                            min_minutes_asof_before_first_tip=min(v['minutes_before_first_tip'] for v in vv),

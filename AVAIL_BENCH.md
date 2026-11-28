@@ -1,6 +1,6 @@
 # Pregame availability benchmark: protocol (recorded 2026-11-28, before any results)
 
-Development evidence only (HOLDOUT.md rule 3: games before 2026-11-27). Nothing here changes live DUNCAN-2 or its
+**Retrospective development evidence, not prospective validation** (HOLDOUT.md rule 3: games before 2026-11-27). Nothing here changes live DUNCAN-2 or its
 forecasts. Code: `fetch_injury_history.py` (reports), `avail_bench.py` (benchmark). Output `results/avail/`.
 
 ## Question
@@ -54,6 +54,25 @@ have candidate rows, and home and away are identified. Every arm is scored on ex
   team-games by report state, listed rows not matched to any candidate (by status).
 - No arm, rule or eligibility filter is changed after seeing test results; all results, including negative ones, are
   kept in `results/avail/` and summarised in IGGY_MINUTES.md and AUDIT.md.
+
+## Reproduction gate (added 2026-11-28, before any results)
+
+Before any pregame result is computed, the reconstructed B2 is scored exactly as frozen (realised absences) and must
+reproduce the saved benchmark `results/iggy/minutes.json`: the same test row counts in each stratum (none 7,496,
+single 11,442, multi 15,328), B0 and B2 MAE within 0.005 of the saved values, and, on the PC, per-row predictions within
+0.01 minutes of `minutes_predictions.parquet` with no unmatched rows. If the gate fails, the script stops and saves only
+the gate result; the cause is found and fixed before anything is run again.
+
+## Limitations (stated with every result)
+
+- **Report publication lag.** The as-of time in a report's header is not its posting time. Posting delay is unknown,
+  and the 45-minute margin before the first tip is an assumption, not a measurement. Some reports could have reached
+  the public later than their as-of time.
+- **DARKO's historical availability.** `darko_history.json` was downloaded on 2026-11-23. It has not been shown to equal
+  what DARKO published on each historical date (AUDIT I6: only "stable over 4 days" is supported). DARKO's historical
+  projected minutes are not archived, so P0 is a proxy of the live rule, not the live system.
+- **Not prospective.** Model choices for IGGY were made on earlier development data that overlaps these seasons. The
+  clean verdict on any minutes model would be a new pre-registered version scored only on future games (HOLDOUT.md).
 
 ## Where it runs
 
