@@ -14,6 +14,8 @@ echo ==== pm %date% %time% >> logs\daily.log
 python live_forecast.py --run pm --live %LIVE% >> logs\daily.log 2>&1
 if errorlevel 1 exit /b 1
 if errorlevel 1 set FAIL=1
+rem shadow IGGY minutes forecast (iggy-b2-shadow-1, separate series; never affects the duncan-2 forecast or heartbeat)
+if exist results\iggy_shadow\b2_frozen.pkl python iggy_shadow.py --live %LIVE% >> logs\daily.log 2>&1
 if not exist %LIVE%\data\heartbeat mkdir %LIVE%\data\heartbeat
 if "%FAIL%"=="0" echo pm %date% %time% > %LIVE%\data\heartbeat\%D%-pm.txt
 cd /d %LIVE%
