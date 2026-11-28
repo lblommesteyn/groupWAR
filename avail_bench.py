@@ -90,8 +90,9 @@ def project_team(D, v, absent):
 
 def reproduce(D0, b2, tol=0.005):
     """Gate (AVAIL_BENCH.md): the reconstructed B2, scored as frozen (realised absences), must reproduce the saved
-    benchmark results/iggy/minutes.json: identical test row counts per stratum and B0/B2 MAE within `tol`; and, where
-    the saved per-row predictions exist (PC), the same predictions."""
+    benchmark results/iggy/minutes.json: identical test row counts per stratum and B0/B2 MAE within `tol`; unique
+    game/team/player keys on both sides; and the saved per-row predictions (required; PC) matched one-to-one within 0.01.
+    Reads the reference outputs only; never writes to results/iggy."""
     saved = json.loads((ROOT / 'results/iggy/minutes.json').read_text())['test']
     P = {'B0': D0.base.values.copy(), 'B2': b2.predict(D0[ig.FEATS['B2']].values)}
     out = {k: np.zeros(len(D0)) for k in P}
@@ -112,15 +113,26 @@ def reproduce(D0, b2, tol=0.005):
             ok &= abs(r[k] - r[k + '_saved']) <= tol
         res[s] = r
     f = ROOT / 'results/iggy/minutes_predictions.parquet'
+    K = ['gid', 'team', 'pid']
+    dup_rec = int(D0.duplicated(K).sum())
     if f.exists():
-        S = pd.read_parquet(f)[['gid', 'team', 'pid', 'pred_B2']]
-        M = D0[['gid', 'team', 'pid']].assign(rec=out['B2']).merge(S, on=['gid', 'team', 'pid'], how='outer', indicator=True)
-        both = M._merge == 'both'
-        res['per_row'] = dict(rows_both=int(both.sum()), rows_only_one=int((~both).sum()),
-                              max_abs_diff=round(float(np.abs(M.rec[both] - M.pred_B2[both]).max()), 6))
-        ok &= res['per_row']['rows_only_one'] == 0 and res['per_row']['max_abs_diff'] <= 0.01
+        S = pd.read_parquet(f)[K + ['pred_B2']]
+        dup_saved = int(S.duplicated(K).sum())
+        res['keys'] = dict(reconstructed_rows=len(D0), reconstructed_duplicates=dup_rec, saved_rows=len(S), saved_duplicates=dup_saved)
+        ok &= dup_rec == 0 and dup_saved == 0
+        if dup_rec == 0 and dup_saved == 0:
+            M = D0[K].assign(rec=out['B2']).merge(S, on=K, how='outer', indicator=True, validate='one_to_one')
+            both = M._merge == 'both'
+            res['per_row'] = dict(rows_both=int(both.sum()), only_reconstructed=int((M._merge == 'left_only').sum()),
+                                  only_saved=int((M._merge == 'right_only').sum()),
+                                  max_abs_diff=round(float(np.abs(M.rec[both] - M.pred_B2[both]).max()), 6))
+            ok &= res['per_row']['only_reconstructed'] == 0 and res['per_row']['only_saved'] == 0 and res['per_row']['max_abs_diff'] <= 0.01
+        else:
+            res['per_row'] = 'not compared: duplicate game/team/player keys'
     else:
-        res['per_row'] = 'saved per-row predictions not on this machine'
+        res['keys'] = dict(reconstructed_rows=len(D0), reconstructed_duplicates=dup_rec)
+        res['per_row'] = 'MISSING: saved per-row predictions required for the real run'
+        ok = False
     res['tolerance_mae'] = tol; res['passed'] = bool(ok)
     return res
 

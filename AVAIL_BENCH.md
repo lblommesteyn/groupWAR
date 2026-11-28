@@ -59,9 +59,11 @@ have candidate rows, and home and away are identified. Every arm is scored on ex
 
 Before any pregame result is computed, the reconstructed B2 is scored exactly as frozen (realised absences) and must
 reproduce the saved benchmark `results/iggy/minutes.json`: the same test row counts in each stratum (none 7,496,
-single 11,442, multi 15,328), B0 and B2 MAE within 0.005 of the saved values, and, on the PC, per-row predictions within
-0.01 minutes of `minutes_predictions.parquet` with no unmatched rows. If the gate fails, the script stops and saves only
-the gate result; the cause is found and fixed before anything is run again.
+single 11,442, multi 15,328), B0 and B2 MAE within 0.005 of the saved values, unique game/team/player keys on both sides,
+and per-row predictions within 0.01 minutes of `minutes_predictions.parquet`, matched one-to-one with no unmatched
+rows. The saved per-row file is **required** for the real run (missing = fail). If the gate fails, the script stops and saves only
+the gate result; the cause is investigated without overwriting the reference outputs (`results/iggy/`) or loosening
+the tolerances.
 
 ## Limitations (stated with every result)
 
